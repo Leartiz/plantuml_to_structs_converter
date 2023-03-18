@@ -35,7 +35,8 @@ RES_FILE      =
 SED           = $(QMAKE) -install sed
 MOVE          = move
 SUBTARGETS    =  \
-		sub-app
+		sub-app \
+		sub-test
 
 
 sub-app-qmake_all:  FORCE
@@ -63,6 +64,31 @@ sub-app-install_subtargets: FORCE
 sub-app-uninstall_subtargets: FORCE
 	@if not exist app\ mkdir app\ & if not exist app\ exit 1
 	cd app\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\app\app.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile uninstall
+sub-test-qmake_all:  FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
+	cd test\ && $(MAKE) -f Makefile qmake_all
+sub-test: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile
+sub-test-make_first: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile 
+sub-test-all: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile all
+sub-test-clean: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile clean
+sub-test-distclean: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile distclean
+sub-test-install_subtargets: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile install
+sub-test-uninstall_subtargets: FORCE
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile uninstall
 
 Makefile: ../converter/converter.pro C:/Qt/6.4.2/mingw_64/mkspecs/win32-g++/qmake.conf C:/Qt/6.4.2/mingw_64/mkspecs/features/spec_pre.prf \
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/device_config.prf \
@@ -182,6 +208,7 @@ Makefile: ../converter/converter.pro C:/Qt/6.4.2/mingw_64/mkspecs/win32-g++/qmak
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/qt_config.prf \
 		C:/Qt/6.4.2/mingw_64/mkspecs/win32-g++/qmake.conf \
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/exclusive_builds.prf \
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/toolchain.prf \
 		C:/Qt/6.4.2/mingw_64/mkspecs/features/default_pre.prf \
@@ -320,6 +347,7 @@ C:/Qt/6.4.2/mingw_64/mkspecs/features/qt_functions.prf:
 C:/Qt/6.4.2/mingw_64/mkspecs/features/qt_config.prf:
 C:/Qt/6.4.2/mingw_64/mkspecs/win32-g++/qmake.conf:
 C:/Qt/6.4.2/mingw_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 C:/Qt/6.4.2/mingw_64/mkspecs/features/exclusive_builds.prf:
 C:/Qt/6.4.2/mingw_64/mkspecs/features/toolchain.prf:
 C:/Qt/6.4.2/mingw_64/mkspecs/features/default_pre.prf:
@@ -342,36 +370,48 @@ C:/Qt/6.4.2/mingw_64/mkspecs/features/lex.prf:
 qmake: FORCE
 	@$(QMAKE) -o Makefile ..\converter\converter.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 
-qmake_all: sub-app-qmake_all FORCE
+qmake_all: sub-app-qmake_all sub-test-qmake_all FORCE
 
-make_first: sub-app-make_first  FORCE
-all: sub-app-all  FORCE
-clean: sub-app-clean  FORCE
-distclean: sub-app-distclean  FORCE
+make_first: sub-app-make_first sub-test-make_first  FORCE
+all: sub-app-all sub-test-all  FORCE
+clean: sub-app-clean sub-test-clean  FORCE
+distclean: sub-app-distclean sub-test-distclean  FORCE
 	-$(DEL_FILE) Makefile
 	-$(DEL_FILE) .qmake.stash
-install_subtargets: sub-app-install_subtargets FORCE
-uninstall_subtargets: sub-app-uninstall_subtargets FORCE
+install_subtargets: sub-app-install_subtargets sub-test-install_subtargets FORCE
+uninstall_subtargets: sub-app-uninstall_subtargets sub-test-uninstall_subtargets FORCE
 
 sub-app-debug:
 	@if not exist app\ mkdir app\ & if not exist app\ exit 1
 	cd app\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\app\app.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile debug
-debug: sub-app-debug
+sub-test-debug:
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile debug
+debug: sub-app-debug sub-test-debug
 
 sub-app-release:
 	@if not exist app\ mkdir app\ & if not exist app\ exit 1
 	cd app\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\app\app.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile release
-release: sub-app-release
+sub-test-release:
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile release
+release: sub-app-release sub-test-release
 
 sub-app-check:
 	@if not exist app\ mkdir app\ & if not exist app\ exit 1
 	cd app\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\app\app.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile check
-check: sub-app-check
+sub-test-check:
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile check
+check: sub-app-check sub-test-check
 
 sub-app-benchmark:
 	@if not exist app\ mkdir app\ & if not exist app\ exit 1
 	cd app\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\app\app.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile benchmark
-benchmark: sub-app-benchmark
+sub-test-benchmark:
+	@if not exist test\ mkdir test\ & if not exist test\ exit 1
+	cd test\ && ( if not exist Makefile $(QMAKE) -o Makefile D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\test\test.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" ) && $(MAKE) -f Makefile benchmark
+benchmark: sub-app-benchmark sub-test-benchmark
 install:install_subtargets  FORCE
 
 uninstall: uninstall_subtargets FORCE

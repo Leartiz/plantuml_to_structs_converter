@@ -1,6 +1,4 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    app \
-    test
-
+    std_string
