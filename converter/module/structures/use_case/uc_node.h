@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "uc_ptrs.h" // has forward declaration.
+#include "robustness/rob_ptrs.h"
+#include "sequence/seq_ptrs.h"
 
 namespace lenv // learning environment!
 {
@@ -45,6 +47,10 @@ private:
 
     std::vector<UC_edge_wp> m_inn_edges;
     std::vector<UC_edge_wp> m_out_edges;
+
+private:
+    Robustness_dia_sp m_rob_dia;
+    Sequence_dia_sp m_seq_dia;
 };
 
 } // lenv

@@ -12,7 +12,13 @@ public:
     ~Module();
 
 private slots:
-    void test_case1();
+    void initTestCase();
+    void cleanupTestCase();
+
+    // Translator
+private slots:
+    void test_convert_uc_dia_data();
+    void test_convert_uc_dia();
 
 };
 

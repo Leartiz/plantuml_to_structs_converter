@@ -2,17 +2,20 @@
 
 #include "tst_module.h"
 
-Module::Module()
+Module::Module() {}
+Module::~Module() {}
+
+void Module::initTestCase() {}
+void Module::cleanupTestCase() {}
+
+// -----------------------------------------------------------------------
+
+void Module::test_convert_uc_dia_data()
 {
 
 }
 
-Module::~Module()
-{
-
-}
-
-void Module::test_case1()
+void Module::test_convert_uc_dia()
 {
 
 }

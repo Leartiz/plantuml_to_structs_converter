@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 9.0.1, 2023-03-19T02:14:14. -->
+<!-- Written by QtCreator 9.0.1, 2023-03-20T00:27:39. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -69,8 +69,15 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
-    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_case1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:cleanupTestCase">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:initTestCase">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia_dia">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:Module">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:test_convert_uc_dia">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:test_convert_uc_dia_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:test_convert_uc_dia_dia">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
