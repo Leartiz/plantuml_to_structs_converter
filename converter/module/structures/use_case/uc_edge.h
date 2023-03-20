@@ -5,10 +5,12 @@
 
 #include "uc_ptrs.h"
 
+#include "common/ijson.h"
+
 namespace lenv
 {
 
-class UC_edge final
+class UC_edge final : public IJson
 {
     friend class Use_Case_dia;
 
@@ -23,6 +25,11 @@ public:
 
 public:
     Type type() const;
+
+    // IJson interface
+public:
+    nlohmann::json to_whole_json() const;
+    nlohmann::json to_short_json() const;
 
 private:
     Type m_type{ ASSOCIATION };

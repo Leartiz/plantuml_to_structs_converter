@@ -1,4 +1,6 @@
 SOURCES += \
+    $$PWD/common/errors/error.cpp \
+    $$PWD/common/errors/null_edge.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
     $$PWD/structures/project.cpp \
@@ -10,8 +12,10 @@ SOURCES += \
     $$PWD/translator/translator.cpp
 
 HEADERS += \
+    $$PWD/common/errors/error.h \
+    $$PWD/common/errors/null_edge.h \
     $$PWD/common/ijson.h \
-    $$PWD/dependency/json.hpp \
+    $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/structures/class/class_dia.h \
     $$PWD/structures/class/class_ptrs.h \
     $$PWD/structures/description.h \
@@ -29,5 +33,6 @@ HEADERS += \
     $$PWD/translator/translator.h
 
 INCLUDEPATH += \
+    ../../dependency/ \
     ../module/structures/ \
     ../module/
