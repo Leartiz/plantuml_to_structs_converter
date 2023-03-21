@@ -1,4 +1,5 @@
 #include <utility> // std::move
+#include <iostream>
 
 #include "uc_node.h"
 #include "uc_edge.h"
@@ -78,21 +79,23 @@ nlohmann::json UC_node::to_whole_json() const
 
 nlohmann::json UC_node::to_short_json() const
 {
-
+    return { { Field::id, m_id } };
 }
 
 nlohmann::json::array_t UC_node::edges_to_json(const UC_edge_wps& edges)
 {
-    auto result{ nlohmann::json::array() };
+    auto result = nlohmann::json::array();
     std::for_each(std::begin(edges), std::end(edges),
                   [&result](const UC_edge_wp edge_wp) -> void {
-        if (auto edge_sp = edge_wp.lock(); edge_sp) {
+        if (const auto edge_sp = edge_wp.lock(); edge_sp) {
             result.push_back(edge_sp->to_short_json());
             return;
         }
 
         throw int{10};
     });
+
+    std::cout << "size: " << result.size();
     return result;
 }
 

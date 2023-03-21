@@ -16,8 +16,8 @@ public:
     };
 
 public:
-    explicit Error(const std::string& what);
-    virtual ~Error();
+    explicit Error(const std::string& what){}
+    virtual ~Error(){}
 
 private:
     std::string m_what;

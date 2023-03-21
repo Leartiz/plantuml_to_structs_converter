@@ -14,8 +14,23 @@ class UC_edge final : public IJson
 {
     friend class Use_Case_dia;
 
+    struct Inner final
+    {
+
+    };
+
 public:
-    enum Type
+    /* metadata */
+    struct Field final
+    {
+        static const std::string id;
+        static const std::string type;
+        static const std::string beg;
+        static const std::string end;
+    };
+
+public:
+    enum Type : uint32_t
     {
         ASSOCIATION,
         GENERALIZATION,
@@ -24,6 +39,18 @@ public:
     };
 
 public:
+    class Builder final
+    {
+    public:
+
+    private:
+        Inner m_inn;
+    };
+
+public:
+    UC_edge(const std::string& id, const Type type) noexcept;
+    UC_edge(const std::string& id, const Type type,
+            UC_node_sp beg, UC_node_sp end);
     Type type() const;
 
     // IJson interface
@@ -32,6 +59,7 @@ public:
     nlohmann::json to_short_json() const;
 
 private:
+    std::string m_id; // surrogate
     Type m_type{ ASSOCIATION };
     UC_node_wp m_beg;
     UC_node_wp m_end;

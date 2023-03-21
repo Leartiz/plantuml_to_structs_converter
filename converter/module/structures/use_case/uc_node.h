@@ -64,6 +64,7 @@ private:
     std::string m_name; // unique
     Type m_type{ USE_CASE };
 
+public:
     std::vector<UC_edge_wp> m_inn_edges;
     std::vector<UC_edge_wp> m_out_edges;
 

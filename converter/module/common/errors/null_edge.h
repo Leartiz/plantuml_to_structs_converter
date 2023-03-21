@@ -12,7 +12,7 @@ namespace lenv
 class Null_edge : public Error
 {
 public:
-    Null_edge();
+
 };
 
 }
