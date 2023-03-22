@@ -31,7 +31,7 @@ void uc_visual_test_0()
     beg_uc_node_a.add_out_edge(uc_edge);
 
     lenv::UC_node::Adder end_uc_node_a{ end_uc_node };
-    end_uc_node_a.add_inn_edge(uc_edge);
+    end_uc_node_a.add_inn_edge(uc_edge);    
 
     /* out json */
     std::cout << "beg_uc_node.json: " << beg_uc_node->to_whole_json() << std::endl;

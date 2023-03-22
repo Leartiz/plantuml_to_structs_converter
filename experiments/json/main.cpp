@@ -1,11 +1,25 @@
+#include <string>
 #include <iostream>
+#include <algorithm>
 
-using namespace std;
-
-// Проверить ОРТИРОВКУ В JSON объектов
+#include "nlohmann/json.hpp"
 
 int main()
 {
-    cout << "Hello World!" << endl;
+    const std::string field_name{ "id" };
+    nlohmann::json::array_t json_arr;
+
+    for (int i = 0; i < 10; ++i) {
+        nlohmann::json one = {{ field_name, std::rand() % 10 }};
+        json_arr.push_back(one);
+    }
+    std::cout << json_arr << std::endl;
+
+    // sort by yourself!
+    std::sort(std::begin(json_arr), std::end(json_arr),
+              [&](nlohmann::json lhs, nlohmann::json rhs){
+        return lhs[field_name] < rhs[field_name];
+    });
+    std::cout << json_arr << std::endl;
     return 0;
 }

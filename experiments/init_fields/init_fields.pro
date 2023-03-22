@@ -5,8 +5,3 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp
-
-INCLUDEPATH += \
-    ../../dependency/
-HEADERS += \
-    ../../dependency/nlohmann/json.hpp
