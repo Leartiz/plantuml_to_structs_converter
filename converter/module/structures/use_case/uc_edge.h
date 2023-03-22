@@ -6,17 +6,22 @@
 #include "uc_ptrs.h"
 
 #include "common/ijson.h"
+#include "common/ivalid.h"
 
 namespace lenv
 {
 
-class UC_edge final : public IJson
+class UC_edge final : public IJson, public IValid
 {
-    friend class Use_Case_dia;
+    friend class lenv::Use_Case_dia; // extra!
 
-    struct Inner final
+public:
+    enum Type : uint32_t
     {
-
+        ASSOCIATION,
+        GENERALIZATION,
+        INCLUDE,
+        EXTEND,
     };
 
 public:
@@ -29,40 +34,52 @@ public:
         static const std::string end;
     };
 
-public:
-    enum Type : uint32_t
+private:
+    struct Impl final
     {
-        ASSOCIATION,
-        GENERALIZATION,
-        INCLUDE,
-        EXTEND,
+        std::string id; // surrogate
+        Type type{ ASSOCIATION };
+        UC_node_wp beg;
+        UC_node_wp end;
     };
 
 public:
+    /* don't need a factory */
     class Builder final
     {
     public:
+        Builder(std::string id) noexcept;
+        Builder& type(const Type type);
+        Builder& beg(UC_node_sp beg);
+        Builder& end(UC_node_sp end);
 
+        UC_edge_sp build_ptr() const;
+        UC_edge build_cpy() const; // do move
     private:
-        Inner m_inn;
+        Impl m_edge_impl;
     };
 
 public:
-    UC_edge(const std::string& id, const Type type) noexcept;
-    UC_edge(const std::string& id, const Type type,
-            UC_node_sp beg, UC_node_sp end);
+    UC_edge(std::string id, const Type type,
+            UC_node_sp beg, UC_node_sp end) noexcept;
+
+    /* used for analysis */
+    const std::string& id() const;
     Type type() const;
+    UC_node_sp beg() const;
+    UC_node_sp end() const;
 
     // IJson interface
 public:
-    nlohmann::json to_whole_json() const;
-    nlohmann::json to_short_json() const;
+    nlohmann::json to_whole_json() const override;
+    nlohmann::json to_short_json() const override;
+
+    // IValid interface
+public:
+    bool is_valid() const override;
 
 private:
-    std::string m_id; // surrogate
-    Type m_type{ ASSOCIATION };
-    UC_node_wp m_beg;
-    UC_node_wp m_end;
+    Impl m_impl;
 };
 
 }

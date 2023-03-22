@@ -3,6 +3,7 @@
 namespace lenv
 {
 
-
+Null_edge::Null_edge(const std::string& arg)
+    : Error{ arg } {};
 
 }

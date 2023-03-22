@@ -2,28 +2,17 @@
 #define ERROR_H
 
 #include <string>
-#include <memory>
+#include <stdexcept> // std::runtime_error
 
 namespace lenv
 {
 
-class Error
+class Error : public std::runtime_error
 {
+    // exception interface
 public:
-    enum Type : uint32_t
-    {
-
-    };
-
-public:
-    explicit Error(const std::string& what){}
-    virtual ~Error(){}
-
-private:
-    std::string m_what;
+    Error(const std::string& arg);
 };
-
-using Error_sp = std::shared_ptr<Error>;
 
 }
 

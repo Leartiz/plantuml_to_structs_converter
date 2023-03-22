@@ -6,6 +6,11 @@
 
 #include "nlohmann/json.hpp"
 
+#include "errors/null_edge.h"
+#include "errors/null_node.h"
+#include "errors/unsuitable_edge.h"
+#include "errors/err_text_creator.h"
+
 namespace lenv
 {
 
@@ -14,49 +19,152 @@ const std::string UC_node::Field::name{ "name" };
 const std::string UC_node::Field::type{ "type" };
 const std::string UC_node::Field::inn_edges{ "inn_edges" };
 const std::string UC_node::Field::out_edges{ "out_edges" };
+const std::string UC_node::Field::rob_dia{ "rob_dia" };
+const std::string UC_node::Field::seq_dia{ "seq_dia" };
 
 // -----------------------------------------------------------------------
 
-UC_node::UC_node(const Type type, const std::string& name)
-    : m_type{ type }, m_name{ name }
-{}
+UC_node::Builder::Builder(UC_node_sp node)
+{
+    if (!node) throw Null_node{
+        Err_text_creator::dt("UC_node::Builder", "Builder",
+                             "node to clone is null")
+    };
+    m_node_impl = node->m_impl;
+}
 
-UC_node::UC_node(const std::string& name)
-    : m_name{ name }
-{}
+UC_node::Builder::Builder(std::string id) noexcept
+{
+    m_node_impl.id = std::move(id);
+}
+
+UC_node::Builder& UC_node::Builder::name(std::string name)
+{
+    m_node_impl.name = std::move(name);
+    return *this;
+}
+
+UC_node::Builder& UC_node::Builder::type(const Type type)
+{
+    m_node_impl.type = type;
+    return *this;
+}
+
+UC_node::Builder& UC_node::Builder::rob_dia(Robustness_dia_sp rob_dia)
+{
+    m_node_impl.rob_dia = rob_dia;
+    return *this;
+}
+
+UC_node::Builder& UC_node::Builder::seq_dia(Sequence_dia_sp seq_dia)
+{
+    m_node_impl.seq_dia = seq_dia;
+    return *this;
+}
+
+UC_node_sp UC_node::Builder::build_ptr() const
+{
+    return UC_node_sp{ std::make_shared<UC_node>(build_cpy()) };
+}
+
+UC_node UC_node::Builder::build_cpy() const
+{
+    return UC_node{ m_node_impl };
+}
+
+// -----------------------------------------------------------------------
+
+UC_node::Adder::Adder(UC_node_sp node)
+{
+    if (!node) throw Null_node{
+        Err_text_creator::dt("UC_node::Adder", "Adder",
+                             "node to update is null")
+    };
+    m_node = node;
+}
+
+// --> node
+UC_node::Adder& UC_node::Adder::add_inn_edge(UC_edge_sp edge)
+{
+    if (!edge) throw Null_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "edge is null")
+    };
+    if (!edge->end() || !edge->beg()) throw Null_node{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "node is null")
+    };
+    if (edge->end()->id() != m_node->id()) throw Unsuitable_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "edge does not enter node")
+    };
+
+    m_node->m_impl.inn_edges.push_back(edge);
+    return *this;
+}
+
+// node -->
+UC_node::Adder& UC_node::Adder::add_out_edge(UC_edge_sp edge)
+{
+    if (!edge) throw Null_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "edge is null")
+    };
+    if (!edge->beg() || !edge->end()) throw Null_node{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "node is null")
+    };
+    if (edge->beg()->id() != m_node->id()) throw Unsuitable_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "edge does not exit node")
+    };
+
+    m_node->m_impl.out_edges.push_back(edge);
+    return *this;
+}
+
+// -----------------------------------------------------------------------
+
+UC_node::UC_node(Impl impl)
+    : m_impl{ std::move(impl) } {}
 
 // -----------------------------------------------------------------------
 
 UC_node::Type UC_node::type() const
 {
-    return m_type;
+    return m_impl.type;
+}
+
+const std::string& UC_node::id() const
+{
+    return m_impl.id;
 }
 
 const std::string& UC_node::name() const
 {
-    return m_name;
+    return m_impl.name;
 };
 
 const std::vector<UC_edge_wp>& UC_node::inn_edges() const
 {    
-    return m_inn_edges;
+    return m_impl.inn_edges;
 }
 
 const std::vector<UC_edge_wp>& UC_node::out_edges() const
 {
-    return m_out_edges;
+    return m_impl.out_edges;
 }
 
 // -----------------------------------------------------------------------
 
-bool UC_node::equal_by_name(const UC_node& rhs) const
+bool UC_node::equal_by_id(const UC_node& rhs) const
 {
-    return m_name == rhs.m_name;
+    return m_impl.id == rhs.id();
 }
 
 bool operator==(const UC_node& lhs, const UC_node& rhs)
 {
-    return lhs.equal_by_name(rhs);
+    return lhs.equal_by_id(rhs);
 }
 
 bool operator!=(const UC_node& lhs, const UC_node& rhs)
@@ -69,36 +177,56 @@ bool operator!=(const UC_node& lhs, const UC_node& rhs)
 nlohmann::json UC_node::to_whole_json() const
 {
     nlohmann::json result;
-    result[Field::id] = m_id;
-    result[Field::name] = m_name;
-    result[Field::type] = static_cast<uint32_t>(m_type);
-    result[Field::inn_edges] = edges_to_json(m_inn_edges);
-    result[Field::out_edges] = edges_to_json(m_out_edges);
+    result[Field::id] = m_impl.id;
+    result[Field::name] = m_impl.name;
+    result[Field::type] = static_cast<uint32_t>(m_impl.type);
+    result[Field::inn_edges] = edges_to_json(m_impl.inn_edges);
+    result[Field::out_edges] = edges_to_json(m_impl.out_edges);
+
+    /* equivalent to precedent id */
+    result[Field::rob_dia] = m_impl.id;
+    result[Field::seq_dia] = m_impl.id;
+
+    /* it's ok for now */
+    if (!m_impl.rob_dia) result[Field::rob_dia] = nullptr;
+    if (!m_impl.seq_dia) result[Field::seq_dia] = nullptr;
+
     return result;
 }
 
 nlohmann::json UC_node::to_short_json() const
 {
-    return { { Field::id, m_id } };
+    return { { Field::id, m_impl.id } };
 }
 
 nlohmann::json::array_t UC_node::edges_to_json(const UC_edge_wps& edges)
 {
     auto result = nlohmann::json::array();
     std::for_each(std::begin(edges), std::end(edges),
-                  [&result](const UC_edge_wp edge_wp) -> void {
+                  [&result](const UC_edge_wp edge_wp) -> void {       
         if (const auto edge_sp = edge_wp.lock(); edge_sp) {
             result.push_back(edge_sp->to_short_json());
             return;
         }
 
-        throw int{10};
+        throw Null_edge{ Err_text_creator::dt("UC_node", "edges_to_json",
+                                              "edge expired") };
     });
-
-    std::cout << "size: " << result.size();
     return result;
 }
 
 // -----------------------------------------------------------------------
+
+bool UC_node::is_valid() const
+{
+    return is_valid(m_impl.inn_edges) && is_valid(m_impl.out_edges);
+}
+
+bool UC_node::is_valid(const UC_edge_wps& edges)
+{
+    for (auto it = std::begin(edges); it != std::end(edges); ++it)
+        if (it->expired()) return false;
+    return true;
+}
 
 }

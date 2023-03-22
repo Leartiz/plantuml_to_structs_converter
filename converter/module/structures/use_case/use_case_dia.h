@@ -1,4 +1,4 @@
-#ifndef USE_CASE_DIA_H
+ #ifndef USE_CASE_DIA_H
 #define USE_CASE_DIA_H
 
 #include <vector>
