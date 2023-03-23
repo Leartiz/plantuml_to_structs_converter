@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 9.0.1, 2023-03-23T02:06:20. -->
+<!-- Written by QtCreator 9.0.1, 2023-03-24T01:51:29. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -71,9 +71,13 @@
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:cleanupTestCase">Unchecked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_err1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia_data">Unchecked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:Module">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:test_UC_edge_Builder_beg_okk1">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>

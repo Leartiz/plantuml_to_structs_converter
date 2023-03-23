@@ -10,6 +10,8 @@
 namespace lenv
 {
 
+// -----------------------------------------------------------------------
+
 const std::string UC_edge::Field::id{ "id" };
 const std::string UC_edge::Field::type{ "type" };
 const std::string UC_edge::Field::beg{ "beg" };
@@ -67,7 +69,8 @@ UC_edge UC_edge::Builder::build_cpy() const
                 m_edge_impl.beg.lock(),
                 m_edge_impl.end.lock() };
     if (!edge.is_valid()) throw Invalid_edge{
-        Err_text_creator::dt("UC_edge::Builder", "build_cpy", "")
+        Err_text_creator::dt("UC_edge::Builder", "build_cpy",
+                             "beg and end not specified")
     };
     return edge;
 }
@@ -79,6 +82,11 @@ UC_edge::UC_edge(std::string id, const Type type,
     : m_impl{ .id = std::move(id), .type = type,
               .beg = beg, .end = end } {}
 
+const std::string& UC_edge::id() const
+{
+    return m_impl.id;
+}
+
 UC_edge::Type UC_edge::type() const
 {
     return m_impl.type;
@@ -86,11 +94,20 @@ UC_edge::Type UC_edge::type() const
 
 UC_node_sp UC_edge::beg() const
 {
+    /* without check? */
+    if (m_impl.beg.expired()) throw Null_node{
+        Err_text_creator::dt("UC_edge", "beg",
+                             "beg expired")
+    };
     return m_impl.beg.lock();
 }
 
 UC_node_sp UC_edge::end() const
 {
+    if (m_impl.end.expired()) throw Null_node{
+        Err_text_creator::dt("UC_edge", "beg",
+                             "end expired")
+    };
     return m_impl.end.lock();
 }
 

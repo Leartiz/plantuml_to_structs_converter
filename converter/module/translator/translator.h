@@ -23,12 +23,10 @@ public:
     Translator();
 
 public:
-    void convert_all(const std::string& project_root_path);
+//    void convert_all(const std::string& project_root_path);
     Use_Case_dia_sp convert_uc_dia(std::istream& in);
-    Robustness_dia_sp convert_rob_dia(std::istream& in);
-    Sequence_dia_sp convert_seq_dia(std::istream& in);
-
-    bool last_error();
+//    Robustness_dia_sp convert_rob_dia(std::istream& in);
+//    Sequence_dia_sp convert_seq_dia(std::istream& in);
 
 private:
     std::shared_ptr<Project> m_proj;

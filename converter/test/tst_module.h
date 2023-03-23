@@ -15,8 +15,13 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
 
-    // Translator
+    // UC_edge
 private slots:
+    void test_UC_edge_Builder_beg_err();
+    void test_UC_edge_Builder_beg_err1();
+
+    void test_UC_edge_Builder_beg_okk();
+
     void test_convert_uc_dia_data();
     void test_convert_uc_dia();
 

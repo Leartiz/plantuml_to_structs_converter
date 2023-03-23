@@ -1,4 +1,5 @@
 #include <utility> // std::move
+#include <algorithm> // std::for_each, std::transform
 #include <iostream>
 
 #include "uc_node.h"
@@ -9,10 +10,13 @@
 #include "errors/null_edge.h"
 #include "errors/null_node.h"
 #include "errors/unsuitable_edge.h"
+#include "errors/repeating_edge.h"
 #include "errors/err_text_creator.h"
 
 namespace lenv
 {
+
+// -----------------------------------------------------------------------
 
 const std::string UC_node::Field::id{ "id" };
 const std::string UC_node::Field::name{ "name" };
@@ -94,9 +98,14 @@ UC_node::Adder& UC_node::Adder::add_inn_edge(UC_edge_sp edge)
         Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
                              "node is null")
     };
+
     if (edge->end()->id() != m_node->id()) throw Unsuitable_edge{
         Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
                              "edge does not enter node")
+    };
+    if (m_node->contains_inn_edge(edge->id())) throw Repeating_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+                             "edge already added")
     };
 
     m_node->m_impl.inn_edges.push_back(edge);
@@ -114,9 +123,14 @@ UC_node::Adder& UC_node::Adder::add_out_edge(UC_edge_sp edge)
         Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
                              "node is null")
     };
+
     if (edge->beg()->id() != m_node->id()) throw Unsuitable_edge{
         Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
                              "edge does not exit node")
+    };
+    if (m_node->contains_out_edge(edge->id())) throw Repeating_edge{
+        Err_text_creator::dt("UC_node::Adder", "add_out_edge",
+                             "edge already added")
     };
 
     m_node->m_impl.out_edges.push_back(edge);
@@ -145,14 +159,53 @@ const std::string& UC_node::name() const
     return m_impl.name;
 };
 
-const std::vector<UC_edge_wp>& UC_node::inn_edges() const
+std::vector<UC_edge_sp> UC_node::inn_edges() const
 {    
-    return m_impl.inn_edges;
+    return edge_wps_to_sps(m_impl.inn_edges);
 }
 
-const std::vector<UC_edge_wp>& UC_node::out_edges() const
+std::vector<UC_edge_sp> UC_node::out_edges() const
 {
-    return m_impl.out_edges;
+    return edge_wps_to_sps(m_impl.out_edges);
+}
+
+UC_edge_sps UC_node::edge_wps_to_sps(const UC_edge_wps& edges)
+{
+    std::vector<UC_edge_sp> result;
+    std::transform(std::begin(edges), std::end(edges), std::back_inserter(result),
+                   [](const UC_edge_wp edge_wp) -> UC_edge_sp {
+        if (edge_wp.expired()) throw Null_edge{
+            Err_text_creator::dt("UC_node", "edge_wps_to_sps",
+                                 "inn/out edge expired")
+        };
+
+        return edge_wp.lock();
+    });
+    return result;
+}
+
+bool UC_node::contains_inn_edge(const std::string& id) const
+{
+    return contains_edge(m_impl.inn_edges, id);
+}
+
+bool UC_node::contains_out_edge(const std::string& id) const
+{
+    return contains_edge(m_impl.out_edges, id);
+}
+
+bool UC_node::contains_edge(const UC_edge_wps& edges, const std::string& id)
+{
+    for (auto it = edges.begin(); it != edges.end(); ++it) {
+        if (it->expired()) throw Null_edge{
+            Err_text_creator::dt("UC_node", "contains_inn_edge",
+                                 "inn/out edge expired")
+        };
+
+        const UC_edge_sp edge{ it->lock() };
+        if (edge->id() == id) return true;
+    }
+    return false;
 }
 
 // -----------------------------------------------------------------------
@@ -201,7 +254,7 @@ nlohmann::json UC_node::to_short_json() const
 
 nlohmann::json::array_t UC_node::edges_to_json(const UC_edge_wps& edges)
 {
-    auto result = nlohmann::json::array();
+    auto result{ nlohmann::json::array() };
     std::for_each(std::begin(edges), std::end(edges),
                   [&result](const UC_edge_wp edge_wp) -> void {       
         if (const auto edge_sp = edge_wp.lock(); edge_sp) {
@@ -210,7 +263,7 @@ nlohmann::json::array_t UC_node::edges_to_json(const UC_edge_wps& edges)
         }
 
         throw Null_edge{ Err_text_creator::dt("UC_node", "edges_to_json",
-                                              "edge expired") };
+                                              "inn/out edge expired") };
     });
     return result;
 }

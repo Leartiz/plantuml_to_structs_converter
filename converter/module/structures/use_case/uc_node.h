@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "uc_ptrs.h" // has forward declaration.
 #include "robustness/rob_ptrs.h"
@@ -39,13 +40,14 @@ public:
     };
 
 private:
-    struct Impl final
+    struct Impl final /* POD? */
     {
         std::string id; // unique
         std::string name;
         Type type{ USE_CASE };
 
         /* filled out separately */
+        /* replace to: map or unordered_map? */
         std::vector<UC_edge_wp> inn_edges;
         std::vector<UC_edge_wp> out_edges;
 
@@ -90,8 +92,11 @@ public:
     const std::string& name() const;
     Type type() const;
 
-    const std::vector<UC_edge_wp>& inn_edges() const;
-    const std::vector<UC_edge_wp>& out_edges() const;
+    std::vector<UC_edge_sp> inn_edges() const;
+    std::vector<UC_edge_sp> out_edges() const;
+
+    bool contains_inn_edge(const std::string& id) const;
+    bool contains_out_edge(const std::string& id) const;
 
 public:
     bool equal_by_id(const UC_node& rhs) const;
@@ -109,6 +114,8 @@ public:
 
 private:
     UC_node(Impl impl);
+    static UC_edge_sps edge_wps_to_sps(const UC_edge_wps& edges);
+    static bool contains_edge(const UC_edge_wps& edges, const std::string& id);
     static nlohmann::json::array_t edges_to_json(const UC_edge_wps& edges);
     static bool is_valid(const UC_edge_wps& edges);
 

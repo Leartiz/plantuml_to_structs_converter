@@ -5,6 +5,8 @@ SOURCES += \
     $$PWD/common/errors/invalid_node.cpp \
     $$PWD/common/errors/null_edge.cpp \
     $$PWD/common/errors/null_node.cpp \
+    $$PWD/common/errors/repeating_edge.cpp \
+    $$PWD/common/errors/repeating_node.cpp \
     $$PWD/common/errors/unsuitable_edge.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
@@ -14,7 +16,9 @@ SOURCES += \
     $$PWD/structures/use_case/uc_edge.cpp \
     $$PWD/structures/use_case/uc_node.cpp \
     $$PWD/structures/use_case/use_case_dia.cpp \
-    $$PWD/translator/translator.cpp
+    $$PWD/translator/translator.cpp \
+    $$PWD/translator/use_case/uc_lexic_analyzer.cpp \
+    $$PWD/translator/use_case/uc_syntac_analyzer.cpp
 
 HEADERS += \
     $$PWD/common/errors/err_text_creator.h \
@@ -23,6 +27,8 @@ HEADERS += \
     $$PWD/common/errors/invalid_node.h \
     $$PWD/common/errors/null_edge.h \
     $$PWD/common/errors/null_node.h \
+    $$PWD/common/errors/repeating_edge.h \
+    $$PWD/common/errors/repeating_node.h \
     $$PWD/common/errors/unsuitable_edge.h \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
@@ -41,7 +47,9 @@ HEADERS += \
     $$PWD/structures/use_case/uc_node.h \
     $$PWD/structures/use_case/uc_ptrs.h \
     $$PWD/structures/use_case/use_case_dia.h \
-    $$PWD/translator/translator.h
+    $$PWD/translator/translator.h \
+    $$PWD/translator/use_case/uc_lexic_analyzer.h \
+    $$PWD/translator/use_case/uc_syntac_analyzer.h
 
 INCLUDEPATH += \
     ../../dependency/ \

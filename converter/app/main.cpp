@@ -5,6 +5,7 @@
 
 #include "structures/use_case/uc_node.h"
 #include "structures/use_case/uc_edge.h"
+#include "structures/use_case/use_case_dia.h"
 
 void uc_visual_test_0()
 {
@@ -33,10 +34,15 @@ void uc_visual_test_0()
     lenv::UC_node::Adder end_uc_node_a{ end_uc_node };
     end_uc_node_a.add_inn_edge(uc_edge);    
 
-    /* out json */
-    std::cout << "beg_uc_node.json: " << beg_uc_node->to_whole_json() << std::endl;
-    std::cout << "end_uc_node.json: " << end_uc_node->to_whole_json() << std::endl;
-    std::cout << "uc_edge.json: " << uc_edge->to_whole_json() << std::endl;
+    /* out whole json */
+    std::cout << "beg_uc_node.whole_json: " << beg_uc_node->to_whole_json() << std::endl;
+    std::cout << "end_uc_node.whole_json: " << end_uc_node->to_whole_json() << std::endl;
+    std::cout << "uc_edge.whole_json: " << uc_edge->to_whole_json() << std::endl;
+
+    /* out short json */
+    std::cout << "beg_uc_node.short_json: " << beg_uc_node->to_short_json() << std::endl;
+    std::cout << "end_uc_node.short_json: " << end_uc_node->to_short_json() << std::endl;
+    std::cout << "uc_edge.short_json: " << uc_edge->to_short_json() << std::endl;
 
     /* out valid */
     std::cout << "beg_uc_node.is_valid: " << beg_uc_node->is_valid() << std::endl;
@@ -44,9 +50,16 @@ void uc_visual_test_0()
     std::cout << "uc_edge.is_valid: " << uc_edge->is_valid() << std::endl;
 }
 
+void uc_visual_test_1()
+{
+    lenv::Use_Case_dia dia;
+    std::cout << dia.to_whole_json() << std::endl;
+}
+
 int main()
 {
     uc_visual_test_0();
+    uc_visual_test_1();
 
 
 
