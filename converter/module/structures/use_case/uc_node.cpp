@@ -7,10 +7,10 @@
 
 #include "nlohmann/json.hpp"
 
-#include "errors/null_edge.h"
-#include "errors/null_node.h"
-#include "errors/unsuitable_edge.h"
-#include "errors/repeating_edge.h"
+#include "errors/bldr/null_edge.h"
+#include "errors/bldr/null_node.h"
+#include "errors/bldr/unsuitable_edge.h"
+#include "errors/bldr/repeating_edge.h"
 #include "errors/err_text_creator.h"
 
 namespace lenv
@@ -139,7 +139,7 @@ UC_node::Adder& UC_node::Adder::add_out_edge(UC_edge_sp edge)
 
 // -----------------------------------------------------------------------
 
-UC_node::UC_node(Impl impl)
+UC_node::UC_node(Impl impl) noexcept
     : m_impl{ std::move(impl) } {}
 
 // -----------------------------------------------------------------------

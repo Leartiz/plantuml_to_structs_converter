@@ -1,12 +1,12 @@
 #ifndef REPEATING_EDGE_H
 #define REPEATING_EDGE_H
 
-#include "error.h"
+#include "bldr_error.h"
 
 namespace lenv
 {
 
-class Repeating_edge : public Error
+class Repeating_edge : public Bldr_error
 {
 public:
     Repeating_edge(const std::string& arg);

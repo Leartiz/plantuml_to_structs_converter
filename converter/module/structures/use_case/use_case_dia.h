@@ -23,6 +23,8 @@ public:
 public:
     //bool contains_node();
 
+    // TODO: Сделать BUILDER
+
 
     // IJson interface
 public:

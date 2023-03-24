@@ -60,9 +60,6 @@ public:
     };
 
 public:
-    UC_edge(std::string id, const Type type,
-            UC_node_sp beg, UC_node_sp end) noexcept;
-
     /* used for analysis */
     const std::string& id() const;
     Type type() const;
@@ -76,7 +73,11 @@ public:
 
     // IValid interface
 public:
-    bool is_valid() const override;
+    bool is_valid() const override; /* nodes may be expired */
+
+private:
+    UC_edge(std::string id, const Type type,
+            UC_node_sp beg, UC_node_sp end) noexcept;
 
 private:
     Impl m_impl;

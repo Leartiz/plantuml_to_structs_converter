@@ -4,6 +4,6 @@ namespace lenv
 {
 
 Repeating_node::Repeating_node(const std::string& arg)
-    : Error{ arg } {}
+    : Bldr_error{ arg } {}
 
 }

@@ -12,6 +12,7 @@ class UC_edge;
 class Use_Case_dia;
 
 using Use_Case_dia_sp = std::shared_ptr<Use_Case_dia>;
+using Use_Case_dia_wp = std::weak_ptr<Use_Case_dia>;
 
 // -----------------------------------------------------------------------
 

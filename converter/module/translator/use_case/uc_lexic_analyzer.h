@@ -6,6 +6,9 @@
 namespace lenv
 {
 
+/*
+    character vector -> token vector
+*/
 class UC_lexic_analyzer final
 {
 public:

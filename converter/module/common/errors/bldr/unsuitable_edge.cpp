@@ -4,6 +4,6 @@ namespace lenv
 {
 
 Unsuitable_edge::Unsuitable_edge(const std::string& arg)
-    : Error{ arg } {};
+    : Bldr_error{ arg } {};
 
 }

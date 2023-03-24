@@ -113,7 +113,7 @@ public:
     bool is_valid() const override;
 
 private:
-    UC_node(Impl impl);
+    UC_node(Impl impl) noexcept;
     static UC_edge_sps edge_wps_to_sps(const UC_edge_wps& edges);
     static bool contains_edge(const UC_edge_wps& edges, const std::string& id);
     static nlohmann::json::array_t edges_to_json(const UC_edge_wps& edges);

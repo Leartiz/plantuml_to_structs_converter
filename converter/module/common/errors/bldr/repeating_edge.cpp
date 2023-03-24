@@ -4,7 +4,7 @@ namespace lenv
 {
 
 Repeating_edge::Repeating_edge(const std::string& arg)
-    : Error{ arg } {}
+    : Bldr_error{ arg } {}
 
 }
 

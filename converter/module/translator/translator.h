@@ -17,19 +17,17 @@ namespace lenv
 
     Переводит файлы проекта в структуры данных.
 */
-class Translator final
+class Translator
 {
 public:
-    Translator();
+    virtual ~Translator();
 
 public:
-//    void convert_all(const std::string& project_root_path);
-    Use_Case_dia_sp convert_uc_dia(std::istream& in);
-//    Robustness_dia_sp convert_rob_dia(std::istream& in);
-//    Sequence_dia_sp convert_seq_dia(std::istream& in);
-
-private:
-    std::shared_ptr<Project> m_proj;
+    virtual Project_sp convert_all(const std::string& project_root_path);
+    virtual Use_Case_dia_sp convert_uc_dia(std::istream& in) = 0;
+    virtual Robustness_dia_sp convert_rob_dia(std::istream& in) = 0;
+    virtual Sequence_dia_sp convert_seq_dia(std::istream& in) = 0;
+    virtual Class_dia_sp convert_class_dia(std::istream& in) = 0;
 };
 
 }

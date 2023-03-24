@@ -7,6 +7,8 @@
 #include "structures/use_case/uc_edge.h"
 #include "structures/use_case/use_case_dia.h"
 
+#include "translator/direct_translator.h"
+
 void uc_visual_test_0()
 {
     /* the first step is to simply create the nodes */
@@ -60,8 +62,6 @@ int main()
 {
     uc_visual_test_0();
     uc_visual_test_1();
-
-
 
 
 

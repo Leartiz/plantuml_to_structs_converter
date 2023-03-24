@@ -3,8 +3,8 @@
 #include "uc_edge.h"
 #include "uc_node.h"
 
-#include "errors/null_node.h"
-#include "errors/invalid_edge.h"
+#include "errors/bldr/null_node.h"
+#include "errors/bldr/invalid_edge.h"
 #include "errors/err_text_creator.h"
 
 namespace lenv
@@ -68,7 +68,8 @@ UC_edge UC_edge::Builder::build_cpy() const
     const UC_edge edge{ m_edge_impl.id, m_edge_impl.type,
                 m_edge_impl.beg.lock(),
                 m_edge_impl.end.lock() };
-    if (!edge.is_valid()) throw Invalid_edge{
+
+    if (!edge.is_valid()) throw Invalid_edge{ // or incomplete?
         Err_text_creator::dt("UC_edge::Builder", "build_cpy",
                              "beg and end not specified")
     };
@@ -121,6 +122,7 @@ nlohmann::json UC_edge::to_whole_json() const
                                               "beg or end expired") };
     }
 
+    // create an object?
     nlohmann::json result;
     result[Field::id] = m_impl.id;
     result[Field::type] = static_cast<uint32_t>(m_impl.type);

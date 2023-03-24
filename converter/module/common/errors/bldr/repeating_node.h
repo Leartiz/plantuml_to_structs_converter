@@ -1,12 +1,12 @@
 #ifndef REPEATING_NODE_H
 #define REPEATING_NODE_H
 
-#include "error.h"
+#include "bldr_error.h"
 
 namespace lenv
 {
 
-class Repeating_node : public Error
+class Repeating_node : public Bldr_error
 {
 public:
     Repeating_node(const std::string& arg);

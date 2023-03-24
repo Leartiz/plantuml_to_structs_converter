@@ -1,12 +1,12 @@
 #ifndef INVALID_EDGE_H
 #define INVALID_EDGE_H
 
-#include "error.h"
+#include "bldr_error.h"
 
 namespace lenv
 {
 
-class Invalid_edge : public Error
+class Invalid_edge : public Bldr_error
 {
 public:
     Invalid_edge(const std::string& arg);

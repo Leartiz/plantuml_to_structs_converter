@@ -4,7 +4,7 @@ namespace lenv
 {
 
 Invalid_edge::Invalid_edge(const std::string& arg)
-    : Error{ arg } {}
+    : Bldr_error{ arg } {}
 
 }
 
