@@ -23,8 +23,8 @@ class UC_node final : public IJson, public IValid
 public:
     enum Type : uint32_t
     {
+        ACTOR,
         USE_CASE,
-        ACTOR
     };
 
 public:
@@ -44,7 +44,7 @@ private:
     {
         std::string id; // unique
         std::string name;
-        Type type{ USE_CASE };
+        Type type{ ACTOR };
 
         /* filled out separately */
         /* replace to: map or unordered_map? */
@@ -60,7 +60,7 @@ public:
     class Builder final
     {
     public:
-        Builder(UC_node_sp node); // clone based!
+        Builder(UC_node_sp node, std::string id); // clone based!
         Builder(std::string id) noexcept;
         Builder& name(std::string name);
         Builder& type(const Type type);
@@ -68,11 +68,13 @@ public:
         Builder& seq_dia(Sequence_dia_sp seq_dia);
 
         UC_node_sp build_ptr() const;
-        UC_node build_cpy() const; // do move
+        UC_node build_cpy() const; // do move!
     private:
         Impl m_node_impl;
     };
 
+    /* this makes Use_Case_dia class! */
+//private:
 public:
     class Adder final
     {
@@ -97,6 +99,7 @@ public:
 
     bool contains_inn_edge(const std::string& id) const;
     bool contains_out_edge(const std::string& id) const;
+    bool has_edges() const;
 
 public:
     bool equal_by_id(const UC_node& rhs) const;

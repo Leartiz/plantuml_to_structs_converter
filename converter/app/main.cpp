@@ -54,16 +54,47 @@ void uc_visual_test_0()
 
 void uc_visual_test_1()
 {
-    lenv::Use_Case_dia dia;
-    std::cout << dia.to_whole_json() << std::endl;
+    auto dia = lenv::Use_Case_dia::Builder{}.build_ptr();
+    std::cout << dia->to_whole_json() << std::endl;
+}
+
+void uc_visual_test_2()
+{
+    auto dia = lenv::Use_Case_dia::Builder{}.build_ptr();
+    std::cout << dia->to_whole_json() << std::endl;
+
+    lenv::UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(lenv::UC_node::ACTOR)
+                .build_ptr() };
+
+    lenv::UC_node::Builder end_uc_node_b("Registration");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(lenv::UC_node::USE_CASE)
+                .build_ptr() };
+
+    /* the second step is to fully create edges */
+    lenv::UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(lenv::UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    dia->add_node_bfore_adder(beg_uc_node);
+    dia->add_node_bfore_adder(end_uc_node);
+    dia->add_edge(uc_edge, "Student", "Registration");
+
+    std::cout << dia->to_whole_json() << std::endl;
 }
 
 int main()
 {
-    uc_visual_test_0();
-    uc_visual_test_1();
+    uc_visual_test_2();
 
-
+//    lenv::Direct_translator tr{};
+//    auto fin = std::ifstream("1.txt");
+//    auto res = tr.convert_uc_dia(fin);
+//    std::cout << res->to_whole_json();
 
     return 0;
 }

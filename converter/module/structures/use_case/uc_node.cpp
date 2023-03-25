@@ -28,13 +28,14 @@ const std::string UC_node::Field::seq_dia{ "seq_dia" };
 
 // -----------------------------------------------------------------------
 
-UC_node::Builder::Builder(UC_node_sp node)
+UC_node::Builder::Builder(UC_node_sp node, std::string id)
 {
     if (!node) throw Null_node{
         Err_text_creator::dt("UC_node::Builder", "Builder",
                              "node to clone is null")
     };
     m_node_impl = node->m_impl;
+    m_node_impl.id = std::move(id);
 }
 
 UC_node::Builder::Builder(std::string id) noexcept
@@ -107,6 +108,8 @@ UC_node::Adder& UC_node::Adder::add_inn_edge(UC_edge_sp edge)
         Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
                              "edge already added")
     };
+
+    /* ignore case when: edge->beg()->id() == edge->end()->id() */
 
     m_node->m_impl.inn_edges.push_back(edge);
     return *this;
@@ -206,6 +209,11 @@ bool UC_node::contains_edge(const UC_edge_wps& edges, const std::string& id)
         if (edge->id() == id) return true;
     }
     return false;
+}
+
+bool UC_node::has_edges() const
+{
+    return !m_impl.inn_edges.empty() || !m_impl.out_edges.empty();
 }
 
 // -----------------------------------------------------------------------

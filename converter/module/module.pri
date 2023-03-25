@@ -1,6 +1,8 @@
 SOURCES += \
     $$PWD/common/errors/any_error.cpp \
     $$PWD/common/errors/bldr/bldr_error.cpp \
+    $$PWD/common/errors/bldr/node_after_adder.cpp \
+    $$PWD/common/errors/bldr/not_found_node.cpp \
     $$PWD/common/errors/err_text_creator.cpp \
     $$PWD/common/errors/bldr/invalid_edge.cpp \
     $$PWD/common/errors/bldr/invalid_node.cpp \
@@ -9,6 +11,8 @@ SOURCES += \
     $$PWD/common/errors/bldr/repeating_edge.cpp \
     $$PWD/common/errors/bldr/repeating_node.cpp \
     $$PWD/common/errors/bldr/unsuitable_edge.cpp \
+    $$PWD/common/errors/tltr/tltr_error.cpp \
+    $$PWD/common/errors/tltr/unknown_directive.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
     $$PWD/structures/project.cpp \
@@ -19,14 +23,16 @@ SOURCES += \
     $$PWD/structures/use_case/use_case_dia.cpp \
     $$PWD/translator/complete_translator.cpp \
     $$PWD/translator/direct_translator.cpp \
-    $$PWD/translator/regex_translator.cpp \
     $$PWD/translator/translator.cpp \
+    $$PWD/translator/use_case/uc_dia_direct_converter.cpp \
     $$PWD/translator/use_case/uc_lexic_analyzer.cpp \
     $$PWD/translator/use_case/uc_syntac_analyzer.cpp
 
 HEADERS += \
     $$PWD/common/errors/any_error.h \
     $$PWD/common/errors/bldr/bldr_error.h \
+    $$PWD/common/errors/bldr/node_after_adder.h \
+    $$PWD/common/errors/bldr/not_found_node.h \
     $$PWD/common/errors/err_text_creator.h \
     $$PWD/common/errors/bldr/invalid_edge.h \
     $$PWD/common/errors/bldr/invalid_node.h \
@@ -35,6 +41,8 @@ HEADERS += \
     $$PWD/common/errors/bldr/repeating_edge.h \
     $$PWD/common/errors/bldr/repeating_node.h \
     $$PWD/common/errors/bldr/unsuitable_edge.h \
+    $$PWD/common/errors/tltr/tltr_error.h \
+    $$PWD/common/errors/tltr/unknown_directive.h \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
@@ -54,9 +62,9 @@ HEADERS += \
     $$PWD/structures/use_case/use_case_dia.h \
     $$PWD/translator/complete_translator.h \
     $$PWD/translator/direct_translator.h \
-    $$PWD/translator/regex_translator.h \
     $$PWD/translator/token_tag.h \
     $$PWD/translator/translator.h \
+    $$PWD/translator/use_case/uc_dia_direct_converter.h \
     $$PWD/translator/use_case/uc_lexic_analyzer.h \
     $$PWD/translator/use_case/uc_syntac_analyzer.h \
     $$PWD/translator/use_case/uc_token_tag.h

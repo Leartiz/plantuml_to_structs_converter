@@ -1,16 +1,15 @@
 #include <string>
 
 #include "direct_translator.h"
+#include "use_case/uc_dia_direct_converter.h"
 
 namespace lenv
 {
 
 Use_Case_dia_sp Direct_translator::convert_uc_dia(std::istream& in)
 {
-    std::string line;
-    while (std::getline(in, line)) {
-        std::cout << line << std::endl;
-    }
+    UC_dia_direct_converter conv{ in };
+    return conv();
 }
 
 Robustness_dia_sp Direct_translator::convert_rob_dia(std::istream& in)

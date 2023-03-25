@@ -141,7 +141,6 @@ void Module::test_UC_edge_Builder_complex()
 void Module::test_UC_edge_to_whole_json_err()
 {
     using namespace lenv;
-
     UC_edge::Builder edge_b("Association");
     edge_b.type(UC_edge::ASSOCIATION);
 
@@ -166,7 +165,6 @@ void Module::test_UC_edge_to_whole_json_err()
 void Module::test_UC_edge_to_whole_json_okk()
 {
     using namespace lenv;
-
     UC_edge::Builder edge_b("Association");
     edge_b.type(UC_edge::ASSOCIATION);
 
@@ -202,7 +200,6 @@ void Module::test_UC_edge_to_whole_json_okk()
 void Module::test_UC_edge_to_short_json_okk()
 {
     using namespace lenv;
-
     UC_edge::Builder edge_b("Association");
     edge_b.type(UC_edge::ASSOCIATION);
 
@@ -236,7 +233,6 @@ void Module::test_UC_edge_to_short_json_okk()
 void Module::test_UC_edge_to_short_json_okk1()
 {
     using namespace lenv;
-
     UC_edge::Builder edge_b("Association");
     edge_b.type(UC_edge::ASSOCIATION);
 
@@ -257,6 +253,131 @@ void Module::test_UC_edge_to_short_json_okk1()
     nlohmann::json actual;
     QVERIFY_THROWS_NO_EXCEPTION(actual = edge_sp->to_short_json());
     const nlohmann::json expected = { { UC_edge::Field::id, "Association" }, };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+// UC_node
+// -----------------------------------------------------------------------
+
+void Module::test_UC_node_Builder_Builder_err()
+{
+    using namespace lenv;
+    UC_node_sp node{ nullptr };
+    QVERIFY_THROWS_EXCEPTION(
+                Null_node,
+                UC_node::Builder node_b(nullptr, "Actor")
+                );
+}
+
+void Module::test_UC_node_Builder_Builder_okk()
+{
+    using namespace lenv;
+    UC_node::Builder node_b("Actor");
+    node_b.name("Actor")
+            .type(UC_node::ACTOR)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
+
+    UC_node_sp node{ nullptr };
+    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr()); // always OK!
+}
+
+void Module::test_UC_node_Builder_Builder_okk1()
+{
+    using namespace lenv;
+    UC_node::Builder node_b("UseCase");
+    node_b.name("UseCase")
+            .type(UC_node::USE_CASE)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
+
+    UC_node_sp node{ nullptr };
+    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
+}
+
+void Module::test_UC_node_Builder_Builder_okk2()
+{
+    using namespace lenv;
+    UC_node::Builder node_b("Actor");
+    node_b.name("Actor")
+            .type(UC_node::ACTOR)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
+
+    UC_node_sp node{ nullptr };
+    QVERIFY_THROWS_NO_EXCEPTION(
+                node = node_b.build_ptr()
+            );
+
+    UC_node::Builder node_b_for_clone(node, "Actor2");
+    node_b_for_clone.name("Actor2")
+            .type(UC_node::ACTOR)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
+
+    UC_node_sp cloned_node{ nullptr };
+    QVERIFY_THROWS_NO_EXCEPTION(
+                cloned_node = node_b_for_clone.build_ptr()
+            );
+
+    QCOMPARE_NE(node->id(), cloned_node->id());
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UC_node_Adder_add_inn_edge_err()
+{
+
+}
+
+void Module::test_UC_node_Adder_add_inn_edge_okk()
+{
+
+}
+
+void Module::test_UC_node_Adder_add_out_edge_err()
+{
+
+}
+
+void Module::test_UC_node_Adder_add_out_edge_okk()
+{
+
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UC_node_to_whole_json_err()
+{
+
+}
+
+void Module::test_UC_node_to_whole_json_okk()
+{
+
+}
+
+void Module::test_UC_node_to_short_json_okk()
+{
+    using namespace lenv;
+    UC_node::Builder node_b("Actor_Id");
+    node_b.name("Actor_name")
+            .type(UC_node::ACTOR)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
+
+    UC_node_sp node;
+    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = node->to_short_json());
+
+    const nlohmann::json expected = { { UC_node::Field::id, "Actor_Id" }, };
 
     QCOMPARE_EQ(actual.is_object(), true);
     QCOMPARE_EQ(expected.is_object(), true);

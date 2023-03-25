@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-#include "use_case/uc_ptrs.h"
-
 class Module : public QObject
 {
     Q_OBJECT
@@ -39,7 +37,24 @@ private slots:
 
     // UC_node
 private slots:
+    void test_UC_node_Builder_Builder_err();
+    void test_UC_node_Builder_Builder_okk();
+    void test_UC_node_Builder_Builder_okk1();
+    void test_UC_node_Builder_Builder_okk2();
 
+private slots:
+    void test_UC_node_Adder_add_inn_edge_err();
+    void test_UC_node_Adder_add_inn_edge_okk();
+
+    void test_UC_node_Adder_add_out_edge_err();
+    void test_UC_node_Adder_add_out_edge_okk();
+
+private slots:
+    void test_UC_node_to_whole_json_err();
+    void test_UC_node_to_whole_json_okk();
+    void test_UC_node_to_short_json_okk();
+
+    // Use_Case_dia
 private slots:
 
     void test_convert_uc_dia_data();
