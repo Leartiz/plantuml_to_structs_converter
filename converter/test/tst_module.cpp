@@ -1,3 +1,4 @@
+#include <sstream>
 #include <iostream>
 
 #include <QtTest>
@@ -7,9 +8,16 @@
 
 #include "use_case/uc_node.h"
 #include "use_case/uc_edge.h"
+#include "use_case/use_case_dia.h"
+
+#include "translator/use_case/uc_dia_direct_converter.h"
+
 #include "errors/bldr/null_node.h"
 #include "errors/bldr/null_edge.h"
 #include "errors/bldr/invalid_edge.h"
+#include "errors/bldr/unsuitable_edge.h"
+#include "errors/bldr/repeating_node.h"
+#include "errors/bldr/repeating_edge.h"
 
 #include "nlohmann/json.hpp"
 
@@ -184,7 +192,7 @@ void Module::test_UC_edge_to_whole_json_okk()
 
     const nlohmann::json actual = edge_sp->to_whole_json();
     const nlohmann::json expected = {
-        { UC_edge::Field::type, 0 }, // static_cast<uint32_t>?
+        { UC_edge::Field::type, UC_edge::ASSOCIATION }, // static_cast<uint32_t>?
         { UC_edge::Field::id, "Association" },
         { UC_edge::Field::beg, { { UC_node::Field::id, "Actor" } } },
         { UC_edge::Field::end, { { UC_node::Field::id, "UseCase" } } },
@@ -259,6 +267,18 @@ void Module::test_UC_edge_to_short_json_okk1()
     QCOMPARE_EQ(actual == expected, true);
 }
 
+// -----------------------------------------------------------------------
+
+void Module::test_UC_edge_is_valid_err()
+{
+    // TODO:
+}
+
+void Module::test_UC_edge_is_valid_okk()
+{
+    // TODO:
+}
+
 // UC_node
 // -----------------------------------------------------------------------
 
@@ -330,12 +350,145 @@ void Module::test_UC_node_Builder_Builder_okk2()
 
 void Module::test_UC_node_Adder_add_inn_edge_err()
 {
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("UC1");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
 
+    UC_node::Adder beg_uc_node_a{ beg_uc_node };
+    QVERIFY_THROWS_EXCEPTION(Null_edge, beg_uc_node_a.add_out_edge(nullptr));
+    QVERIFY_THROWS_EXCEPTION(Null_edge, beg_uc_node_a.add_inn_edge(nullptr));
+}
+
+void Module::test_UC_node_Adder_add_inn_edge_err1()
+{
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Registration");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    beg_uc_node.reset(); // clear node - will result in an error.
+
+    // ***
+
+    UC_node::Adder beg_uc_node_a{ end_uc_node };
+    QVERIFY_THROWS_EXCEPTION(Null_node, beg_uc_node_a.add_inn_edge(uc_edge));
+}
+
+void Module::test_UC_node_Adder_add_inn_edge_err2()
+{
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Registration");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    // ***
+
+    UC_node::Builder uc_node_b("User");
+    auto uc_node{ uc_node_b.name("User")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // ***
+
+    {
+        UC_node::Adder uc_node_a{ uc_node };
+        QVERIFY_THROWS_EXCEPTION(Unsuitable_edge, uc_node_a.add_inn_edge(uc_edge));
+        QVERIFY_THROWS_EXCEPTION(Unsuitable_edge, uc_node_a.add_out_edge(uc_edge));
+    }
+}
+
+void Module::test_UC_node_Adder_add_inn_edge_err3()
+{
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Reg");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    // ***
+
+    UC_node::Adder end_uc_node_a{ end_uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
+    QVERIFY_THROWS_EXCEPTION(Repeating_edge, end_uc_node_a.add_inn_edge(uc_edge));
 }
 
 void Module::test_UC_node_Adder_add_inn_edge_okk()
 {
+    using namespace lenv;
+    UC_node::Builder uc_node_b("Student");
+    auto uc_node{ uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
 
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(uc_node)
+            .end(uc_node)
+            .build_ptr(); // a loop!
+
+    // ***
+
+    UC_node::Adder uc_node_a{ uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_inn_edge(uc_edge));
+    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_out_edge(uc_edge));
 }
 
 void Module::test_UC_node_Adder_add_out_edge_err()
@@ -352,12 +505,219 @@ void Module::test_UC_node_Adder_add_out_edge_okk()
 
 void Module::test_UC_node_to_whole_json_err()
 {
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
 
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Registration");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // scope for edge!
+    {
+        UC_edge::Builder uc_edge_b("1");
+        auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+                .beg(beg_uc_node)
+                .end(end_uc_node)
+                .build_ptr();
+
+        UC_node::Adder beg_uc_node_a{ beg_uc_node };
+        QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
+    }
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_EXCEPTION(
+                Null_edge,
+                actual = beg_uc_node->to_whole_json()
+            );
 }
 
 void Module::test_UC_node_to_whole_json_okk()
 {
+    using namespace lenv;
+    UC_node::Builder node_b("Actor_Id");
+    node_b.name("Actor_name")
+            .type(UC_node::ACTOR)
+            .rob_dia(nullptr)
+            .seq_dia(nullptr);
 
+    UC_node_sp node;
+    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = node->to_whole_json());
+
+    const nlohmann::json expected = {
+        { UC_node::Field::id, "Actor_Id" },
+        { UC_node::Field::name, "Actor_name" },
+        { UC_node::Field::type, static_cast<uint32_t>(UC_node::ACTOR) },
+        { UC_node::Field::inn_edges, nlohmann::json::array() },
+        { UC_node::Field::out_edges, nlohmann::json::array() },
+        { UC_node::Field::rob_dia, nullptr },
+        { UC_node::Field::seq_dia, nullptr },
+    };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+void Module::test_UC_node_to_whole_json_okk1()
+{
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Registration");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    // ***
+
+    UC_node::Adder beg_uc_node_a{ beg_uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
+
+    UC_node::Adder end_uc_node_a{ end_uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = beg_uc_node->to_whole_json());
+
+    const nlohmann::json expected = {
+        { UC_node::Field::id, "Student" },
+        { UC_node::Field::name, "Student" },
+        { UC_node::Field::type, UC_node::ACTOR },
+        { UC_node::Field::inn_edges, nlohmann::json::array() },
+        { UC_node::Field::out_edges, { { { UC_edge::Field::id, "1" } } } },
+        { UC_node::Field::rob_dia, nullptr },
+        { UC_node::Field::seq_dia, nullptr },
+    };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+void Module::test_UC_node_to_whole_json_okk2()
+{
+    using namespace lenv;
+    UC_node::Builder beg_uc_node_b("Student");
+    auto beg_uc_node{ beg_uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    // only for building edge!
+    UC_node::Builder end_uc_node_b("Reg");
+    auto end_uc_node{ end_uc_node_b.name("Registration")
+                .type(UC_node::USE_CASE)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(beg_uc_node)
+            .end(end_uc_node)
+            .build_ptr();
+
+    // ***
+
+    UC_node::Adder end_uc_node_a{ end_uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
+
+    UC_node::Adder beg_uc_node_a{ beg_uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = end_uc_node->to_whole_json());
+
+    const nlohmann::json expected = {
+        { UC_node::Field::id, "Reg" },
+        { UC_node::Field::name, "Registration" },
+        { UC_node::Field::type, UC_node::USE_CASE },
+        { UC_node::Field::inn_edges, { { { UC_edge::Field::id, "1" } } } },
+        { UC_node::Field::out_edges, nlohmann::json::array() },
+        { UC_node::Field::rob_dia, nullptr },
+        { UC_node::Field::seq_dia, nullptr },
+    };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+void Module::test_UC_node_to_whole_json_okk3()
+{
+    using namespace lenv;
+    UC_node::Builder uc_node_b("Student");
+    auto uc_node{ uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(uc_node)
+            .end(uc_node)
+            .build_ptr(); // a loop!
+
+    // ***
+
+    UC_node::Adder uc_node_a{ uc_node };
+    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_inn_edge(uc_edge));
+    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_out_edge(uc_edge));
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_node->to_whole_json());
+
+    const nlohmann::json expected = {
+        { UC_node::Field::id, "Student" },
+        { UC_node::Field::name, "Student" },
+        { UC_node::Field::type, UC_node::ACTOR },
+        { UC_node::Field::inn_edges, { { { UC_edge::Field::id, "1" } } } },
+        { UC_node::Field::out_edges, { { { UC_edge::Field::id, "1" } } } },
+        { UC_node::Field::rob_dia, nullptr },
+        { UC_node::Field::seq_dia, nullptr },
+    };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
 }
 
 void Module::test_UC_node_to_short_json_okk()
@@ -386,12 +746,125 @@ void Module::test_UC_node_to_short_json_okk()
 
 // -----------------------------------------------------------------------
 
-void Module::test_convert_uc_dia_data()
+void Module::test_UC_node_is_valid_err()
+{
+    // TODO:
+}
+
+void Module::test_UC_node_is_valid_okk()
+{
+    // TODO:
+}
+
+// Use_Case_dia
+// -----------------------------------------------------------------------
+
+void Module::test_Use_Case_dia_to_whole_json_err()
 {
 
 }
 
-void Module::test_convert_uc_dia()
+void Module::test_Use_Case_dia_to_whole_json_okk()
+{
+    using namespace lenv;
+    const Use_Case_dia::Builder uc_dia_b;
+    auto uc_dia = uc_dia_b.build_ptr();
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia->to_whole_json());
+
+    const nlohmann::json expected = {
+        { Use_Case_dia::Field::id, Use_Case_dia::id },
+        { Use_Case_dia::Field::nodes, nlohmann::json::array() },
+        { Use_Case_dia::Field::edges, nlohmann::json::array() },
+    };
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+void Module::test_Use_Case_dia_to_whole_json_okk1()
+{
+    using namespace lenv;
+    const Use_Case_dia::Builder uc_dia_b;
+    auto uc_dia = uc_dia_b.build_ptr();
+
+    // ***
+
+    UC_node::Builder uc_node_b("Student");
+    auto uc_node{ uc_node_b.name("Student")
+                .type(UC_node::ACTOR)
+                .rob_dia(nullptr)
+                .seq_dia(nullptr)
+                .build_ptr() };
+
+    UC_edge::Builder uc_edge_b("1");
+    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
+            .beg(uc_node)
+            .end(uc_node)
+            .build_ptr(); // a loop!
+
+    // ***
+
+    QVERIFY_THROWS_NO_EXCEPTION(uc_dia->add_node_bfore_adder(uc_node));
+    QVERIFY_THROWS_NO_EXCEPTION(uc_dia->add_edge(uc_edge, "Student", "Student"));
+
+    // ***
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia->to_whole_json());
+
+    const nlohmann::json expected = {
+        { Use_Case_dia::Field::id, Use_Case_dia::id },
+        { Use_Case_dia::Field::nodes, { uc_node->to_whole_json() } },
+        { Use_Case_dia::Field::edges, { uc_edge->to_whole_json() } },
+    };
+
+    QCOMPARE_EQ(actual[Use_Case_dia::Field::nodes].is_array(), true);
+    QCOMPARE_EQ(actual[Use_Case_dia::Field::edges].is_array(), true);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+void Module::test_Use_Case_dia_to_whole_json_okk2()
+{
+    // TODO:
+}
+
+// String_utils
+// -----------------------------------------------------------------------
+
+void Module::test_String_utils_start_with_data()
+{
+
+}
+
+void Module::test_String_utils_start_with()
+{
+
+}
+
+void Module::test_String_utils_stop_with_data()
+{
+
+}
+
+void Module::test_String_utils_stop_with()
+{
+
+}
+
+// Puml_utils
+// -----------------------------------------------------------------------
+
+
+// Direct_translator
+// -----------------------------------------------------------------------
+
+void Module::test_Direct_translator_convert_uc_dia_okks()
 {
 
 }

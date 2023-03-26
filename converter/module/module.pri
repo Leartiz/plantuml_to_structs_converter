@@ -13,6 +13,8 @@ SOURCES += \
     $$PWD/common/errors/bldr/unsuitable_edge.cpp \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
+    $$PWD/common/utils/puml_utils.cpp \
+    $$PWD/common/utils/string_utils.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
     $$PWD/structures/project.cpp \
@@ -46,6 +48,8 @@ HEADERS += \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
+    $$PWD/common/utils/puml_utils.h \
+    $$PWD/common/utils/string_utils.h \
     $$PWD/structures/class/class_dia.h \
     $$PWD/structures/class/class_ptrs.h \
     $$PWD/structures/description.h \

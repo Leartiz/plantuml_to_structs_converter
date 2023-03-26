@@ -119,16 +119,16 @@ UC_node::Adder& UC_node::Adder::add_inn_edge(UC_edge_sp edge)
 UC_node::Adder& UC_node::Adder::add_out_edge(UC_edge_sp edge)
 {
     if (!edge) throw Null_edge{
-        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+        Err_text_creator::dt("UC_node::Adder", "add_out_edge",
                              "edge is null")
     };
     if (!edge->beg() || !edge->end()) throw Null_node{
-        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+        Err_text_creator::dt("UC_node::Adder", "add_out_edge",
                              "node is null")
     };
 
     if (edge->beg()->id() != m_node->id()) throw Unsuitable_edge{
-        Err_text_creator::dt("UC_node::Adder", "add_inn_edge",
+        Err_text_creator::dt("UC_node::Adder", "add_out_edge",
                              "edge does not exit node")
     };
     if (m_node->contains_out_edge(edge->id())) throw Repeating_edge{
@@ -262,7 +262,7 @@ nlohmann::json UC_node::to_short_json() const
 
 nlohmann::json::array_t UC_node::edges_to_json(const UC_edge_wps& edges)
 {
-    auto result{ nlohmann::json::array() };
+    auto result = nlohmann::json::array();
     std::for_each(std::begin(edges), std::end(edges),
                   [&result](const UC_edge_wp edge_wp) -> void {       
         if (const auto edge_sp = edge_wp.lock(); edge_sp) {

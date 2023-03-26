@@ -93,6 +93,12 @@ void Use_Case_dia::add_edge(UC_edge_sp edge,
     m_edges.push_back(edge);
 }
 
+void Use_Case_dia::reset_all()
+{
+    m_nodes.clear();
+    m_edges.clear();
+}
+
 // -----------------------------------------------------------------------
 
 const UC_node_sps& Use_Case_dia::nodes() const
@@ -157,7 +163,7 @@ bool Use_Case_dia::contains_edge_with_type(const UC_edge::Type type) const
 UC_node_sp Use_Case_dia::node_by_id(const std::string& id) const
 {
     auto found_it = std::find_if(std::begin(m_nodes), std::end(m_nodes),
-                 [&id](const UC_node_sp node_sp) -> bool {
+                                 [&id](const UC_node_sp node_sp) -> bool {
         return node_sp->id() == id;
     });
 
@@ -169,7 +175,7 @@ UC_node_sp Use_Case_dia::node_by_id(const std::string& id) const
 UC_edge_sp Use_Case_dia::edge_by_id(const std::string& id) const
 {
     auto found_it = std::find_if(std::begin(m_edges), std::end(m_edges),
-                 [&id](const UC_edge_sp edge_sp) -> bool {
+                                 [&id](const UC_edge_sp edge_sp) -> bool {
         return edge_sp->id() == id;
     });
 
@@ -181,7 +187,7 @@ UC_edge_sp Use_Case_dia::edge_by_id(const std::string& id) const
 UC_node_sp Use_Case_dia::node_by_name(const std::string& name) const
 {
     auto found_it = std::find_if(std::begin(m_nodes), std::end(m_nodes),
-                 [&name](const UC_node_sp node_sp) -> bool {
+                                 [&name](const UC_node_sp node_sp) -> bool {
         return node_sp->name() == name;
     });
 
@@ -193,7 +199,7 @@ UC_node_sp Use_Case_dia::node_by_name(const std::string& name) const
 UC_node_sp Use_Case_dia::node_by_type(const UC_node::Type type) const
 {
     auto found_it = std::find_if(std::begin(m_nodes), std::end(m_nodes),
-                 [&type](const UC_node_sp node_sp) -> bool {
+                                 [&type](const UC_node_sp node_sp) -> bool {
         return node_sp->type() == type;
     });
 
@@ -205,7 +211,7 @@ UC_node_sp Use_Case_dia::node_by_type(const UC_node::Type type) const
 UC_edge_sp Use_Case_dia::edge_by_type(const UC_edge::Type type) const
 {
     auto found_it = std::find_if(std::begin(m_edges), std::end(m_edges),
-                 [&type](const UC_edge_sp edge_sp) -> bool {
+                                 [&type](const UC_edge_sp edge_sp) -> bool {
         return edge_sp->type() == type;
     });
 
@@ -279,7 +285,8 @@ nlohmann::json::array_t Use_Case_dia::edges_to_whole_json() const
 
 bool Use_Case_dia::is_valid() const
 {
-
+    // TODO:
+    return true;
 }
 
 }

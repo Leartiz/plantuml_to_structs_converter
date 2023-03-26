@@ -51,6 +51,7 @@ public:
     void add_edge(UC_edge_sp edge,
                   const std::string& beg_node_id,
                   const std::string& end_node_id);
+    void reset_all();
 
 public:
     const UC_node_sps& nodes() const;
