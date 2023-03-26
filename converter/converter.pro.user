@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 9.0.1, 2023-03-26T02:36:02. -->
+<!-- Written by QtCreator 9.0.1, 2023-03-27T00:42:32. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -69,8 +69,27 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:   @STARTUML">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:@STARTUML">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:@STARTUML123">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:@STARTUML123   ">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:@startuml">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:ACtoR: 🤬🙄😎">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:USECASE">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:actor: 🤬🙄😎">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:cleanupTestCase">Unchecked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Direct_translator_convert_uc_dia_okks">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_start_with">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_start_with_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_stop_with">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_stop_with_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_to_lower">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_to_lower_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_to_upper">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_to_upper_data">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_err1">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_beg_okk">Checked</value>
@@ -79,11 +98,16 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_complex">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_end_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_end_okk">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_is_valid_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_is_valid_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_short_json_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_short_json_okk1">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_whole_json_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_whole_json_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err3">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_out_edge_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_out_edge_okk">Checked</value>
@@ -91,11 +115,23 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Builder_Builder_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Builder_Builder_okk1">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Builder_Builder_okk2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_is_valid_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_is_valid_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_short_json_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_whole_json_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_whole_json_okk">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia">Checked</value>
-    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_convert_uc_dia_data">Unchecked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_whole_json_okk1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_whole_json_okk2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_to_whole_json_okk3">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Use_Case_dia_to_whole_json_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Use_Case_dia_to_whole_json_okk">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Use_Case_dia_to_whole_json_okk1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Use_Case_dia_to_whole_json_okk2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:useCase">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:при 🤬 вет">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:приВЕТ">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:приветPRIVET阪市立学">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:приветPrivet阪市立学">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:Module">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>

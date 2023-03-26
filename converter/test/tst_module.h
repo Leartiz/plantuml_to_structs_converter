@@ -78,11 +78,22 @@ private slots:
 
     // String_utils
 private slots:
+    void test_String_utils_to_upper_data();
+    void test_String_utils_to_upper();
+
+    void test_String_utils_to_lower_data();
+    void test_String_utils_to_lower();
+
+private slots:
     void test_String_utils_start_with_data();
     void test_String_utils_start_with();
 
     void test_String_utils_stop_with_data();
     void test_String_utils_stop_with();
+
+private slots:
+    void test_String_utils_eq_data();
+    void test_String_utils_eq();
 
     // Puml_utils
 private slots:

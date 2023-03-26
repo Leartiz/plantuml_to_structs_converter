@@ -10,8 +10,6 @@
 #include "use_case/uc_edge.h"
 #include "use_case/use_case_dia.h"
 
-#include "translator/use_case/uc_dia_direct_converter.h"
-
 #include "errors/bldr/null_node.h"
 #include "errors/bldr/null_edge.h"
 #include "errors/bldr/invalid_edge.h"
@@ -19,6 +17,10 @@
 #include "errors/bldr/repeating_node.h"
 #include "errors/bldr/repeating_edge.h"
 
+#include "utils/string_utils.h"
+#include "utils/puml_utils.h"
+
+#include "translator/use_case/uc_dia_direct_converter.h"
 #include "nlohmann/json.hpp"
 
 Module::Module() {}
@@ -493,12 +495,12 @@ void Module::test_UC_node_Adder_add_inn_edge_okk()
 
 void Module::test_UC_node_Adder_add_out_edge_err()
 {
-
+    // TODO:
 }
 
 void Module::test_UC_node_Adder_add_out_edge_okk()
 {
-
+    // TODO:
 }
 
 // -----------------------------------------------------------------------
@@ -837,24 +839,232 @@ void Module::test_Use_Case_dia_to_whole_json_okk2()
 // String_utils
 // -----------------------------------------------------------------------
 
+void Module::test_String_utils_to_upper_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "приВЕТ" };
+        const std::string res{ "приВЕТ" };
+        QTest::newRow("приВЕТ") << str << res;
+    }
+    {
+        const std::string str{ "useCase" };
+        const std::string res{ "USECASE" };
+        QTest::newRow("useCase") << str << res;
+    }
+    {
+        const std::string str{ "actor: 🤬🙄😎" };
+        const std::string res{ "ACTOR: 🤬🙄😎" };
+        QTest::newRow("actor: 🤬🙄😎") << str << res;
+    }
+    {
+        const std::string str{ "приветPrivet阪市立学" };
+        const std::string res{ "приветPRIVET阪市立学" };
+        QTest::newRow("приветPrivet阪市立学") << str << res;
+    }
+    {
+        const std::string str{ "@startuml" };
+        const std::string res{ "@STARTUML" };
+        QTest::newRow("@startuml") << str << res;
+    }
+    // ...
+}
+
+void Module::test_String_utils_to_upper()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::to_upper(str) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_utils_to_lower_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "приВЕТ" };
+        const std::string res{ "приВЕТ" };
+        QTest::newRow("приВЕТ") << str << res;
+    }
+    {
+        const std::string str{ "USECASE" };
+        const std::string res{ "usecase" };
+        QTest::newRow("USECASE") << str << res;
+    }
+    {
+        const std::string str{ "приветPRIVET阪市立学" };
+        const std::string res{ "приветprivet阪市立学" };
+        QTest::newRow("приветPRIVET阪市立学") << str << res;
+    }
+    {
+        const std::string str{ "ACtoR: 🤬🙄😎" };
+        const std::string res{ "actor: 🤬🙄😎" };
+        QTest::newRow("ACtoR: 🤬🙄😎") << str << res;
+    }
+    {
+        const std::string str{ "@STARTUML" };
+        const std::string res{ "@startuml" };
+        QTest::newRow("@STARTUML") << str << res;
+    }
+    // ...
+}
+
+void Module::test_String_utils_to_lower()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::to_lower(str) };
+    QCOMPARE_EQ(got, res);
+}
+
+// -----------------------------------------------------------------------
+
 void Module::test_String_utils_start_with_data()
 {
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("start");
+    QTest::addColumn<bool>("sensitive");
+    QTest::addColumn<bool>("res");
 
+    {
+        std::string str{ "@STARTUML" };
+        std::string start{ "@START" };
+        const bool sensitive{ true };
+        const bool res{ true };
+        QTest::newRow("@STARTUML") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "   @STARTUML" };
+        std::string start{ "@START" };
+        const bool sensitive{ true };
+        const bool res{ false };
+        QTest::newRow("   @STARTUML") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "@STARTUML" };
+        std::string start{ "@start" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("@STARTUML") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "при 🤬 вет" };
+        std::string start{ "при 🤬" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("при 🤬 вет") << str << start << sensitive << res;
+    }
+    // ...
 }
 
 void Module::test_String_utils_start_with()
 {
+    QFETCH(std::string, str);
+    QFETCH(std::string, start);
+    QFETCH(bool, sensitive);
+    QFETCH(bool, res);
 
+    auto got{ lenv::String_utils::start_with(str, start, sensitive) };
+    QCOMPARE_EQ(got, res);
 }
 
 void Module::test_String_utils_stop_with_data()
 {
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("stop");
+    QTest::addColumn<bool>("sensitive");
+    QTest::addColumn<bool>("res");
 
+    {
+        std::string str{ "@STARTUML" };
+        std::string start{ "UML" };
+        const bool sensitive{ true };
+        const bool res{ true };
+        QTest::newRow("@STARTUML") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "@STARTUML123" };
+        std::string start{ "tuml123" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("@STARTUML123") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "@STARTUML123   " };
+        std::string start{ "tuml123" };
+        const bool sensitive{ false };
+        const bool res{ false };
+        QTest::newRow("@STARTUML123   ") << str << start << sensitive << res;
+    }
+    {
+        std::string str{ "при 🤬 вет" };
+        std::string start{ "🤬 вет" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("при 🤬 вет") << str << start << sensitive << res;
+    }
+    // ...
 }
 
 void Module::test_String_utils_stop_with()
 {
+    QFETCH(std::string, str);
+    QFETCH(std::string, stop);
+    QFETCH(bool, sensitive);
+    QFETCH(bool, res);
 
+    auto got{ lenv::String_utils::stop_with(str, stop, sensitive) };
+    QCOMPARE_EQ(got, res);
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_String_utils_eq_data()
+{
+    QTest::addColumn<std::string>("lhs");
+    QTest::addColumn<std::string>("rhs");
+    QTest::addColumn<bool>("sensitive");
+    QTest::addColumn<bool>("res");
+
+    {
+        std::string lhs{ "@STARTUML" };
+        std::string rhs{ "@startuml" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("@STARTUML") << lhs << rhs << sensitive << res;
+    }
+    {
+        std::string lhs{ "@STARTUML123" };
+        std::string rhs{ "@startuml123" };
+        const bool sensitive{ true };
+        const bool res{ false };
+        QTest::newRow("@STARTUML123") << lhs << rhs << sensitive << res;
+    }
+    {
+        std::string lhs{ "при 🤬 вет" };
+        std::string rhs{ "при 🤬 вет" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("при 🤬 вет") << lhs << rhs << sensitive << res;
+    }
+    // ...
+}
+
+void Module::test_String_utils_eq()
+{
+    QFETCH(std::string, lhs);
+    QFETCH(std::string, rhs);
+    QFETCH(bool, sensitive);
+    QFETCH(bool, res);
+
+    auto got{ lenv::String_utils::eq(lhs, rhs, sensitive) };
+    QCOMPARE_EQ(got, res);
 }
 
 // Puml_utils
