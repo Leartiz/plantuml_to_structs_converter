@@ -11,12 +11,16 @@ SOURCES += \
     $$PWD/common/errors/bldr/repeating_edge.cpp \
     $$PWD/common/errors/bldr/repeating_node.cpp \
     $$PWD/common/errors/bldr/unsuitable_edge.cpp \
+    $$PWD/common/errors/not_implemented.cpp \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
     $$PWD/common/utils/puml_utils.cpp \
     $$PWD/common/utils/string_utils.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
+    $$PWD/structures/format.cpp \
+    $$PWD/structures/layout.cpp \
+    $$PWD/structures/layout_flow/layout_flow_dia.cpp \
     $$PWD/structures/project.cpp \
     $$PWD/structures/robustness/robustness_dia.cpp \
     $$PWD/structures/sequence/sequence_dia.cpp \
@@ -24,11 +28,10 @@ SOURCES += \
     $$PWD/structures/use_case/uc_node.cpp \
     $$PWD/structures/use_case/use_case_dia.cpp \
     $$PWD/translator/complete_translator.cpp \
+    $$PWD/translator/dia_direct_converter.cpp \
     $$PWD/translator/direct_translator.cpp \
     $$PWD/translator/translator.cpp \
-    $$PWD/translator/use_case/uc_dia_direct_converter.cpp \
-    $$PWD/translator/use_case/uc_lexic_analyzer.cpp \
-    $$PWD/translator/use_case/uc_syntac_analyzer.cpp
+    $$PWD/translator/use_case/uc_dia_direct_converter.cpp
 
 HEADERS += \
     $$PWD/common/errors/any_error.h \
@@ -43,6 +46,7 @@ HEADERS += \
     $$PWD/common/errors/bldr/repeating_edge.h \
     $$PWD/common/errors/bldr/repeating_node.h \
     $$PWD/common/errors/bldr/unsuitable_edge.h \
+    $$PWD/common/errors/not_implemented.h \
     $$PWD/common/errors/tltr/tltr_error.h \
     $$PWD/common/errors/tltr/unknown_directive.h \
     $$PWD/common/ijson.h \
@@ -53,6 +57,10 @@ HEADERS += \
     $$PWD/structures/class/class_dia.h \
     $$PWD/structures/class/class_ptrs.h \
     $$PWD/structures/description.h \
+    $$PWD/structures/format.h \
+    $$PWD/structures/layout.h \
+    $$PWD/structures/layout_flow/layout_flow_dia.h \
+    $$PWD/structures/layout_flow/lw_ptrs.h \
     $$PWD/structures/project.h \
     $$PWD/structures/robustness/rob_ptrs.h \
     $$PWD/structures/robustness/robustness_dia.h \
@@ -65,12 +73,11 @@ HEADERS += \
     $$PWD/structures/use_case/uc_ptrs.h \
     $$PWD/structures/use_case/use_case_dia.h \
     $$PWD/translator/complete_translator.h \
+    $$PWD/translator/dia_direct_converter.h \
     $$PWD/translator/direct_translator.h \
     $$PWD/translator/token_tag.h \
     $$PWD/translator/translator.h \
     $$PWD/translator/use_case/uc_dia_direct_converter.h \
-    $$PWD/translator/use_case/uc_lexic_analyzer.h \
-    $$PWD/translator/use_case/uc_syntac_analyzer.h \
     $$PWD/translator/use_case/uc_token_tag.h
 
 INCLUDEPATH += \

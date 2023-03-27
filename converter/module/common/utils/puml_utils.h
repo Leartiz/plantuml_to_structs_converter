@@ -16,8 +16,10 @@ public:
     static const std::string start_ocomment;
 
 public:
-    static const std::string kw_usecase;
     static const std::string kw_actor;
+    static const std::string kw_usecase;
+    static const std::string kw_rectangle;
+    static const std::string kw_skinparam;
 
 public:
 

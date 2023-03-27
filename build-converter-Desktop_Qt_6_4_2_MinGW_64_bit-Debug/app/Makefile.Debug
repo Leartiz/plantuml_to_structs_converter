@@ -63,12 +63,16 @@ SOURCES       = ..\..\converter\app\main.cpp \
 		..\..\converter\module\common\errors\bldr\repeating_edge.cpp \
 		..\..\converter\module\common\errors\bldr\repeating_node.cpp \
 		..\..\converter\module\common\errors\bldr\unsuitable_edge.cpp \
+		..\..\converter\module\common\errors\not_implemented.cpp \
 		..\..\converter\module\common\errors\tltr\tltr_error.cpp \
 		..\..\converter\module\common\errors\tltr\unknown_directive.cpp \
 		..\..\converter\module\common\utils\puml_utils.cpp \
 		..\..\converter\module\common\utils\string_utils.cpp \
 		..\..\converter\module\structures\class\class_dia.cpp \
 		..\..\converter\module\structures\description.cpp \
+		..\..\converter\module\structures\format.cpp \
+		..\..\converter\module\structures\layout.cpp \
+		..\..\converter\module\structures\layout_flow\layout_flow_dia.cpp \
 		..\..\converter\module\structures\project.cpp \
 		..\..\converter\module\structures\robustness\robustness_dia.cpp \
 		..\..\converter\module\structures\sequence\sequence_dia.cpp \
@@ -76,11 +80,10 @@ SOURCES       = ..\..\converter\app\main.cpp \
 		..\..\converter\module\structures\use_case\uc_node.cpp \
 		..\..\converter\module\structures\use_case\use_case_dia.cpp \
 		..\..\converter\module\translator\complete_translator.cpp \
+		..\..\converter\module\translator\dia_direct_converter.cpp \
 		..\..\converter\module\translator\direct_translator.cpp \
 		..\..\converter\module\translator\translator.cpp \
-		..\..\converter\module\translator\use_case\uc_dia_direct_converter.cpp \
-		..\..\converter\module\translator\use_case\uc_lexic_analyzer.cpp \
-		..\..\converter\module\translator\use_case\uc_syntac_analyzer.cpp 
+		..\..\converter\module\translator\use_case\uc_dia_direct_converter.cpp 
 OBJECTS       = debug/main.o \
 		debug/any_error.o \
 		debug/bldr_error.o \
@@ -94,12 +97,16 @@ OBJECTS       = debug/main.o \
 		debug/repeating_edge.o \
 		debug/repeating_node.o \
 		debug/unsuitable_edge.o \
+		debug/not_implemented.o \
 		debug/tltr_error.o \
 		debug/unknown_directive.o \
 		debug/puml_utils.o \
 		debug/string_utils.o \
 		debug/class_dia.o \
 		debug/description.o \
+		debug/format.o \
+		debug/layout.o \
+		debug/layout_flow_dia.o \
 		debug/project.o \
 		debug/robustness_dia.o \
 		debug/sequence_dia.o \
@@ -107,11 +114,10 @@ OBJECTS       = debug/main.o \
 		debug/uc_node.o \
 		debug/use_case_dia.o \
 		debug/complete_translator.o \
+		debug/dia_direct_converter.o \
 		debug/direct_translator.o \
 		debug/translator.o \
-		debug/uc_dia_direct_converter.o \
-		debug/uc_lexic_analyzer.o \
-		debug/uc_syntac_analyzer.o
+		debug/uc_dia_direct_converter.o
 
 DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/any_error.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/bldr/bldr_error.h \
@@ -125,6 +131,7 @@ DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/bldr/repeating_edge.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/bldr/repeating_node.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/bldr/unsuitable_edge.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/not_implemented.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/tltr/tltr_error.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/errors/tltr/unknown_directive.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/common/ijson.h \
@@ -135,6 +142,10 @@ DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/class/class_dia.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/class/class_ptrs.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/description.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/format.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/layout.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/layout_flow/layout_flow_dia.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/layout_flow/lw_ptrs.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/project.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/robustness/rob_ptrs.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/robustness/robustness_dia.h \
@@ -149,12 +160,11 @@ DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/use_case/uc_ptrs.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/structures/use_case/use_case_dia.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/complete_translator.h \
+		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/dia_direct_converter.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/direct_translator.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/token_tag.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/translator.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/use_case/uc_dia_direct_converter.h \
-		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/use_case/uc_lexic_analyzer.h \
-		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/use_case/uc_syntac_analyzer.h \
 		D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/module/translator/use_case/uc_token_tag.h ..\..\converter\app\main.cpp \
 		..\..\converter\module\common\errors\any_error.cpp \
 		..\..\converter\module\common\errors\bldr\bldr_error.cpp \
@@ -168,12 +178,16 @@ DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs
 		..\..\converter\module\common\errors\bldr\repeating_edge.cpp \
 		..\..\converter\module\common\errors\bldr\repeating_node.cpp \
 		..\..\converter\module\common\errors\bldr\unsuitable_edge.cpp \
+		..\..\converter\module\common\errors\not_implemented.cpp \
 		..\..\converter\module\common\errors\tltr\tltr_error.cpp \
 		..\..\converter\module\common\errors\tltr\unknown_directive.cpp \
 		..\..\converter\module\common\utils\puml_utils.cpp \
 		..\..\converter\module\common\utils\string_utils.cpp \
 		..\..\converter\module\structures\class\class_dia.cpp \
 		..\..\converter\module\structures\description.cpp \
+		..\..\converter\module\structures\format.cpp \
+		..\..\converter\module\structures\layout.cpp \
+		..\..\converter\module\structures\layout_flow\layout_flow_dia.cpp \
 		..\..\converter\module\structures\project.cpp \
 		..\..\converter\module\structures\robustness\robustness_dia.cpp \
 		..\..\converter\module\structures\sequence\sequence_dia.cpp \
@@ -181,11 +195,10 @@ DIST          =  D:/education/magistracy/master_dissertation/plantuml_to_structs
 		..\..\converter\module\structures\use_case\uc_node.cpp \
 		..\..\converter\module\structures\use_case\use_case_dia.cpp \
 		..\..\converter\module\translator\complete_translator.cpp \
+		..\..\converter\module\translator\dia_direct_converter.cpp \
 		..\..\converter\module\translator\direct_translator.cpp \
 		..\..\converter\module\translator\translator.cpp \
-		..\..\converter\module\translator\use_case\uc_dia_direct_converter.cpp \
-		..\..\converter\module\translator\use_case\uc_lexic_analyzer.cpp \
-		..\..\converter\module\translator\use_case\uc_syntac_analyzer.cpp
+		..\..\converter\module\translator\use_case\uc_dia_direct_converter.cpp
 QMAKE_TARGET  = app
 DESTDIR        = debug\ #avoid trailing-slash linebreak
 TARGET         = app.exe
@@ -208,7 +221,7 @@ dist:
 	$(ZIP) app.zip $(SOURCES) $(DIST) ..\..\converter\app\app.pro C:\Qt\6.4.2\mingw_64\mkspecs\features\spec_pre.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\device_config.prf C:\Qt\6.4.2\mingw_64\mkspecs\common\sanitize.conf C:\Qt\6.4.2\mingw_64\mkspecs\common\gcc-base.conf C:\Qt\6.4.2\mingw_64\mkspecs\common\g++-base.conf C:\Qt\6.4.2\mingw_64\mkspecs\features\win32\windows_vulkan_sdk.prf C:\Qt\6.4.2\mingw_64\mkspecs\common\windows-vulkan.conf C:\Qt\6.4.2\mingw_64\mkspecs\common\g++-win32.conf C:\Qt\6.4.2\mingw_64\mkspecs\common\windows-desktop.conf C:\Qt\6.4.2\mingw_64\mkspecs\qconfig.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_ext_freetype.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_ext_libjpeg.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_ext_libpng.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_concurrent.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_concurrent_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_core.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_core_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_dbus.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_dbus_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_designer.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_designer_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_designercomponents_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_devicediscovery_support_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_entrypoint_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_fb_support_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_freetype_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_gui.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_gui_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_harfbuzz_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_help.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_help_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_jpeg_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsanimation.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsanimation_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsfolderlistmodel.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsfolderlistmodel_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsqmlmodels.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labsqmlmodels_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labssettings.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labssettings_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labssharedimage.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labssharedimage_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labswavefrontmesh.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_labswavefrontmesh_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_linguist.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_linguist_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_network.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_network_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_opengl.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_opengl_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_openglwidgets.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_openglwidgets_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_packetprotocol_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_png_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_printsupport.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_printsupport_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qml.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qml_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlcompiler_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlcore.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlcore_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmldebug_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmldom_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlintegration.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlintegration_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmllocalstorage.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmllocalstorage_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlmodels.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlmodels_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmltest.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmltest_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlworkerscript.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlworkerscript_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlxmllistmodel.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_qmlxmllistmodel_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quick.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quick_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickcontrols2.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickcontrols2_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickcontrols2impl.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickcontrols2impl_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickcontrolstestutilsprivate_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2quickimpl.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2quickimpl_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2utils.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickdialogs2utils_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quicklayouts.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quicklayouts_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickparticles_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickshapes_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quicktemplates2.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quicktemplates2_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quicktestutilsprivate_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickwidgets.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_quickwidgets_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_sql.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_sql_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_svg.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_svg_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_svgwidgets.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_svgwidgets_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_testlib.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_testlib_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_tools_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_uiplugin.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_uitools.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_uitools_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_widgets.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_widgets_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_xml.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_xml_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\modules\qt_lib_zlib_private.pri C:\Qt\6.4.2\mingw_64\mkspecs\features\qt_functions.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\qt_config.prf C:\Qt\6.4.2\mingw_64\mkspecs\win32-g++\qmake.conf C:\Qt\6.4.2\mingw_64\mkspecs\features\spec_post.prf ..\.qmake.stash C:\Qt\6.4.2\mingw_64\mkspecs\features\exclusive_builds.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\toolchain.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\default_pre.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\win32\default_pre.prf ..\..\converter\module\module.pri C:\Qt\6.4.2\mingw_64\mkspecs\features\resolve_config.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\exclusive_builds_post.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\default_post.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\build_pass.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\win32\console.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\qml_debug.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\entrypoint.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\precompile_header.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\warn_on.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\qmake_use.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\file_copies.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\testcase_targets.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\exceptions.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\yacc.prf C:\Qt\6.4.2\mingw_64\mkspecs\features\lex.prf ..\..\converter\app\app.pro      
 
 clean: compiler_clean 
-	-$(DEL_FILE) debug\main.o debug\any_error.o debug\bldr_error.o debug\node_after_adder.o debug\not_found_node.o debug\err_text_creator.o debug\invalid_edge.o debug\invalid_node.o debug\null_edge.o debug\null_node.o debug\repeating_edge.o debug\repeating_node.o debug\unsuitable_edge.o debug\tltr_error.o debug\unknown_directive.o debug\puml_utils.o debug\string_utils.o debug\class_dia.o debug\description.o debug\project.o debug\robustness_dia.o debug\sequence_dia.o debug\uc_edge.o debug\uc_node.o debug\use_case_dia.o debug\complete_translator.o debug\direct_translator.o debug\translator.o debug\uc_dia_direct_converter.o debug\uc_lexic_analyzer.o debug\uc_syntac_analyzer.o
+	-$(DEL_FILE) debug\main.o debug\any_error.o debug\bldr_error.o debug\node_after_adder.o debug\not_found_node.o debug\err_text_creator.o debug\invalid_edge.o debug\invalid_node.o debug\null_edge.o debug\null_node.o debug\repeating_edge.o debug\repeating_node.o debug\unsuitable_edge.o debug\not_implemented.o debug\tltr_error.o debug\unknown_directive.o debug\puml_utils.o debug\string_utils.o debug\class_dia.o debug\description.o debug\format.o debug\layout.o debug\layout_flow_dia.o debug\project.o debug\robustness_dia.o debug\sequence_dia.o debug\uc_edge.o debug\uc_node.o debug\use_case_dia.o debug\complete_translator.o debug\dia_direct_converter.o debug\direct_translator.o debug\translator.o debug\uc_dia_direct_converter.o
 
 distclean: clean 
 	-$(DEL_FILE) $(DESTDIR_TARGET)
@@ -244,7 +257,8 @@ debug/main.o: ../../converter/app/main.cpp ../../converter/module/structures/use
 		../../converter/module/translator/direct_translator.h \
 		../../converter/module/translator/translator.h \
 		../../converter/module/structures/project.h \
-		../../converter/module/structures/class/class_ptrs.h
+		../../converter/module/structures/class/class_ptrs.h \
+		../../converter/module/structures/layout_flow/lw_ptrs.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\..\converter\app\main.cpp
 
 debug/any_error.o: ../../converter/module/common/errors/any_error.cpp ../../converter/module/common/errors/any_error.h
@@ -302,6 +316,10 @@ debug/unsuitable_edge.o: ../../converter/module/common/errors/bldr/unsuitable_ed
 		../../converter/module/common/errors/any_error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\unsuitable_edge.o ..\..\converter\module\common\errors\bldr\unsuitable_edge.cpp
 
+debug/not_implemented.o: ../../converter/module/common/errors/not_implemented.cpp ../../converter/module/common/errors/not_implemented.h \
+		../../converter/module/common/errors/any_error.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\not_implemented.o ..\..\converter\module\common\errors\not_implemented.cpp
+
 debug/tltr_error.o: ../../converter/module/common/errors/tltr/tltr_error.cpp ../../converter/module/common/errors/tltr/tltr_error.h \
 		../../converter/module/common/errors/any_error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\tltr_error.o ..\..\converter\module\common\errors\tltr\tltr_error.cpp
@@ -323,9 +341,19 @@ debug/class_dia.o: ../../converter/module/structures/class/class_dia.cpp ../../c
 debug/description.o: ../../converter/module/structures/description.cpp ../../converter/module/structures/description.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\description.o ..\..\converter\module\structures\description.cpp
 
+debug/format.o: ../../converter/module/structures/format.cpp ../../converter/module/structures/format.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\format.o ..\..\converter\module\structures\format.cpp
+
+debug/layout.o: ../../converter/module/structures/layout.cpp ../../converter/module/structures/layout.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\layout.o ..\..\converter\module\structures\layout.cpp
+
+debug/layout_flow_dia.o: ../../converter/module/structures/layout_flow/layout_flow_dia.cpp ../../converter/module/structures/layout_flow/layout_flow_dia.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\layout_flow_dia.o ..\..\converter\module\structures\layout_flow\layout_flow_dia.cpp
+
 debug/project.o: ../../converter/module/structures/project.cpp ../../converter/module/structures/project.h \
 		../../converter/module/structures/use_case/uc_ptrs.h \
-		../../converter/module/structures/class/class_ptrs.h
+		../../converter/module/structures/class/class_ptrs.h \
+		../../converter/module/structures/layout_flow/lw_ptrs.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\project.o ..\..\converter\module\structures\project.cpp
 
 debug/robustness_dia.o: ../../converter/module/structures/robustness/robustness_dia.cpp ../../converter/module/structures/robustness/robustness_dia.h
@@ -386,14 +414,27 @@ debug/use_case_dia.o: ../../converter/module/structures/use_case/use_case_dia.cp
 		../../converter/module/common/errors/bldr/null_edge.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\use_case_dia.o ..\..\converter\module\structures\use_case\use_case_dia.cpp
 
-debug/complete_translator.o: ../../converter/module/translator/complete_translator.cpp ../../converter/module/translator/complete_translator.h
+debug/complete_translator.o: ../../converter/module/translator/complete_translator.cpp ../../converter/module/translator/complete_translator.h \
+		../../converter/module/translator/translator.h \
+		../../converter/module/structures/project.h \
+		../../converter/module/structures/use_case/uc_ptrs.h \
+		../../converter/module/structures/class/class_ptrs.h \
+		../../converter/module/structures/layout_flow/lw_ptrs.h \
+		../../converter/module/structures/robustness/rob_ptrs.h \
+		../../converter/module/structures/sequence/seq_ptrs.h \
+		../../converter/module/common/errors/not_implemented.h \
+		../../converter/module/common/errors/any_error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\complete_translator.o ..\..\converter\module\translator\complete_translator.cpp
+
+debug/dia_direct_converter.o: ../../converter/module/translator/dia_direct_converter.cpp ../../converter/module/translator/dia_direct_converter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\dia_direct_converter.o ..\..\converter\module\translator\dia_direct_converter.cpp
 
 debug/direct_translator.o: ../../converter/module/translator/direct_translator.cpp ../../converter/module/translator/direct_translator.h \
 		../../converter/module/translator/translator.h \
 		../../converter/module/structures/project.h \
 		../../converter/module/structures/use_case/uc_ptrs.h \
 		../../converter/module/structures/class/class_ptrs.h \
+		../../converter/module/structures/layout_flow/lw_ptrs.h \
 		../../converter/module/structures/robustness/rob_ptrs.h \
 		../../converter/module/structures/sequence/seq_ptrs.h \
 		../../converter/module/translator/use_case/uc_dia_direct_converter.h
@@ -403,6 +444,7 @@ debug/translator.o: ../../converter/module/translator/translator.cpp ../../conve
 		../../converter/module/structures/project.h \
 		../../converter/module/structures/use_case/uc_ptrs.h \
 		../../converter/module/structures/class/class_ptrs.h \
+		../../converter/module/structures/layout_flow/lw_ptrs.h \
 		../../converter/module/structures/robustness/rob_ptrs.h \
 		../../converter/module/structures/sequence/seq_ptrs.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\translator.o ..\..\converter\module\translator\translator.cpp
@@ -424,12 +466,6 @@ debug/uc_dia_direct_converter.o: ../../converter/module/translator/use_case/uc_d
 		../../converter/module/common/errors/tltr/tltr_error.h \
 		../../converter/module/common/errors/any_error.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\uc_dia_direct_converter.o ..\..\converter\module\translator\use_case\uc_dia_direct_converter.cpp
-
-debug/uc_lexic_analyzer.o: ../../converter/module/translator/use_case/uc_lexic_analyzer.cpp ../../converter/module/translator/use_case/uc_lexic_analyzer.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\uc_lexic_analyzer.o ..\..\converter\module\translator\use_case\uc_lexic_analyzer.cpp
-
-debug/uc_syntac_analyzer.o: ../../converter/module/translator/use_case/uc_syntac_analyzer.cpp ../../converter/module/translator/use_case/uc_syntac_analyzer.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\uc_syntac_analyzer.o ..\..\converter\module\translator\use_case\uc_syntac_analyzer.cpp
 
 ####### Install
 

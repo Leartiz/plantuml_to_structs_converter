@@ -91,7 +91,7 @@ void UC_dia_direct_converter::read_directive()
     std::string name_dia; /* eq Use_Case_dia::id; */
     if (String_utils::start_with(m_cur_line, Puml_utils::startuml)) {
         if (!Puml_utils::read_startuml_directive(m_cur_line, name_dia)) {
-            throw int{};
+            throw int{}; // TODO:
         }
         if (!name_dia.empty() && name_dia != Use_Case_dia::id) {
             throw int{};
@@ -132,7 +132,7 @@ void UC_dia_direct_converter::read_whole_use_case()
 
     UC_node::Builder node_b{ id };
     auto node = node_b.type( UC_node::Type::USE_CASE )
-            .name(name).build_ptr();
+            .name(String_utils::un_quote(name)).build_ptr();
 
     m_uc_dia->add_node_bfore_adder(node);
 }
@@ -154,7 +154,7 @@ void UC_dia_direct_converter::read_whole_actor()
 
     UC_node::Builder node_b{ id };
     auto node = node_b.type( UC_node::Type::ACTOR )
-            .name(name).build_ptr();
+            .name(String_utils::un_quote(name)).build_ptr();
 
     m_uc_dia->add_node_bfore_adder(node);
 }

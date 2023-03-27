@@ -95,13 +95,34 @@ private slots:
     void test_String_utils_eq_data();
     void test_String_utils_eq();
 
+private slots:
+    void test_String_trim_left_data();
+    void test_String_trim_left();
+
+    void test_String_trim_rght_data();
+    void test_String_trim_rght();
+
+    void test_String_trim_data();
+    void test_String_trim();
+
+private slots:
+    void test_String_trim_left_space_data();
+    void test_String_trim_left_space();
+
+    void test_String_trim_rght_space_data();
+    void test_String_trim_rght_space();
+
+    void test_String_trim_space_data();
+    void test_String_trim_space();
+
     // Puml_utils
 private slots:
 
 
     // Direct_translator
 private slots:
-    void test_Direct_translator_convert_uc_dia_okks();
+    void test_Direct_translator_convert_uc_dia_data();
+    void test_Direct_translator_convert_uc_dia();
 };
 
 #endif // TST_MODULE_H

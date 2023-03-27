@@ -1,11 +1,18 @@
 #include <sstream>
+#include <fstream>
 #include <iostream>
 
 #include <QtTest>
 #include <QDebug>
 
+#include <QDir>
+#include <QFile>
+
 #include "tst_module.h"
 
+#include "nlohmann/json.hpp"
+
+#include "use_case/uc_ptrs.h"
 #include "use_case/uc_node.h"
 #include "use_case/uc_edge.h"
 #include "use_case/use_case_dia.h"
@@ -14,14 +21,12 @@
 #include "errors/bldr/null_edge.h"
 #include "errors/bldr/invalid_edge.h"
 #include "errors/bldr/unsuitable_edge.h"
-#include "errors/bldr/repeating_node.h"
 #include "errors/bldr/repeating_edge.h"
 
 #include "utils/string_utils.h"
-#include "utils/puml_utils.h"
 
 #include "translator/use_case/uc_dia_direct_converter.h"
-#include "nlohmann/json.hpp"
+#include "translator/direct_translator.h"
 
 Module::Module() {}
 Module::~Module() {}
@@ -933,29 +938,29 @@ void Module::test_String_utils_start_with_data()
     QTest::addColumn<bool>("res");
 
     {
-        std::string str{ "@STARTUML" };
-        std::string start{ "@START" };
+        const std::string str{ "@STARTUML" };
+        const std::string start{ "@START" };
         const bool sensitive{ true };
         const bool res{ true };
         QTest::newRow("@STARTUML") << str << start << sensitive << res;
     }
     {
-        std::string str{ "   @STARTUML" };
-        std::string start{ "@START" };
+        const std::string str{ "   @STARTUML" };
+        const std::string start{ "@START" };
         const bool sensitive{ true };
         const bool res{ false };
         QTest::newRow("   @STARTUML") << str << start << sensitive << res;
     }
     {
-        std::string str{ "@STARTUML" };
-        std::string start{ "@start" };
+        const std::string str{ "@STARTUML" };
+        const std::string start{ "@start" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("@STARTUML") << str << start << sensitive << res;
     }
     {
-        std::string str{ "при 🤬 вет" };
-        std::string start{ "при 🤬" };
+        const std::string str{ "при 🤬 вет" };
+        const std::string start{ "при 🤬" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("при 🤬 вет") << str << start << sensitive << res;
@@ -982,29 +987,29 @@ void Module::test_String_utils_stop_with_data()
     QTest::addColumn<bool>("res");
 
     {
-        std::string str{ "@STARTUML" };
-        std::string start{ "UML" };
+        const std::string str{ "@STARTUML" };
+        const std::string start{ "UML" };
         const bool sensitive{ true };
         const bool res{ true };
         QTest::newRow("@STARTUML") << str << start << sensitive << res;
     }
     {
-        std::string str{ "@STARTUML123" };
-        std::string start{ "tuml123" };
+        const std::string str{ "@STARTUML123" };
+        const std::string start{ "tuml123" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("@STARTUML123") << str << start << sensitive << res;
     }
     {
-        std::string str{ "@STARTUML123   " };
-        std::string start{ "tuml123" };
+        const std::string str{ "@STARTUML123   " };
+        const std::string start{ "tuml123" };
         const bool sensitive{ false };
         const bool res{ false };
         QTest::newRow("@STARTUML123   ") << str << start << sensitive << res;
     }
     {
-        std::string str{ "при 🤬 вет" };
-        std::string start{ "🤬 вет" };
+        const std::string str{ "при 🤬 вет" };
+        const std::string start{ "🤬 вет" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("при 🤬 вет") << str << start << sensitive << res;
@@ -1033,22 +1038,22 @@ void Module::test_String_utils_eq_data()
     QTest::addColumn<bool>("res");
 
     {
-        std::string lhs{ "@STARTUML" };
-        std::string rhs{ "@startuml" };
+        const std::string lhs{ "@STARTUML" };
+        const std::string rhs{ "@startuml" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("@STARTUML") << lhs << rhs << sensitive << res;
     }
     {
-        std::string lhs{ "@STARTUML123" };
-        std::string rhs{ "@startuml123" };
+        const std::string lhs{ "@STARTUML123" };
+        const std::string rhs{ "@startuml123" };
         const bool sensitive{ true };
         const bool res{ false };
         QTest::newRow("@STARTUML123") << lhs << rhs << sensitive << res;
     }
     {
-        std::string lhs{ "при 🤬 вет" };
-        std::string rhs{ "при 🤬 вет" };
+        const std::string lhs{ "при 🤬 вет" };
+        const std::string rhs{ "при 🤬 вет" };
         const bool sensitive{ false };
         const bool res{ true };
         QTest::newRow("при 🤬 вет") << lhs << rhs << sensitive << res;
@@ -1067,6 +1072,202 @@ void Module::test_String_utils_eq()
     QCOMPARE_EQ(got, res);
 }
 
+// -----------------------------------------------------------------------
+
+void Module::test_String_trim_left_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("chs");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "\"name\"" };
+        const std::string chs{ "\"" };
+        const std::string res{ "name\"" };
+        QTest::newRow("\"name\"") << str << chs << res;
+    }
+    {
+        const std::string str{ "@Startuml name" };
+        const std::string chs{ "tS@" };
+        const std::string res{ "artuml name" };
+        QTest::newRow("@Startuml name") << str << chs << res;
+    }
+    {
+        const std::string str{ "- @ - +-  Start - @ - +-" };
+        const std::string chs{ "@+- " };
+        const std::string res{ "Start - @ - +-" };
+        QTest::newRow("- @ - +-  Start - @ - +-") << str << chs << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim_left()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, chs);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim_left(str, chs) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_trim_rght_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("chs");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "\"name\"" };
+        const std::string chs{ "\"" };
+        const std::string res{ "\"name" };
+        QTest::newRow("\"name\"") << str << chs << res;
+    }
+    {
+        const std::string str{ "@Startuml name@St" };
+        const std::string chs{ "tS@" };
+        const std::string res{ "@Startuml name" };
+        QTest::newRow("@Startuml name@St") << str << chs << res;
+    }
+    {
+        const std::string str{ "- @ - +-  Start - @ - +-" };
+        const std::string chs{ "@+- " };
+        const std::string res{ "- @ - +-  Start" };
+        QTest::newRow("- @ - +-  Start - @ - +-") << str << chs << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim_rght()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, chs);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim_rght(str, chs) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_trim_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("chs");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "\"name\"" };
+        const std::string chs{ "\"" };
+        const std::string res{ "name" };
+        QTest::newRow("\"name\"") << str << chs << res;
+    }
+    {
+        const std::string str{ "@Startuml name@St" };
+        const std::string chs{ "tS@" };
+        const std::string res{ "artuml name" };
+        QTest::newRow("@Startuml name@St") << str << chs << res;
+    }
+    {
+        const std::string str{ "- @ - +-  Start - @ - +-" };
+        const std::string chs{ "@+- " };
+        const std::string res{ "Start" };
+        QTest::newRow("- @ - +-  Start - @ - +-") << str << chs << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, chs);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim(str, chs) };
+    QCOMPARE_EQ(got, res);
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_String_trim_left_space_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "    @Startuml name@St" };
+        const std::string res{ "@Startuml name@St" };
+        QTest::newRow("    @Startuml name@St") << str << res;
+    }
+    {
+        const std::string str{ "\n\t   @St     " };
+        const std::string res{ "@St     " };
+        QTest::newRow("\\n\\t   @St     ") << str << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim_left_space()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim_left_space(str) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_trim_rght_space_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "    @Startuml name@St    " };
+        const std::string res{ "    @Startuml name@St" };
+        QTest::newRow("    @Startuml name@St    ") << str << res;
+    }
+    {
+        const std::string str{ "\n\t   @St     \n" };
+        const std::string res{ "\n\t   @St" };
+        QTest::newRow("\\n\\t   @St     \\n") << str << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim_rght_space()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim_rght_space(str) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_trim_space_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<std::string>("res");
+
+    {
+        const std::string str{ "    @Startuml name@St    " };
+        const std::string res{ "@Startuml name@St" };
+        QTest::newRow("    @Startuml name@St    ") << str << res;
+    }
+    {
+        const std::string str{ "\n\t   @St     \n" };
+        const std::string res{ "@St" };
+        QTest::newRow("\\n\\t   @St     \\n") << str << res;
+    }
+    // ...
+}
+
+void Module::test_String_trim_space()
+{
+    QFETCH(std::string, str);
+    QFETCH(std::string, res);
+
+    auto got{ lenv::String_utils::trim_space(str) };
+    QCOMPARE_EQ(got, res);
+}
+
 // Puml_utils
 // -----------------------------------------------------------------------
 
@@ -1074,9 +1275,85 @@ void Module::test_String_utils_eq()
 // Direct_translator
 // -----------------------------------------------------------------------
 
-void Module::test_Direct_translator_convert_uc_dia_okks()
+void Module::test_Direct_translator_convert_uc_dia_data()
 {
+    QTest::addColumn<std::string>("inn_fpath");
+    QTest::addColumn<std::string>("expect_out_fpath");
+    QTest::addColumn<std::string>("actual_out_fpath");
 
+    // ***
+
+    auto cur_dir{ QDir::current() };
+    QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cd("converter/test/tltr/use_case_dias"), true); // always like this?
+
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
+    QCOMPARE_EQ(test_catalogs.contains(".."), false);
+    QCOMPARE_EQ(test_catalogs.contains("."), false);
+
+    // ***
+
+    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
+        QCOMPARE_EQ(cur_test_catalog.exists(), true);
+
+        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
+        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
+        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
+
+        QCOMPARE_EQ(QFile::exists(dia_source), true);
+        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
+        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
+
+        const std::string inn_fpath{ dia_source.toStdString() };
+        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
+        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
+
+        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
+    }
+}
+
+void Module::test_Direct_translator_convert_uc_dia()
+{
+    QFETCH(std::string, inn_fpath);
+    QFETCH(std::string, expect_out_fpath);
+    QFETCH(std::string, actual_out_fpath);
+
+    // *** open all files now! ***
+
+    std::ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    std::ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    std::ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    // *** check the file with PlantUML ***
+
+    // TODO:
+
+    // *** write what happened ***
+
+    auto tr = lenv::Direct_translator{};
+    auto uc_dia_sp = tr.convert_uc_dia(fin_inn);
+
+    nlohmann::json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia_sp->to_whole_json());
+    fout_actual << std::setw(2) << actual; // not sticky manipulator!
+
+    // *** compare adjusted expectation ***
+
+    nlohmann::json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
 }
 
 QTEST_APPLESS_MAIN(Module)

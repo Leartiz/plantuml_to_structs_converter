@@ -27,6 +27,8 @@ public:
         USE_CASE,
     };
 
+    // TODO: to String!!!!
+
 public:
     struct Field final
     {
