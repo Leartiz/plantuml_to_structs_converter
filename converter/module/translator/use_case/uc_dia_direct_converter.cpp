@@ -42,13 +42,9 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
             read_connection();
         }
         else if (start_ch == '\'') {
-            // one line comment
         }
         else if (start_ch == '/') {
             read_multi_line_comment();
-        }
-        else if (start_ch == '}') {
-            // end of rectangle/package/...
         }
         else if (m_cur_line.empty()) {
         }
@@ -62,17 +58,29 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
 
 void UC_dia_direct_converter::conv_word()
 {
-    auto word = std::string{};
     std::istringstream sin{ m_cur_line };
-    sin >> word;
+    std::string word; sin >> word;
 
-    if (word == Puml_utils::kw_usecase) {
+    // TODO: обобщить и разбить
+
+    if (String_utils::eq(word, Puml_utils::kw_usecase, false)) {
         m_cur_line = m_cur_line.substr(Puml_utils::kw_usecase.size());
         read_whole_use_case();
     }
-    else if (word == Puml_utils::kw_actor) {
+    else if (String_utils::eq(word, Puml_utils::kw_actor, false)) {
         m_cur_line = m_cur_line.substr(Puml_utils::kw_actor.size());
         read_whole_actor();
+    }
+    else if (String_utils::eq(word, Puml_utils::kw_skinparam, false)) {
+
+    }
+    else if (String_utils::eq(word, Puml_utils::kw_note, false)) {
+
+    }
+    else if (String_utils::eq(word, Puml_utils::kw_left, false)) {}
+    else if (String_utils::eq(word, Puml_utils::kw_top, false)) {}
+    else if (false) {
+        // TODO: все остальное запрет!
     }
     else {
         read_connection();

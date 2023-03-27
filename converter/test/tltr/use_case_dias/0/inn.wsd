@@ -1,6 +1,8 @@
 @startuml
 
-actor "User" as User
-usecase "Registration" as Reg
+actor "Student" as Student
+usecase "Registration" as Registration
+
+User --> Registration
 
 @enduml

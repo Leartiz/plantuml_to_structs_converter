@@ -89,12 +89,12 @@ void uc_visual_test_2()
 
 int main()
 {
-    //uc_visual_test_2();
+    uc_visual_test_2();
 
-    lenv::Direct_translator tr{};
-    auto fin = std::ifstream("1.txt");
-    auto res = tr.convert_uc_dia(fin);
-    std::cout << res->to_whole_json();
+//    lenv::Direct_translator tr{};
+//    auto fin = std::ifstream("1.txt");
+//    auto res = tr.convert_uc_dia(fin);
+//    std::cout << res->to_whole_json();
 
     return 0;
 }
