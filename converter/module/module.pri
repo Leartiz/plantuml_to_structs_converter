@@ -3,6 +3,8 @@ SOURCES += \
     $$PWD/common/errors/bldr/bldr_error.cpp \
     $$PWD/common/errors/bldr/node_after_adder.cpp \
     $$PWD/common/errors/bldr/not_found_node.cpp \
+    $$PWD/common/errors/bldr/unknown_edge_type.cpp \
+    $$PWD/common/errors/bldr/unknown_node_type.cpp \
     $$PWD/common/errors/err_text_creator.cpp \
     $$PWD/common/errors/bldr/invalid_edge.cpp \
     $$PWD/common/errors/bldr/invalid_node.cpp \
@@ -38,6 +40,8 @@ HEADERS += \
     $$PWD/common/errors/bldr/bldr_error.h \
     $$PWD/common/errors/bldr/node_after_adder.h \
     $$PWD/common/errors/bldr/not_found_node.h \
+    $$PWD/common/errors/bldr/unknown_edge_type.h \
+    $$PWD/common/errors/bldr/unknown_node_type.h \
     $$PWD/common/errors/err_text_creator.h \
     $$PWD/common/errors/bldr/invalid_edge.h \
     $$PWD/common/errors/bldr/invalid_node.h \

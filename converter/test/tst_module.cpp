@@ -22,6 +22,9 @@
 #include "errors/bldr/invalid_edge.h"
 #include "errors/bldr/unsuitable_edge.h"
 #include "errors/bldr/repeating_edge.h"
+#include "errors/bldr/unknown_edge_type.h"
+#include "errors/bldr/unknown_node_type.h"
+
 
 #include "utils/string_utils.h"
 
@@ -149,6 +152,60 @@ void Module::test_UC_edge_Builder_complex()
 
     QVERIFY_THROWS_NO_EXCEPTION(edge_b.end(end_node));
     QVERIFY_THROWS_NO_EXCEPTION(edge_b.build_ptr());
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UC_edge_type_to_str_complex()
+{
+    using namespace lenv;
+    {
+        std::string str;
+        const UC_edge::Type type{ static_cast<UC_edge::Type>(0) };
+        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_edge::type_to_str(type));
+        QCOMPARE_EQ(str, "ASSOCIATION");
+    }
+    {
+        std::string str;
+        const UC_edge::Type type{ static_cast<UC_edge::Type>(1) };
+        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_edge::type_to_str(type));
+        QCOMPARE_EQ(str, "GENERALIZATION");
+    }
+    {
+        std::string str;
+        const UC_edge::Type type{ static_cast<UC_edge::Type>(6) };
+        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, str = lenv::UC_edge::type_to_str(type));
+    }
+    {
+        std::string str;
+        const UC_edge::Type type{ static_cast<UC_edge::Type>(9) };
+        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, str = lenv::UC_edge::type_to_str(type));
+    }
+    // ...
+}
+
+void Module::test_UC_edge_str_to_type_complex()
+{
+    using namespace lenv;
+    {
+        UC_edge::Type type{};
+        const std::string str{ "AssOCIAtiOn" };
+        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_edge::str_to_type(str));
+        QCOMPARE_EQ(type, UC_edge::Type::ASSOCIATION);
+    }
+    {
+        UC_edge::Type type{};
+        const std::string str{ "ExtEND" };
+        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_edge::str_to_type(str));
+        QCOMPARE_EQ(type, UC_edge::Type::EXTEND);
+    }
+    {
+        UC_edge::Type type{};
+        const std::string str{ "Ext123" };
+        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, type = lenv::UC_edge::str_to_type(str));
+        static_cast<void>(type);
+    }
+    // ...
 }
 
 // -----------------------------------------------------------------------
@@ -1069,6 +1126,55 @@ void Module::test_String_utils_eq()
     QFETCH(bool, res);
 
     auto got{ lenv::String_utils::eq(lhs, rhs, sensitive) };
+    QCOMPARE_EQ(got, res);
+}
+
+void Module::test_String_utils_eq_ref_data()
+{
+    QTest::addColumn<std::string>("lhs");
+    QTest::addColumn<std::string>("rhs");
+    QTest::addColumn<bool>("sensitive");
+    QTest::addColumn<bool>("res");
+
+    {
+        const std::string lhs{ "@STARTUML" };
+        const std::string rhs{ "@startuml" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("@STARTUML") << lhs << rhs << sensitive << res;
+    }
+    {
+        const std::string lhs{ "@STARTUML123" };
+        const std::string rhs{ "@startuml123" };
+        const bool sensitive{ true };
+        const bool res{ false };
+        QTest::newRow("@STARTUML123") << lhs << rhs << sensitive << res;
+    }
+    {
+        const std::string lhs{ "при 🤬 вет" };
+        const std::string rhs{ "при 🤬 вет" };
+        const bool sensitive{ false };
+        const bool res{ true };
+        QTest::newRow("при 🤬 вет") << lhs << rhs << sensitive << res;
+    }
+    {
+        const std::string lhs{ "" };
+        const std::string rhs{ "при" };
+        const bool sensitive{ false };
+        const bool res{ false };
+        QTest::newRow("[empty]") << lhs << rhs << sensitive << res;
+    }
+    // ...
+}
+
+void Module::test_String_utils_eq_ref()
+{
+    QFETCH(std::string, lhs);
+    QFETCH(std::string, rhs);
+    QFETCH(bool, sensitive);
+    QFETCH(bool, res);
+
+    auto got{ lenv::String_utils::eq_ref(lhs, rhs, sensitive) };
     QCOMPARE_EQ(got, res);
 }
 

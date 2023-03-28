@@ -29,6 +29,10 @@ private slots:
     void test_UC_edge_Builder_complex();
 
 private slots:
+    void test_UC_edge_type_to_str_complex();
+    void test_UC_edge_str_to_type_complex();
+
+private slots:
     void test_UC_edge_to_whole_json_err();
     void test_UC_edge_to_whole_json_okk();
 
@@ -80,38 +84,34 @@ private slots:
 private slots:
     void test_String_utils_to_upper_data();
     void test_String_utils_to_upper();
-
     void test_String_utils_to_lower_data();
     void test_String_utils_to_lower();
 
 private slots:
     void test_String_utils_start_with_data();
     void test_String_utils_start_with();
-
     void test_String_utils_stop_with_data();
     void test_String_utils_stop_with();
 
 private slots:
     void test_String_utils_eq_data();
     void test_String_utils_eq();
+    void test_String_utils_eq_ref_data();
+    void test_String_utils_eq_ref();
 
 private slots:
     void test_String_trim_left_data();
     void test_String_trim_left();
-
     void test_String_trim_rght_data();
     void test_String_trim_rght();
-
     void test_String_trim_data();
     void test_String_trim();
 
 private slots:
     void test_String_trim_left_space_data();
     void test_String_trim_left_space();
-
     void test_String_trim_rght_space_data();
     void test_String_trim_rght_space();
-
     void test_String_trim_space_data();
     void test_String_trim_space();
 

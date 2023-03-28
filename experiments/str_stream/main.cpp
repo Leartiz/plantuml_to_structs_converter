@@ -24,5 +24,14 @@ int main()
 
     std::cout << "sin.str: " << sin.str() << std::endl;
 
+    {
+        sin.clear(); // necessarily?
+        sin.str("actor \"User\"");
+        std::cout << "sin.str: " << sin.str() << std::endl;
+
+        sin >> word;
+        std::cout << word << std::endl;
+    }
+
     return 0;
 }

@@ -2,6 +2,7 @@
 #define UC_DIA_DIRECT_CONVERTER_H
 
 #include <string>
+#include <sstream>
 #include <iostream>
 
 #include "use_case/uc_ptrs.h"
@@ -29,12 +30,16 @@ private:
     void read_whole_actor();
     void read_short_actor();
 
+protected:
+    void read_skinparam();
+    void read_note();
+
 private:
     std::istream& m_in_stream;
     Use_Case_dia_sp m_uc_dia;
 
 private:
-    std::string m_cur_line;
+    std::istringstream m_csin;
     bool m_completed{ false };
 };
 

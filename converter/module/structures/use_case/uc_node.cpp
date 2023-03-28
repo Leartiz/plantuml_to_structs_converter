@@ -1,20 +1,50 @@
 #include <utility> // std::move
 #include <algorithm> // std::for_each, std::transform
-#include <iostream>
 
 #include "uc_node.h"
 #include "uc_edge.h"
-
-#include "nlohmann/json.hpp"
 
 #include "errors/bldr/null_edge.h"
 #include "errors/bldr/null_node.h"
 #include "errors/bldr/unsuitable_edge.h"
 #include "errors/bldr/repeating_edge.h"
+#include "errors/bldr/unknown_node_type.h"
 #include "errors/err_text_creator.h"
+
+#include "utils/string_utils.h"
 
 namespace lenv
 {
+
+// -----------------------------------------------------------------------
+
+std::string UC_node::type_to_str(const UC_node::Type type)
+{
+    switch (type) {
+    case ACTOR: return "ACTOR";
+    case USE_CASE: return "USE_CASE";
+    }
+
+    throw Unknown_node_type{
+        Err_text_creator::dt("UC_node", "type_to_str",
+                             "unknown enum value")
+    };
+}
+
+UC_node::Type UC_node::str_to_type(const std::string& str)
+{
+    if (String_utils::eq_ref(str, type_to_str(UC_node::ACTOR), false)) {
+        return UC_node::ACTOR;
+    }
+    if (String_utils::eq_ref(str, type_to_str(UC_node::USE_CASE), false)) {
+        return UC_node::USE_CASE;
+    }
+
+    throw Unknown_node_type{
+        Err_text_creator::dt("UC_node", "str_to_type",
+                             "unknown str value")
+    };
+}
 
 // -----------------------------------------------------------------------
 

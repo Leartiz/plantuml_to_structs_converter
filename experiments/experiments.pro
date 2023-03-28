@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     check_cctype \
+    getline \
     init_fields \
     inner_struct \
     json \

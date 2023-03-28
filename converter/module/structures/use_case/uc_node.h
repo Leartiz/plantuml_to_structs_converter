@@ -3,14 +3,13 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 #include "uc_ptrs.h" // has forward declaration.
 #include "robustness/rob_ptrs.h"
 #include "sequence/seq_ptrs.h"
 
-#include "common/ijson.h"
 #include "common/ivalid.h"
+#include "common/ijson.h"
 
 namespace lenv // learning environment!
 {
@@ -27,7 +26,8 @@ public:
         USE_CASE,
     };
 
-    // TODO: to String!!!!
+    static std::string type_to_str(const Type type);
+    static Type str_to_type(const std::string& str);
 
 public:
     struct Field final

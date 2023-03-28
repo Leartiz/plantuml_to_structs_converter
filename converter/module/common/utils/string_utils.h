@@ -16,6 +16,8 @@ class String_utils final
 {
 public:
     static bool is_keyword_letter(const char ch);
+    static bool eq(char lhs, char rhs, bool sensitive = true);
+    static bool ne(char lhs, char rhs, bool sensitive = true);
 
     static void to_upper_by_ref(std::string& str);
     static void to_lower_by_ref(std::string& str);
@@ -30,6 +32,8 @@ public:
 public:
     static bool eq(std::string lhs, std::string rhs, bool sensitive = true);
     static bool ne(std::string lhs, std::string rhs, bool sensitive = true);
+    static bool eq_ref(const std::string& lhs, const std::string& rhs, bool sensitive = true);
+    static bool ne_ref(const std::string& lhs, const std::string& rhs, bool sensitive = true);
 
 public:
     static void trim_left_space_by_ref(std::string& str);

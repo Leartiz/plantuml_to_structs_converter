@@ -43,10 +43,13 @@ public:
 
 
 public:
-    static bool
+    static bool is_keyword(const std::string& str);
 
     static bool read_startuml_directive(const std::string& line, std::string& out_name);
     static bool read_enduml_directive(const std::string& line);
+
+    static bool read_short_use_case(const std::string& line, std::string& out_name);
+    static bool read_short_actor(const std::string& line, std::string& out_name);
 };
 
 }

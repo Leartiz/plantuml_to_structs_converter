@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "puml_utils.h"
+#include "string_utils.h"
 
 namespace lenv
 {
@@ -33,17 +34,21 @@ const std::string Puml_utils::kw_end{ "end" };
 
 // -----------------------------------------------------------------------
 
+bool Puml_utils::is_keyword(const std::string& str)
+{
+    return false;
+}
+
 bool Puml_utils::read_startuml_directive(const std::string& line,
                                          std::string& out_name)
 {
     std::istringstream sin{ line };
     std::string directive; sin >> directive;
-
-    if (directive != startuml)
+    if (!String_utils::eq_ref(directive, startuml, false))
         return false;
 
     std::getline(sin, out_name, '\n');
-    // TODO: trim
+    String_utils::trim_space_by_ref(out_name);
     return true;
 }
 
@@ -51,8 +56,18 @@ bool Puml_utils::read_enduml_directive(const std::string& line)
 {
     std::istringstream sin{ line };
     std::string directive; sin >> directive;
+    return String_utils::eq_ref(directive, enduml, false);
+}
 
-    return directive == enduml;
+bool Puml_utils::read_short_use_case(const std::string& line,
+                                     std::string& out_name)
+{
+
+}
+
+bool Puml_utils::read_short_actor(const std::string& line, std::string& out_name)
+{
+
 }
 
 }

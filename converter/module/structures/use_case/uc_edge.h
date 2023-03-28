@@ -24,6 +24,9 @@ public:
         EXTEND,
     };
 
+    static std::string type_to_str(const Type type);
+    static Type str_to_type(const std::string& str);
+
 public:
     /* metadata */
     struct Field final

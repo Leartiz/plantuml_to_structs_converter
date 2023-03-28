@@ -28,26 +28,28 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
     Use_Case_dia::Builder uc_dia_b;
     m_uc_dia = uc_dia_b.build_ptr();
 
-    while (!m_completed && std::getline(m_in_stream, m_cur_line)) {
-        std::istringstream sin{ m_cur_line };
-        char start_ch{ 0 }; sin >> start_ch;
+    auto cur_line = std::string{};
+    while (!m_completed && std::getline(m_in_stream, cur_line, '\n')) {
+        String_utils::trim_space_by_ref(cur_line);
+        m_csin.str(cur_line);
+        m_csin.clear();
+
+        char start_ch{ 0 };
+        m_csin >> start_ch;
+        m_csin.unget();
 
         if (start_ch == '@') {
             read_directive();
         }
-        else if (start_ch == '(') {
+        else if (start_ch == '(' || start_ch == ':') {
             read_connection();
-        }
-        else if (start_ch == ':') {
-            read_connection();
-        }
-        else if (start_ch == '\'') {
         }
         else if (start_ch == '/') {
             read_multi_line_comment();
         }
-        else if (m_cur_line.empty()) {
-        }
+        /* skip line */
+        else if (start_ch == '\'') {}
+        else if (cur_line.empty()) {}
         else {
             conv_word();
         }
@@ -58,28 +60,25 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
 
 void UC_dia_direct_converter::conv_word()
 {
-    std::istringstream sin{ m_cur_line };
-    std::string word; sin >> word;
+    std::string word;
+    m_csin >> word; // new position!
 
-    // TODO: обобщить и разбить
-
-    if (String_utils::eq(word, Puml_utils::kw_usecase, false)) {
-        m_cur_line = m_cur_line.substr(Puml_utils::kw_usecase.size());
+    if (String_utils::eq_ref(word, Puml_utils::kw_usecase, false)) {
         read_whole_use_case();
     }
-    else if (String_utils::eq(word, Puml_utils::kw_actor, false)) {
-        m_cur_line = m_cur_line.substr(Puml_utils::kw_actor.size());
+    else if (String_utils::eq_ref(word, Puml_utils::kw_actor, false)) {
         read_whole_actor();
     }
     else if (String_utils::eq(word, Puml_utils::kw_skinparam, false)) {
-
+        read_skinparam();
     }
     else if (String_utils::eq(word, Puml_utils::kw_note, false)) {
-
+        read_note();
     }
     else if (String_utils::eq(word, Puml_utils::kw_left, false)) {}
     else if (String_utils::eq(word, Puml_utils::kw_top, false)) {}
-    else if (false) {
+    else if (Puml_utils::is_keyword(word)) {
+        throw int{  1 };
         // TODO: все остальное запрет!
     }
     else {
@@ -94,11 +93,22 @@ void UC_dia_direct_converter::read_multi_line_comment()
 
 }
 
+void UC_dia_direct_converter::read_skinparam()
+{
+
+}
+
+void UC_dia_direct_converter::read_note()
+{
+
+}
+
 void UC_dia_direct_converter::read_directive()
 {
     std::string name_dia; /* eq Use_Case_dia::id; */
-    if (String_utils::start_with(m_cur_line, Puml_utils::startuml)) {
-        if (!Puml_utils::read_startuml_directive(m_cur_line, name_dia)) {
+    const std::string cur_line{ m_csin.str() };
+    if (String_utils::start_with(cur_line, Puml_utils::startuml)) {
+        if (!Puml_utils::read_startuml_directive(cur_line, name_dia)) {
             throw int{}; // TODO:
         }
         if (!name_dia.empty() && name_dia != Use_Case_dia::id) {
@@ -107,8 +117,8 @@ void UC_dia_direct_converter::read_directive()
 
         m_uc_dia->reset_all(); // multiple @startuml allowed!
     }
-    else if (String_utils::start_with(m_cur_line, Puml_utils::enduml)) {
-        if (!Puml_utils::read_enduml_directive(m_cur_line)) {
+    else if (String_utils::start_with(cur_line, Puml_utils::enduml)) {
+        if (!Puml_utils::read_enduml_directive(cur_line)) {
             throw int{};
         }
         m_completed = true;
@@ -130,18 +140,54 @@ void UC_dia_direct_converter::read_connection()
 
 void UC_dia_direct_converter::read_whole_use_case()
 {
-    std::istringstream sin{ m_cur_line };
+    UC_node::Type id_type{ UC_node::Type::USE_CASE };
+    UC_node::Type name_type{ UC_node::Type::USE_CASE };
+
+    char start_name_ch{ 0 };
+    m_csin >> start_name_ch;
+
     std::string name;
-    std::string as;
-    std::string id;
-    sin >> name;
-    sin >> as;
-    sin >> id;
+    if (start_name_ch == ':') {
+        std::getline(m_csin, name, ':');
+        name_type = UC_node::Type::ACTOR;
+    }
+    else if (start_name_ch == '(') {
+        std::getline(m_csin, name, ')');
+    }
+    else if (start_name_ch == '\"') {
+        std::getline(m_csin, name, '\"');
+    }
+    else {
+        m_csin.unget();
+        m_csin >> name;
+    }
+
+    std::string id{ name };
+    std::string as; m_csin >> as;
+    if (String_utils::eq_ref(as, Puml_utils::kw_as, false)) {
+        char start_id_ch{ 0 };
+        m_csin >> start_id_ch;
+
+        if (start_id_ch == ':') {
+            std::getline(m_csin, id, ':');
+            name_type = UC_node::Type::ACTOR;
+        }
+        else if (start_id_ch == '(') {
+            std::getline(m_csin, id, ')');
+        }
+        else if (start_id_ch == '\"') {
+            std::getline(m_csin, id, '\"');
+        }
+        else {
+            m_csin.unget();
+            m_csin >> id;
+        }
+    }
 
     UC_node::Builder node_b{ id };
-    auto node = node_b.type( UC_node::Type::USE_CASE )
-            .name(String_utils::un_quote(name)).build_ptr();
+    node_b.type(name_type).name(name);
 
+    const auto node = node_b.build_ptr();
     m_uc_dia->add_node_bfore_adder(node);
 }
 
@@ -152,13 +198,12 @@ void UC_dia_direct_converter::read_short_use_case()
 
 void UC_dia_direct_converter::read_whole_actor()
 {
-    std::istringstream sin{ m_cur_line };
     std::string name;
     std::string as;
     std::string id;
-    sin >> name;
-    sin >> as;
-    sin >> id;
+    m_csin >> name;
+    m_csin >> as;
+    m_csin >> id;
 
     UC_node::Builder node_b{ id };
     auto node = node_b.type( UC_node::Type::ACTOR )

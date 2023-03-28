@@ -5,10 +5,51 @@
 
 #include "errors/bldr/null_node.h"
 #include "errors/bldr/invalid_edge.h"
+#include "errors/bldr/unknown_edge_type.h"
 #include "errors/err_text_creator.h"
+
+#include "utils/string_utils.h"
 
 namespace lenv
 {
+
+// -----------------------------------------------------------------------
+
+std::string UC_edge::type_to_str(const UC_edge::Type type)
+{
+    switch (type) {
+    case ASSOCIATION: return "ASSOCIATION";
+    case GENERALIZATION: return "GENERALIZATION";
+    case INCLUDE: return "INCLUDE";
+    case EXTEND: return "EXTEND";
+    }
+
+    throw Unknown_edge_type{
+        Err_text_creator::dt("UC_edge", "type_to_str",
+                             "unknown enum value")
+    };
+}
+
+UC_edge::Type UC_edge::str_to_type(const std::string& str)
+{
+    if (String_utils::eq_ref(str, type_to_str(ASSOCIATION), false)) {
+        return ASSOCIATION;
+    }
+    if (String_utils::eq_ref(str, type_to_str(GENERALIZATION), false)) {
+        return GENERALIZATION;
+    }
+    if (String_utils::eq_ref(str, type_to_str(INCLUDE), false)) {
+        return INCLUDE;
+    }
+    if (String_utils::eq_ref(str, type_to_str(EXTEND), false)) {
+        return EXTEND;
+    }
+
+    throw Unknown_edge_type{
+        Err_text_creator::dt("UC_edge", "str_to_type",
+                             "unknown str value")
+    };
+}
 
 // -----------------------------------------------------------------------
 

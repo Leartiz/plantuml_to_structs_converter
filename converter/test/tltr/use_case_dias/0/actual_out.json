@@ -3,7 +3,7 @@
   "id": "use_case_dia",
   "nodes": [
     {
-      "id": "Reg",
+      "id": "Registration",
       "inn_edges": [],
       "name": "Registration",
       "out_edges": [],
@@ -12,9 +12,9 @@
       "type": 1
     },
     {
-      "id": "User",
+      "id": "Student",
       "inn_edges": [],
-      "name": "User",
+      "name": "Student",
       "out_edges": [],
       "rob_dia": null,
       "seq_dia": null,

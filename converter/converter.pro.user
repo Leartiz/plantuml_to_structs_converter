@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 9.0.1, 2023-03-28T01:49:35. -->
+<!-- Written by QtCreator 9.0.1, 2023-03-29T01:40:56. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -81,6 +81,7 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:@startuml">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:ACtoR: 🤬🙄😎">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:USECASE">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:[empty]">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:\&quot;name\&quot;">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:\\n\\t   @St     ">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:\\n\\t   @St     \\n">Checked</value>
@@ -103,6 +104,8 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_trim_space_data">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq_data">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq_ref">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_eq_ref_data">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_start_with">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_start_with_data">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_String_utils_stop_with">Checked</value>
@@ -121,10 +124,12 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_Builder_end_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_is_valid_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_is_valid_okk">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_str_to_type_complex">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_short_json_okk">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_short_json_okk1">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_whole_json_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_to_whole_json_okk">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_edge_type_to_str_complex">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err1">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_UC_node_Adder_add_inn_edge_err2">Checked</value>
@@ -154,6 +159,7 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:приветPRIVET阪市立学">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:приветPrivet阪市立学">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:Module">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.h:test_UC_edge_type_to_str_c">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
@@ -181,7 +187,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt6.642.win64_mingw_kit</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">1</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <value type="int" key="EnableQmlDebugging">0</value>
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\..\build-converter-Desktop_Qt_6_4_2_MinGW_64_bit-Debug</value>

@@ -12,9 +12,30 @@ bool String_utils::is_keyword_letter(const char ch)
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
+bool String_utils::eq(char lhs, char rhs, bool sensitive)
+{
+    /*
+       The behavior of std::tolower is undefined
+       if the argument's value is neither
+       representable as unsigned char.
+    */
+
+    if (!sensitive) {
+        lhs = static_cast<char>(std::tolower(static_cast<unsigned char>(lhs)));
+        rhs = static_cast<char>(std::tolower(static_cast<unsigned char>(rhs)));
+    }
+    return lhs == rhs;
+}
+
+bool String_utils::ne(char lhs, char rhs, bool sensitive)
+{
+    return !eq(lhs, rhs, sensitive);
+}
+
 void String_utils::to_upper_by_ref(std::string& str)
 {
     // TODO: study std::locale!
+
     std::transform(str.cbegin(), str.cend(), str.begin(),
                    [](unsigned char ch) -> unsigned char {
         return std::toupper(ch);
@@ -50,8 +71,8 @@ std::string String_utils::to_lower(const std::string& str)
 bool String_utils::start_with(std::string str, std::string start, bool sensitive)
 {
     if (!sensitive) {
-        str = to_lower(str);
-        start = to_lower(str);
+        to_lower_by_ref(str);
+        to_lower_by_ref(str);
     }
 
     return !str.find(start);
@@ -60,8 +81,8 @@ bool String_utils::start_with(std::string str, std::string start, bool sensitive
 bool String_utils::stop_with(std::string str, std::string stop, bool sensitive)
 {
     if (!sensitive) {
-        str = to_lower(str);
-        stop= to_lower(stop);
+        to_lower_by_ref(str);
+        to_lower_by_ref(stop);
     }
 
     return str.rfind(stop) == (str.length() - stop.length());
@@ -72,8 +93,8 @@ bool String_utils::stop_with(std::string str, std::string stop, bool sensitive)
 bool String_utils::eq(std::string lhs, std::string rhs, bool sensitive)
 {
     if (!sensitive) {
-        lhs = to_lower(lhs);
-        rhs = to_lower(rhs);
+        to_lower_by_ref(lhs);
+        to_lower_by_ref(rhs);
     }
 
     return lhs == rhs;
@@ -82,6 +103,22 @@ bool String_utils::eq(std::string lhs, std::string rhs, bool sensitive)
 bool String_utils::ne(std::string lhs, std::string rhs, bool sensitive)
 {
     return !eq(lhs, rhs, sensitive);
+}
+
+bool String_utils::eq_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
+{
+    if (lhs.size() != rhs.size()) return false;
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        if (!eq(lhs[i], rhs[i], sensitive)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool String_utils::ne_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
+{
+    return !eq_ref(lhs, rhs, sensitive);
 }
 
 // -----------------------------------------------------------------------
@@ -172,7 +209,8 @@ std::string String_utils::trim(std::string str, const std::string& chs)
 
 std::string String_utils::un_quote(std::string str)
 {
-    return trim(str, "\"");
+    trim_by_ref(str, "\"");
+    return str;
 }
 
 std::string String_utils::wrap_quote(std::string str)
