@@ -25,8 +25,8 @@
 #include "errors/bldr/unknown_edge_type.h"
 #include "errors/bldr/unknown_node_type.h"
 
-
 #include "utils/string_utils.h"
+#include "utils/puml_utils.h"
 
 #include "translator/use_case/uc_dia_direct_converter.h"
 #include "translator/direct_translator.h"
@@ -173,7 +173,7 @@ void Module::test_UC_edge_type_to_str_complex()
     }
     {
         std::string str;
-        const UC_edge::Type type{ static_cast<UC_edge::Type>(6) };
+        const UC_edge::Type type{ static_cast<UC_edge::Type>(4) };
         QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, str = lenv::UC_edge::type_to_str(type));
     }
     {
@@ -408,6 +408,54 @@ void Module::test_UC_node_Builder_Builder_okk2()
             );
 
     QCOMPARE_NE(node->id(), cloned_node->id());
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UC_node_type_to_str_complex()
+{
+    using namespace lenv;
+    {
+        std::string str;
+        const UC_node::Type type{ static_cast<UC_node::Type>(0) };
+        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_node::type_to_str(type));
+        QCOMPARE_EQ(str, "ACTOR");
+    }
+    {
+        std::string str;
+        const UC_node::Type type{ static_cast<UC_node::Type>(1) };
+        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_node::type_to_str(type));
+        QCOMPARE_EQ(str, "USE_CASE");
+    }
+    {
+        std::string str;
+        const UC_node::Type type{ static_cast<UC_node::Type>(2) };
+        QVERIFY_THROWS_EXCEPTION(Unknown_node_type, str = lenv::UC_node::type_to_str(type));
+    }
+    // ...
+}
+
+void Module::test_UC_node_str_to_type_complex()
+{
+    using namespace lenv;
+    {
+        UC_node::Type type{};
+        const std::string str{ "Actor" };
+        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_node::str_to_type(str));
+        QCOMPARE_EQ(type, UC_node::Type::ACTOR);
+    }
+    {
+        UC_node::Type type{};
+        const std::string str{ "use_CASE" };
+        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_node::str_to_type(str));
+        QCOMPARE_EQ(type, UC_node::Type::USE_CASE);
+    }
+    {
+        UC_node::Type type{};
+        const std::string str{ "Ext123" };
+        QVERIFY_THROWS_EXCEPTION(Unknown_node_type, type = lenv::UC_node::str_to_type(str));
+        static_cast<void>(type);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1377,6 +1425,331 @@ void Module::test_String_trim_space()
 // Puml_utils
 // -----------------------------------------------------------------------
 
+void Module::test_Puml_utils_read_startuml_directive_data()
+{
+    QTest::addColumn<std::string>("line");
+    QTest::addColumn<std::string>("exd_out_name");
+    QTest::addColumn<bool>("exd_status");
+
+    {
+        const std::string line{ "@Startuml" };
+        const std::string exd_out_name{ "" };
+        const bool exd_status{ true };
+        QTest::newRow("@Startuml") << line << exd_out_name << exd_status;
+    }
+    {
+        const std::string line{ "@Startuml inner" };
+        const std::string exd_out_name{ "inner" };
+        const bool exd_status{ true };
+        QTest::newRow("@Startuml inner") << line << exd_out_name << exd_status;
+    }
+    {
+        const std::string line{ "@Sta" };
+        const std::string exd_out_name{ "" };
+        const bool exd_status{ false };
+        QTest::newRow("@Sta") << line << exd_out_name << exd_status;
+    }
+    {
+        const std::string line{ "     @STARTUML      my   dia  " };
+        const std::string exd_out_name{ "my   dia" };
+        const bool exd_status{ true };
+        QTest::newRow("     @STARTUML      my   dia  ")
+                << line << exd_out_name << exd_status;
+    }
+    {
+        const std::string line{ "     @STARTUML         " };
+        const std::string exd_out_name{ "" };
+        const bool exd_status{ true };
+        QTest::newRow("     @STARTUML         ")
+                << line << exd_out_name << exd_status;
+    }
+    {
+        const std::string line{ "@enduml" };
+        const std::string exd_out_name{ "" };
+        const bool exd_status{ false };
+        QTest::newRow("@enduml")
+                << line << exd_out_name << exd_status;
+    }
+    // ...
+}
+
+void Module::test_Puml_utils_read_startuml_directive()
+{
+    using namespace lenv;
+    QFETCH(std::string, line);
+    QFETCH(std::string, exd_out_name);
+    QFETCH(bool, exd_status);
+
+    std::string got_out_name{};
+    QCOMPARE_EQ(Puml_utils::read_startuml_directive(line, got_out_name), exd_status);
+    if (exd_status) QCOMPARE_EQ(got_out_name, exd_out_name);
+}
+
+void Module::test_Puml_utils_read_enduml_directive_data()
+{
+    QTest::addColumn<std::string>("line");
+    QTest::addColumn<bool>("exd_status");
+
+    {
+        const std::string line{ "@Startuml" };
+        const bool exd_status{ false };
+        QTest::newRow("@Startuml") << line << exd_status;
+    }
+    {
+        const std::string line{ "@enduml         " };
+        const bool exd_status{ true };
+        QTest::newRow("@enduml         ") << line << exd_status;
+    }
+    {
+        const std::string line{ "@en du ml" };
+        const bool exd_status{ false };
+        QTest::newRow("@en du ml") << line << exd_status;
+    }
+    {
+        const std::string line{ "     @enduml    " };
+        const bool exd_status{ true };
+        QTest::newRow("     @enduml    ") << line << exd_status;
+    }
+    {
+        const std::string line{ "kdasaswe" };
+        const bool exd_status{ false };
+        QTest::newRow("kdasaswe") << line << exd_status;
+    }
+    // ...
+}
+
+void Module::test_Puml_utils_read_enduml_directive()
+{
+    using namespace lenv;
+    QFETCH(std::string, line);
+    QFETCH(bool, exd_status);
+
+    const bool got_status{ Puml_utils::read_enduml_directive(line) };
+    QCOMPARE_EQ(got_status, exd_status);
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_Puml_utils_read_use_case_creation_data()
+{
+    using namespace lenv;
+    QTest::addColumn<std::string>("line");
+    QTest::addColumn<std::string>("exd_name");
+    QTest::addColumn<std::string>("exd_id");
+    QTest::addColumn<UC_node::Type>("exd_type");
+    QTest::addColumn<bool>("exd_status");
+
+    /* true */
+    {
+        const std::string line{ "usecase Reg" };
+        const std::string exd_name{ "Reg" };
+        const std::string exd_id{ "Reg" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase Reg")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"Reg\"" };
+        const std::string exd_name{ "Reg" };
+        const std::string exd_id{ "Reg" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"Reg\"")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"Registr\" as Reg" };
+        const std::string exd_name{ "Registr" };
+        const std::string exd_id{ "Reg" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"Registr\" as Reg")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"Reg reg\" as Reg" };
+        const std::string exd_name{ "Reg reg" };
+        const std::string exd_id{ "Reg" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"Reg reg\" as Reg")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase :Reg ds:" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reg ds" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("usecase :Reg ds:")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    // *** 5
+    {
+        const std::string line{ "usecase :Reg ds: as \"Reggg  d\"" };
+        const std::string exd_name{ "Reggg  d" };
+        const std::string exd_id{ "Reg ds" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("usecase :Reg ds: as \"Reggg  d\"")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase :Reg ds: as (Reggg  d)" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reggg  d" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase :Reg ds: as (Reggg  d)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase :Reg ds: as :Reggg  d:" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reggg  d" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("usecase :Reg ds: as :Reggg  d:")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase (Reg ds) as :Reggg  d:" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reggg  d" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase (Reg ds) as :Reggg  d:")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"Reg ds\" as :Reggg  d:" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reggg  d" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"Reg ds\" as :Reggg  d:")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    // *** 10
+    {
+        const std::string line{ "usecase (Reg ds)" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reg ds" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase (Reg ds)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase (Reg ds)" };
+        const std::string exd_name{ "Reg ds" };
+        const std::string exd_id{ "Reg ds" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase (Reg ds)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"dasd asd\"" };
+        const std::string exd_name{ "dasd asd" };
+        const std::string exd_id{ "dasd asd" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"dasd asd\"")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"dasd asd\" AS REG" };
+        const std::string exd_name{ "dasd asd" };
+        const std::string exd_id{ "REG" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"dasd asd\" AS REG")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "USECASE   (dasd asd)    AS    (REG)" };
+        const std::string exd_name{ "dasd asd" };
+        const std::string exd_id{ "REG" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("USECASE   (dasd asd)    AS    (REG)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    // *** 15
+    {
+        const std::string line{ "usecase \"Reg reg\" as as" };
+        const std::string exd_name{ "Reg reg" };
+        const std::string exd_id{ "as" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase \"Reg reg\" as as")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+
+    /* false */
+    {
+        const std::string line{ "usecase Reg bs" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("usecase Reg bs")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "uscase Reg bs" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("uscase Reg bs")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase \"Reg reg\" as as as" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("usecase \"Reg reg\" as as as")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+}
+
+void Module::test_Puml_utils_read_use_case_creation()
+{
+    using namespace lenv;
+    QFETCH(std::string, line);
+    QFETCH(std::string, exd_name);
+    QFETCH(std::string, exd_id);
+    QFETCH(UC_node::Type, exd_type);
+    QFETCH(bool, exd_status);
+
+    // ***
+
+    std::string got_name, got_id;
+    UC_node::Type got_type{ UC_node::ACTOR };
+    QCOMPARE_EQ(Puml_utils::read_use_case_creation(line,
+                    got_name, got_id, got_type), exd_status);
+
+    if (exd_status) {
+        QCOMPARE_EQ(exd_name, got_name);
+        QCOMPARE_EQ(exd_id, got_id);
+        QCOMPARE_EQ(exd_type, got_type);
+    }
+}
+
+void Module::test_Puml_utils_read_actor_creation_data()
+{
+
+}
+
+void Module::test_Puml_utils_read_actor_creation()
+{
+
+}
 
 // Direct_translator
 // -----------------------------------------------------------------------

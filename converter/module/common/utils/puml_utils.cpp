@@ -54,18 +54,114 @@ bool Puml_utils::read_startuml_directive(const std::string& line,
 
 bool Puml_utils::read_enduml_directive(const std::string& line)
 {
-    std::istringstream sin{ line };
-    std::string directive; sin >> directive;
+    std::string directive{ String_utils::trim_space(line) };
     return String_utils::eq_ref(directive, enduml, false);
 }
 
-bool Puml_utils::read_short_use_case(const std::string& line,
-                                     std::string& out_name)
-{
+// -----------------------------------------------------------------------
 
+bool Puml_utils::read_use_case_creation(const std::string& line,
+                                        std::string& out_name,
+                                        std::string& out_id,
+                                        UC_node::Type& out_type)
+{
+    std::istringstream sin{ line };
+    std::string keyword;
+    sin >> keyword;
+
+    if (!String_utils::eq_ref(keyword, kw_usecase, false)) {
+        return false;
+    }
+
+    char start_lstr_ch{ 0 };
+    sin >> start_lstr_ch;
+
+    std::string lstr;
+    UC_node::Type ltype{ UC_node::USE_CASE };
+    if (start_lstr_ch == ':') {
+        std::getline(sin, lstr, ':'); // TODO:
+        ltype = UC_node::ACTOR;
+    }
+    else if (start_lstr_ch == '(') {
+        std::getline(sin, lstr, ')');
+
+    }
+    else if (start_lstr_ch == '\"') {
+        std::getline(sin, lstr, '\"');
+    }
+    else {
+        sin.unget();
+        sin >> lstr;
+    }
+
+    keyword.clear();
+    sin >> keyword;
+
+    if (keyword.empty()) {
+        out_id = lstr;
+        out_name = lstr;
+        out_type = ltype;
+        return true;
+    }
+
+    if (!String_utils::eq_ref(keyword, kw_as, false)) {
+        return false;
+    }
+
+    char start_rstr_ch{ 0 };
+    sin >> start_rstr_ch;
+
+    std::string rstr;
+    UC_node::Type rtype{ UC_node::USE_CASE };
+    if (start_rstr_ch == ':') {
+        std::getline(sin, rstr, ':');
+        rtype = UC_node::ACTOR;
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+
+        if (start_lstr_ch == '(') {
+            out_type = ltype;
+        }
+    }
+    else if (start_rstr_ch == '(') {
+        std::getline(sin, rstr, ')');
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+    }
+    else if (start_rstr_ch == '\"') {
+        std::getline(sin, rstr, '\"');
+
+        out_id = lstr;
+        out_name = rstr;
+        out_type = ltype;
+    }
+    else {
+        sin.unget();
+        sin >> rstr;
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+    }
+
+    std::string rest;
+    sin >> rest;
+    if (!rest.empty()) {
+        out_id.clear();
+        out_name.clear();
+        return false;
+    }
+    return true;
 }
 
-bool Puml_utils::read_short_actor(const std::string& line, std::string& out_name)
+bool Puml_utils::read_actor_creation(const std::string& line,
+                                     std::string& out_name,
+                                     std::string& out_id,
+                                     UC_node::Type& out_type)
 {
 
 }

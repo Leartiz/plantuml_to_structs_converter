@@ -32,7 +32,7 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
     while (!m_completed && std::getline(m_in_stream, cur_line, '\n')) {
         String_utils::trim_space_by_ref(cur_line);
         m_csin.str(cur_line);
-        m_csin.clear();
+        m_csin.clear(); // to good.
 
         char start_ch{ 0 };
         m_csin >> start_ch;
@@ -64,11 +64,12 @@ void UC_dia_direct_converter::conv_word()
     m_csin >> word; // new position!
 
     if (String_utils::eq_ref(word, Puml_utils::kw_usecase, false)) {
-        read_whole_use_case();
+        read_use_case();
     }
     else if (String_utils::eq_ref(word, Puml_utils::kw_actor, false)) {
-        read_whole_actor();
+        read_actor();
     }
+    /* extra */
     else if (String_utils::eq(word, Puml_utils::kw_skinparam, false)) {
         read_skinparam();
     }
@@ -105,13 +106,13 @@ void UC_dia_direct_converter::read_note()
 
 void UC_dia_direct_converter::read_directive()
 {
-    std::string name_dia; /* eq Use_Case_dia::id; */
+    std::string dia_id; /* eq Use_Case_dia::id; */
     const std::string cur_line{ m_csin.str() };
     if (String_utils::start_with(cur_line, Puml_utils::startuml)) {
-        if (!Puml_utils::read_startuml_directive(cur_line, name_dia)) {
+        if (!Puml_utils::read_startuml_directive(cur_line, dia_id)) {
             throw int{}; // TODO:
         }
-        if (!name_dia.empty() && name_dia != Use_Case_dia::id) {
+        if (!dia_id.empty() && dia_id != Use_Case_dia::id) {
             throw int{};
         }
 
@@ -133,12 +134,24 @@ void UC_dia_direct_converter::read_directive()
 
 void UC_dia_direct_converter::read_connection()
 {
+    char start_ch{ 0 };
+    m_csin >> start_ch;
+    m_csin.unget();
 
+    if (start_ch == ':') {
+
+    }
+    else if (start_ch == '(') {
+
+    }
+    else {
+
+    }
 }
 
 // -----------------------------------------------------------------------
 
-void UC_dia_direct_converter::read_whole_use_case()
+void UC_dia_direct_converter::read_use_case()
 {
     UC_node::Type id_type{ UC_node::Type::USE_CASE };
     UC_node::Type name_type{ UC_node::Type::USE_CASE };
@@ -191,12 +204,7 @@ void UC_dia_direct_converter::read_whole_use_case()
     m_uc_dia->add_node_bfore_adder(node);
 }
 
-void UC_dia_direct_converter::read_short_use_case()
-{
-
-}
-
-void UC_dia_direct_converter::read_whole_actor()
+void UC_dia_direct_converter::read_actor()
 {
     std::string name;
     std::string as;
@@ -210,11 +218,6 @@ void UC_dia_direct_converter::read_whole_actor()
             .name(String_utils::un_quote(name)).build_ptr();
 
     m_uc_dia->add_node_bfore_adder(node);
-}
-
-void UC_dia_direct_converter::read_short_actor()
-{
-
 }
 
 }

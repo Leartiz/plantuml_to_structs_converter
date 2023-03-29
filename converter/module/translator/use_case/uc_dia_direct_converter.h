@@ -24,11 +24,8 @@ private:
     void read_connection();
 
 private:
-    void read_whole_use_case();
-    void read_short_use_case();
-
-    void read_whole_actor();
-    void read_short_actor();
+    void read_use_case();
+    void read_actor();
 
 protected:
     void read_skinparam();

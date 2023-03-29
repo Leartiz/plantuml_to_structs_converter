@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "use_case/uc_node.h"
+
 namespace lenv
 {
 
@@ -41,15 +43,24 @@ public:
     static const std::string kw_of;
     static const std::string kw_end;
 
-
+    /* Such TDD */
 public:
     static bool is_keyword(const std::string& str);
 
     static bool read_startuml_directive(const std::string& line, std::string& out_name);
     static bool read_enduml_directive(const std::string& line);
 
-    static bool read_short_use_case(const std::string& line, std::string& out_name);
-    static bool read_short_actor(const std::string& line, std::string& out_name);
+public:
+    static bool read_use_case_creation(const std::string& line,
+                                       std::string& out_name,
+                                       std::string& out_id,
+                                       UC_node::Type& out_type);
+    static bool read_actor_creation(const std::string& line,
+                                    std::string& out_name,
+                                    std::string& out_id,
+                                    UC_node::Type& out_type);
+
+public:
 };
 
 }

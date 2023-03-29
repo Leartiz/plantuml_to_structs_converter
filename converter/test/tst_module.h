@@ -51,6 +51,10 @@ private slots:
     void test_UC_node_Builder_Builder_okk2();
 
 private slots:
+    void test_UC_node_type_to_str_complex();
+    void test_UC_node_str_to_type_complex();
+
+private slots:
     void test_UC_node_Adder_add_inn_edge_err();
     void test_UC_node_Adder_add_inn_edge_err1();
     void test_UC_node_Adder_add_inn_edge_err2();
@@ -117,7 +121,16 @@ private slots:
 
     // Puml_utils
 private slots:
+    void test_Puml_utils_read_startuml_directive_data();
+    void test_Puml_utils_read_startuml_directive();
+    void test_Puml_utils_read_enduml_directive_data();
+    void test_Puml_utils_read_enduml_directive();
 
+private slots:
+    void test_Puml_utils_read_use_case_creation_data();
+    void test_Puml_utils_read_use_case_creation();
+    void test_Puml_utils_read_actor_creation_data();
+    void test_Puml_utils_read_actor_creation();
 
     // Direct_translator
 private slots:

@@ -16,6 +16,7 @@ SOURCES += \
     $$PWD/common/errors/not_implemented.cpp \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
+    $$PWD/common/utils/conv_utils.cpp \
     $$PWD/common/utils/puml_utils.cpp \
     $$PWD/common/utils/string_utils.cpp \
     $$PWD/structures/class/class_dia.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
+    $$PWD/common/utils/conv_utils.h \
     $$PWD/common/utils/puml_utils.h \
     $$PWD/common/utils/string_utils.h \
     $$PWD/structures/class/class_dia.h \
