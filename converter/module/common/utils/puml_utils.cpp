@@ -373,9 +373,7 @@ bool Puml_utils::UC_dia::arrow_to_type(const std::string& arrow,
         return false;
     }
 
-
-
-
+    std::string lhead(1, arrow[0]);
 
 }
 

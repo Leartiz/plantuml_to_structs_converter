@@ -16,6 +16,7 @@ SOURCES += \
     $$PWD/common/errors/not_implemented.cpp \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
+    $$PWD/common/generator/ordergenerator.cpp \
     $$PWD/common/utils/conv_utils.cpp \
     $$PWD/common/utils/puml_utils.cpp \
     $$PWD/common/utils/string_utils.cpp \
@@ -55,6 +56,8 @@ HEADERS += \
     $$PWD/common/errors/not_implemented.h \
     $$PWD/common/errors/tltr/tltr_error.h \
     $$PWD/common/errors/tltr/unknown_directive.h \
+    $$PWD/common/generator/igenerator.h \
+    $$PWD/common/generator/ordergenerator.h \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
