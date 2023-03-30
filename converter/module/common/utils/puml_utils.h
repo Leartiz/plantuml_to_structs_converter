@@ -4,10 +4,12 @@
 #include <string>
 
 #include "use_case/uc_node.h"
+#include "use_case/uc_edge.h"
 
 namespace lenv
 {
 
+/* correctly parse by tokens or just return a DTO! */
 class Puml_utils final
 {
 public:
@@ -43,6 +45,10 @@ public:
     static const std::string kw_of;
     static const std::string kw_end;
 
+public:
+    static const std::vector<std::string> arrow_heads;
+    static const std::vector<char> arrow_body;
+
     /* Such TDD */
 public:
     static bool is_keyword(const std::string& str);
@@ -51,16 +57,33 @@ public:
     static bool read_enduml_directive(const std::string& line);
 
 public:
-    static bool read_use_case_creation(const std::string& line,
-                                       std::string& out_name,
-                                       std::string& out_id,
-                                       UC_node::Type& out_type);
-    static bool read_actor_creation(const std::string& line,
-                                    std::string& out_name,
-                                    std::string& out_id,
-                                    UC_node::Type& out_type);
+    class UC_dia final
+    {
+    public:
+        static bool read_use_case_creation(const std::string& line,
+                                           std::string& out_name,
+                                           std::string& out_id,
+                                           UC_node::Type& out_type);
+        static bool read_actor_creation(const std::string& line,
+                                        std::string& out_name,
+                                        std::string& out_id,
+                                        UC_node::Type& out_type);
+    public:
+        static bool read_connection_creation(const std::string& line,
+                                             std::string& out_beg_str,
+                                             std::string& out_end_str,
+                                             UC_edge::Type& out_type);
+        static bool arrow_to_type(const std::string& arrow,
+                                  UC_edge::Type& out_type);
+    };
 
 public:
+    class Rob_dia final
+    {
+    };
+
+public:
+    // ...
 };
 
 }

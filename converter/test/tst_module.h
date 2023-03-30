@@ -127,10 +127,14 @@ private slots:
     void test_Puml_utils_read_enduml_directive();
 
 private slots:
-    void test_Puml_utils_read_use_case_creation_data();
-    void test_Puml_utils_read_use_case_creation();
-    void test_Puml_utils_read_actor_creation_data();
-    void test_Puml_utils_read_actor_creation();
+    void test_Puml_utils_UC_dia_read_use_case_creation_data();
+    void test_Puml_utils_UC_dia_read_use_case_creation();
+    void test_Puml_utils_UC_dia_read_actor_creation_data();
+    void test_Puml_utils_UC_dia_read_actor_creation();
+    void test_Puml_utils_UC_dia_read_connection_creation_data();
+    void test_Puml_utils_UC_dia_read_connection_creation();
+    void test_Puml_utils_UC_dia_arrow_to_type_data();
+    void test_Puml_utils_UC_dia_arrow_to_type();
 
     // Direct_translator
 private slots:

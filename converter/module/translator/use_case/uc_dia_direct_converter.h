@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "use_case/uc_ptrs.h"
+#include "use_case/uc_node.h"
 
 namespace lenv
 {
@@ -24,8 +25,7 @@ private:
     void read_connection();
 
 private:
-    void read_use_case();
-    void read_actor();
+    void read_node_creation(UC_node::Type primary_type);
 
 protected:
     void read_skinparam();

@@ -64,10 +64,10 @@ void UC_dia_direct_converter::conv_word()
     m_csin >> word; // new position!
 
     if (String_utils::eq_ref(word, Puml_utils::kw_usecase, false)) {
-        read_use_case();
+        read_node_creation(UC_node::USE_CASE);
     }
     else if (String_utils::eq_ref(word, Puml_utils::kw_actor, false)) {
-        read_actor();
+        read_node_creation(UC_node::ACTOR);
     }
     /* extra */
     else if (String_utils::eq(word, Puml_utils::kw_skinparam, false)) {
@@ -138,11 +138,18 @@ void UC_dia_direct_converter::read_connection()
     m_csin >> start_ch;
     m_csin.unget();
 
+    std::string node_id;
     if (start_ch == ':') {
+        std::getline(m_csin, node_id, ':');
+        if (!m_csin.good()) {
 
+        }
     }
     else if (start_ch == '(') {
+        std::getline(m_csin, node_id, ')');
+        if (!m_csin.good()) {
 
+        }
     }
     else {
 
@@ -151,72 +158,22 @@ void UC_dia_direct_converter::read_connection()
 
 // -----------------------------------------------------------------------
 
-void UC_dia_direct_converter::read_use_case()
+void UC_dia_direct_converter::read_node_creation(UC_node::Type primary_type)
 {
-    UC_node::Type id_type{ UC_node::Type::USE_CASE };
-    UC_node::Type name_type{ UC_node::Type::USE_CASE };
+    std::string name, id;
+    UC_node::Type type = primary_type;
 
-    char start_name_ch{ 0 };
-    m_csin >> start_name_ch;
-
-    std::string name;
-    if (start_name_ch == ':') {
-        std::getline(m_csin, name, ':');
-        name_type = UC_node::Type::ACTOR;
-    }
-    else if (start_name_ch == '(') {
-        std::getline(m_csin, name, ')');
-    }
-    else if (start_name_ch == '\"') {
-        std::getline(m_csin, name, '\"');
+    if (primary_type == UC_node::Type::ACTOR) {
+        Puml_utils::UC_dia::read_actor_creation(m_csin.str(), name, id, type);
     }
     else {
-        m_csin.unget();
-        m_csin >> name;
-    }
-
-    std::string id{ name };
-    std::string as; m_csin >> as;
-    if (String_utils::eq_ref(as, Puml_utils::kw_as, false)) {
-        char start_id_ch{ 0 };
-        m_csin >> start_id_ch;
-
-        if (start_id_ch == ':') {
-            std::getline(m_csin, id, ':');
-            name_type = UC_node::Type::ACTOR;
-        }
-        else if (start_id_ch == '(') {
-            std::getline(m_csin, id, ')');
-        }
-        else if (start_id_ch == '\"') {
-            std::getline(m_csin, id, '\"');
-        }
-        else {
-            m_csin.unget();
-            m_csin >> id;
-        }
+        Puml_utils::UC_dia::read_use_case_creation(m_csin.str(), name, id, type);
     }
 
     UC_node::Builder node_b{ id };
-    node_b.type(name_type).name(name);
+    node_b.name(name).type(type);
 
-    const auto node = node_b.build_ptr();
-    m_uc_dia->add_node_bfore_adder(node);
-}
-
-void UC_dia_direct_converter::read_actor()
-{
-    std::string name;
-    std::string as;
-    std::string id;
-    m_csin >> name;
-    m_csin >> as;
-    m_csin >> id;
-
-    UC_node::Builder node_b{ id };
-    auto node = node_b.type( UC_node::Type::ACTOR )
-            .name(String_utils::un_quote(name)).build_ptr();
-
+    const auto node{ node_b.build_ptr() };
     m_uc_dia->add_node_bfore_adder(node);
 }
 

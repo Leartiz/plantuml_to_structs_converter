@@ -31,6 +31,18 @@
 #include "translator/use_case/uc_dia_direct_converter.h"
 #include "translator/direct_translator.h"
 
+// -----------------------------------------------------------------------
+
+#if QT_VERSION <= QT_VERSION_CHECK(6, 4, 0)
+    #define QCOMPARE_EQ(lhs, rhs) QCOMPARE(lhs == rhs, true);
+    #define QCOMPARE_NE(lhs, rhs) QCOMPARE(lhs == rhs, false);
+
+    #define QVERIFY_THROWS_EXCEPTION(exceptiontype, expression) QVERIFY_EXCEPTION_THROWN(expression, exceptiontype);
+    #define QVERIFY_THROWS_NO_EXCEPTION(expression) static_cast<void>(expression);
+#endif
+
+// -----------------------------------------------------------------------
+
 Module::Module() {}
 Module::~Module() {}
 
@@ -63,6 +75,7 @@ void Module::test_UC_edge_Builder_beg_err1()
 {
     using namespace lenv;
     UC_edge::Builder b(""); b.type(UC_edge::ASSOCIATION);
+
     QVERIFY_THROWS_EXCEPTION(Null_node, b.beg(nullptr));
 }
 
@@ -1530,7 +1543,7 @@ void Module::test_Puml_utils_read_enduml_directive()
 
 // -----------------------------------------------------------------------
 
-void Module::test_Puml_utils_read_use_case_creation_data()
+void Module::test_Puml_utils_UC_dia_read_use_case_creation_data()
 {
     using namespace lenv;
     QTest::addColumn<std::string>("line");
@@ -1687,6 +1700,15 @@ void Module::test_Puml_utils_read_use_case_creation_data()
         QTest::newRow("usecase \"Reg reg\" as as")
                 << line << exd_name << exd_id << exd_type << exd_status;
     }
+    {
+        const std::string line{ "usecase Reg as \"Обычная регистрация\nпользователя\nбез.\"" };
+        const std::string exd_name{ "Обычная регистрация\nпользователя\nбез." };
+        const std::string exd_id{ "Reg" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("usecase Reg as \"Обычная регистрация\\nпользователя\\nбез.\"")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
 
     /* false */
     {
@@ -1716,9 +1738,37 @@ void Module::test_Puml_utils_read_use_case_creation_data()
         QTest::newRow("usecase \"Reg reg\" as as as")
                 << line << exd_name << exd_id << exd_type << exd_status;
     }
+    {
+        const std::string line{ "usecase \"Reg reg" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("usecase \"Reg reg")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "usecase :Reg reg: as :sss" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("usecase \"Reg reg")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    // *** 5
+    {
+        const std::string line{ "usecase (RegReg as d" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ false };
+        QTest::newRow("usecase (RegReg as d")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
 }
 
-void Module::test_Puml_utils_read_use_case_creation()
+void Module::test_Puml_utils_UC_dia_read_use_case_creation()
 {
     using namespace lenv;
     QFETCH(std::string, line);
@@ -1731,22 +1781,205 @@ void Module::test_Puml_utils_read_use_case_creation()
 
     std::string got_name, got_id;
     UC_node::Type got_type{ UC_node::ACTOR };
-    QCOMPARE_EQ(Puml_utils::read_use_case_creation(line,
+    QCOMPARE_EQ(Puml_utils::UC_dia::read_use_case_creation(line,
                     got_name, got_id, got_type), exd_status);
 
     if (exd_status) {
-        QCOMPARE_EQ(exd_name, got_name);
         QCOMPARE_EQ(exd_id, got_id);
+        QCOMPARE_EQ(exd_name, got_name);
         QCOMPARE_EQ(exd_type, got_type);
     }
 }
 
-void Module::test_Puml_utils_read_actor_creation_data()
+void Module::test_Puml_utils_UC_dia_read_actor_creation_data()
 {
+    using namespace lenv;
+    QTest::addColumn<std::string>("line");
+    QTest::addColumn<std::string>("exd_name");
+    QTest::addColumn<std::string>("exd_id");
+    QTest::addColumn<UC_node::Type>("exd_type");
+    QTest::addColumn<bool>("exd_status");
 
+    /* true */
+    {
+        const std::string line{ "actor User" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "User" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("actor User")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor (User) as \"dsa\"" };
+        const std::string exd_name{ "dsa" };
+        const std::string exd_id{ "User" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("actor (User) as \"dsa\"")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor (User) as (dsa)" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "dsa" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("actor (User) as (dsa)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor (User) as :dsa:" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "dsa" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("actor (User) as :dsa:")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor :User: as (dsa)" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "dsa" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("actor :User: as (dsa)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    // *** 5
+    {
+        const std::string line{ "actor User as dsa" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "dsa" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ true };
+        QTest::newRow("actor User as dsa")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor (User)" };
+        const std::string exd_name{ "User" };
+        const std::string exd_id{ "User" };
+        const UC_node::Type exd_type{ UC_node::USE_CASE };
+        const bool exd_status{ true };
+        QTest::newRow("actor (User)")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+
+    /* false */
+    {
+        const std::string line{ "actor ds ds ds" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ false };
+        QTest::newRow("actor ds ds ds")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor (())ds" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ false };
+        QTest::newRow("actor (())ds")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
+    {
+        const std::string line{ "actor User as ds dffs w" };
+        const std::string exd_name{ "" };
+        const std::string exd_id{ "" };
+        const UC_node::Type exd_type{ UC_node::ACTOR };
+        const bool exd_status{ false };
+        QTest::newRow("actor User as ds dffs w")
+                << line << exd_name << exd_id << exd_type << exd_status;
+    }
 }
 
-void Module::test_Puml_utils_read_actor_creation()
+void Module::test_Puml_utils_UC_dia_read_actor_creation()
+{
+    using namespace lenv;
+    QFETCH(std::string, line);
+    QFETCH(std::string, exd_name);
+    QFETCH(std::string, exd_id);
+    QFETCH(UC_node::Type, exd_type);
+    QFETCH(bool, exd_status);
+
+    // ***
+
+    std::string got_name, got_id;
+    UC_node::Type got_type{ UC_node::ACTOR };
+    QCOMPARE_EQ(Puml_utils::UC_dia::read_actor_creation(line,
+                    got_name, got_id, got_type), exd_status);
+
+    if (exd_status) {
+        QCOMPARE_EQ(exd_id, got_id);
+        QCOMPARE_EQ(exd_name, got_name);
+        QCOMPARE_EQ(exd_type, got_type);
+    }
+}
+
+void Module::test_Puml_utils_UC_dia_read_connection_creation_data()
+{
+    using namespace lenv;
+    QTest::addColumn<std::string>("line");
+    QTest::addColumn<std::string>("exd_lstr");
+    QTest::addColumn<std::string>("exd_rstr");
+    QTest::addColumn<UC_edge::Type>("exd_edge_type");
+    QTest::addColumn<bool>("exd_status");
+
+    /* true */
+    {
+        const std::string line{ ":das: --> (dasda)" };
+        const std::string exd_lstr{ ":das:" };
+        const std::string exd_rstr{ "(dasda)" };
+        const UC_edge::Type exd_type{ UC_edge::ASSOCIATION };
+        const bool exd_status{ true };
+        QTest::newRow(":das: --> (dasda)")
+                << line << exd_lstr << exd_rstr << exd_type << exd_status;
+    }
+}
+
+void Module::test_Puml_utils_UC_dia_read_connection_creation()
+{
+    using namespace lenv;
+    QFETCH(std::string, line);
+    QFETCH(std::string, exd_lstr);
+    QFETCH(std::string, exd_rstr);
+    QFETCH(UC_edge::Type, exd_edge_type);
+    QFETCH(bool, exd_status);
+
+    // ***
+
+    std::string got_lstr, got_rstr;
+    UC_edge::Type got_edge_type{ UC_edge::ASSOCIATION };
+    QCOMPARE_EQ(Puml_utils::UC_dia::read_connection_creation(line,
+                    got_lstr, got_rstr, got_edge_type), exd_status);
+
+    if (exd_status) {
+        QCOMPARE_EQ(exd_lstr, got_lstr);
+        QCOMPARE_EQ(exd_rstr, got_rstr);
+        QCOMPARE_EQ(exd_edge_type, got_edge_type);
+    }
+}
+
+void Module::test_Puml_utils_UC_dia_arrow_to_type_data()
+{
+    using namespace lenv;
+    QTest::addColumn<std::string>("arrow");
+    QTest::addColumn<UC_edge::Type>("exd_edge_type");
+    QTest::addColumn<bool>("exd_status");
+
+    /* true */
+    {
+        const std::string arrow{ "-->" };
+        const UC_edge::Type exd_edge_type{ UC_edge::ASSOCIATION };
+        const bool exd_status{ true };
+        QTest::newRow("-->") << arrow << exd_edge_type << exd_status;
+    }
+}
+
+void Module::test_Puml_utils_UC_dia_arrow_to_type()
 {
 
 }

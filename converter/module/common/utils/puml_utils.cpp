@@ -1,4 +1,5 @@
 #include <sstream>
+#include <algorithm>
 
 #include "puml_utils.h"
 #include "string_utils.h"
@@ -34,6 +35,22 @@ const std::string Puml_utils::kw_end{ "end" };
 
 // -----------------------------------------------------------------------
 
+const std::vector<std::string> Puml_utils::arrow_heads {
+    "<|", "|>",
+    "*", "o",
+    "<", ">",
+    "#", "x",
+    "}", "{",
+    "+", "^",
+    "()" "(", ")",
+};
+
+const std::vector<char> Puml_utils::arrow_body {
+    '.', '-',
+};
+
+// -----------------------------------------------------------------------
+
 bool Puml_utils::is_keyword(const std::string& str)
 {
     return false;
@@ -60,10 +77,10 @@ bool Puml_utils::read_enduml_directive(const std::string& line)
 
 // -----------------------------------------------------------------------
 
-bool Puml_utils::read_use_case_creation(const std::string& line,
-                                        std::string& out_name,
-                                        std::string& out_id,
-                                        UC_node::Type& out_type)
+bool Puml_utils::UC_dia::read_use_case_creation(const std::string& line,
+                                                std::string& out_name,
+                                                std::string& out_id,
+                                                UC_node::Type& out_type)
 {
     std::istringstream sin{ line };
     std::string keyword;
@@ -79,15 +96,20 @@ bool Puml_utils::read_use_case_creation(const std::string& line,
     std::string lstr;
     UC_node::Type ltype{ UC_node::USE_CASE };
     if (start_lstr_ch == ':') {
-        std::getline(sin, lstr, ':'); // TODO:
+        if (!std::getline(sin, lstr, ':').good()) {
+            return false;
+        }
         ltype = UC_node::ACTOR;
     }
     else if (start_lstr_ch == '(') {
-        std::getline(sin, lstr, ')');
-
+        if (!std::getline(sin, lstr, ')').good()) {
+            return false;
+        }
     }
     else if (start_lstr_ch == '\"') {
-        std::getline(sin, lstr, '\"');
+        if (!std::getline(sin, lstr, '\"').good()) {
+            return false;
+        }
     }
     else {
         sin.unget();
@@ -114,7 +136,9 @@ bool Puml_utils::read_use_case_creation(const std::string& line,
     std::string rstr;
     UC_node::Type rtype{ UC_node::USE_CASE };
     if (start_rstr_ch == ':') {
-        std::getline(sin, rstr, ':');
+        if (!std::getline(sin, rstr, ':').good()) {
+            return false;
+        }
         rtype = UC_node::ACTOR;
 
         out_id = rstr;
@@ -126,14 +150,18 @@ bool Puml_utils::read_use_case_creation(const std::string& line,
         }
     }
     else if (start_rstr_ch == '(') {
-        std::getline(sin, rstr, ')');
+        if (!std::getline(sin, rstr, ')').good()) {
+            return false;
+        }
 
         out_id = rstr;
         out_name = lstr;
         out_type = rtype;
     }
     else if (start_rstr_ch == '\"') {
-        std::getline(sin, rstr, '\"');
+        if (!std::getline(sin, rstr, '\"').good()) {
+            return false;
+        }
 
         out_id = lstr;
         out_name = rstr;
@@ -158,11 +186,196 @@ bool Puml_utils::read_use_case_creation(const std::string& line,
     return true;
 }
 
-bool Puml_utils::read_actor_creation(const std::string& line,
-                                     std::string& out_name,
-                                     std::string& out_id,
-                                     UC_node::Type& out_type)
+bool Puml_utils::UC_dia::read_actor_creation(const std::string& line,
+                                             std::string& out_name,
+                                             std::string& out_id,
+                                             UC_node::Type& out_type)
 {
+    std::istringstream sin{ line };
+    std::string keyword;
+    sin >> keyword;
+
+    if (!String_utils::eq_ref(keyword, kw_actor, false)) {
+        return false;
+    }
+
+    char start_lstr_ch{ 0 };
+    sin >> start_lstr_ch;
+
+    std::string lstr;
+    UC_node::Type ltype{ UC_node::ACTOR };
+    if (start_lstr_ch == ':') {
+        if (!std::getline(sin, lstr, ':').good()) {
+            return false;
+        }
+    }
+    else if (start_lstr_ch == '(') {
+        if (!std::getline(sin, lstr, ')').good()) {
+            return false;
+        }
+        ltype = UC_node::USE_CASE;
+    }
+    else if (start_lstr_ch == '\"') {
+        if (!std::getline(sin, lstr, '\"').good()) {
+            return false;
+        }
+    }
+    else {
+        sin.unget();
+        sin >> lstr;
+    }
+
+    keyword.clear();
+    sin >> keyword;
+
+    if (keyword.empty()) {
+        out_id = lstr;
+        out_name = lstr;
+        out_type = ltype;
+        return true;
+    }
+
+    if (!String_utils::eq_ref(keyword, kw_as, false)) {
+        return false;
+    }
+
+    char start_rstr_ch{ 0 };
+    sin >> start_rstr_ch;
+
+    std::string rstr;
+    UC_node::Type rtype{ UC_node::ACTOR };
+    if (start_rstr_ch == ':') {
+        if (!std::getline(sin, rstr, ':').good()) {
+            return false;
+        }
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+
+        if (start_lstr_ch == '(') {
+            out_type = ltype;
+        }
+    }
+    else if (start_rstr_ch == '(') {
+        if (!std::getline(sin, rstr, ')').good()) {
+            return false;
+        }
+        rtype = UC_node::USE_CASE;
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+    }
+    else if (start_rstr_ch == '\"') {
+        if (!std::getline(sin, rstr, '\"').good()) {
+            return false;
+        }
+
+        out_id = lstr;
+        out_name = rstr;
+        out_type = ltype;
+    }
+    else {
+        sin.unget();
+        sin >> rstr;
+
+        out_id = rstr;
+        out_name = lstr;
+        out_type = rtype;
+    }
+
+    std::string rest;
+    sin >> rest;
+    if (!rest.empty()) {
+        out_id.clear();
+        out_name.clear();
+        return false;
+    }
+    return true;
+}
+
+bool Puml_utils::UC_dia::read_connection_creation(const std::string& line,
+                                                  std::string& out_beg_str,
+                                                  std::string& out_end_str,
+                                                  UC_edge::Type& out_type)
+{
+    std::istringstream sin{ line };
+    char start_str_ch{ 0 };
+    sin >> start_str_ch;
+
+    std::string lstr;
+    if (start_str_ch == ':') {
+        if (!std::getline(sin, lstr, ':').good()) {
+            return false;
+        }
+        lstr = ':' + lstr + ':';
+    }
+    else if (start_str_ch == '(') {
+        if (!std::getline(sin, lstr, ')').good()) {
+            return false;
+        }
+        lstr = '(' + lstr + ')';
+    }
+    else {
+        sin.unget();
+        sin >> lstr;
+    }
+
+    std::string arrw;
+    sin >> arrw;
+
+    UC_edge::Type type;
+    if (!arrow_to_type(arrw, type)) {
+        return false;
+    }
+    bool is_ltr{ true };
+    if (arrw[0] != '-' && arrw[0] != '.') {
+        is_ltr = false;
+    }
+
+    start_str_ch = 0;
+    sin >> start_str_ch;
+
+    std::string rstr;
+    if (start_str_ch == ':') {
+        if (!std::getline(sin, rstr, ':').good()) {
+            return false;
+        }
+        rstr = ':' + rstr + ':';
+    }
+    else if (start_str_ch == '(') {
+        if (!std::getline(sin, rstr, ')').good()) {
+            return false;
+        }
+        rstr = '(' + rstr + ')';
+    }
+    else {
+        sin.unget();
+        sin >> rstr;
+    }
+
+    if (!is_ltr) {
+        std::swap(lstr, rstr);
+    }
+
+    out_beg_str = lstr;
+    out_end_str = rstr;
+    out_type = type;
+
+    return true;
+}
+
+bool Puml_utils::UC_dia::arrow_to_type(const std::string& arrow,
+                                       UC_edge::Type& out_type)
+{
+    if (arrow.empty()) {
+        return false;
+    }
+
+
+
+
 
 }
 

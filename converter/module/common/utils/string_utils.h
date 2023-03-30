@@ -2,6 +2,7 @@
 #define STRING_UTILS_H
 
 #include <string>
+#include <vector>
 
 namespace lenv
 {
