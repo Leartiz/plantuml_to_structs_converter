@@ -9,7 +9,7 @@ namespace lenv
 class IGenerator
 {
 public:
-    virtual ~IGenerator();
+    virtual ~IGenerator() {};
     virtual std::string next() const = 0;
 };
 

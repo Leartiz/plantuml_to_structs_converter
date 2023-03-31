@@ -16,7 +16,7 @@ SOURCES += \
     $$PWD/common/errors/not_implemented.cpp \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
-    $$PWD/common/generator/ordergenerator.cpp \
+    $$PWD/common/generator/order_generator.cpp \
     $$PWD/common/utils/conv_utils.cpp \
     $$PWD/common/utils/puml_utils.cpp \
     $$PWD/common/utils/string_utils.cpp \
@@ -31,6 +31,7 @@ SOURCES += \
     $$PWD/structures/use_case/uc_edge.cpp \
     $$PWD/structures/use_case/uc_node.cpp \
     $$PWD/structures/use_case/use_case_dia.cpp \
+    $$PWD/translator/arrow.cpp \
     $$PWD/translator/complete_translator.cpp \
     $$PWD/translator/dia_direct_converter.cpp \
     $$PWD/translator/direct_translator.cpp \
@@ -57,7 +58,7 @@ HEADERS += \
     $$PWD/common/errors/tltr/tltr_error.h \
     $$PWD/common/errors/tltr/unknown_directive.h \
     $$PWD/common/generator/igenerator.h \
-    $$PWD/common/generator/ordergenerator.h \
+    $$PWD/common/generator/order_generator.h \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
@@ -82,6 +83,7 @@ HEADERS += \
     $$PWD/structures/use_case/uc_node.h \
     $$PWD/structures/use_case/uc_ptrs.h \
     $$PWD/structures/use_case/use_case_dia.h \
+    $$PWD/translator/arrow.h \
     $$PWD/translator/complete_translator.h \
     $$PWD/translator/dia_direct_converter.h \
     $$PWD/translator/direct_translator.h \
@@ -89,7 +91,7 @@ HEADERS += \
     $$PWD/translator/token_tag.h \
     $$PWD/translator/translator.h \
     $$PWD/translator/use_case/uc_dia_direct_converter.h \
-    $$PWD/translator/use_case/uc_token_tag.h
+    $$PWD/translator/use_case/uc_dia_token_tag.h
 
 INCLUDEPATH += \
     ../../dependency/ \

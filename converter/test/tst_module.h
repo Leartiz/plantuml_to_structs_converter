@@ -138,6 +138,10 @@ private slots:
 
     // Direct_translator
 private slots:
+
+
+    // Direct_translator
+private slots:
     void test_Direct_translator_convert_uc_dia_data();
     void test_Direct_translator_convert_uc_dia();
 };

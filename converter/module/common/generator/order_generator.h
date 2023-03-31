@@ -1,5 +1,5 @@
-#ifndef ORDERGENERATOR_H
-#define ORDERGENERATOR_H
+#ifndef ORDER_GENERATOR_H
+#define ORDER_GENERATOR_H
 
 #include <string>
 #include <cstdint>
@@ -9,7 +9,7 @@
 namespace lenv
 {
 
-class OrderGenerator final : public IGenerator
+class Order_generator final : public IGenerator
 {
     // IGenerator interface
 public:
@@ -21,4 +21,4 @@ private:
 
 }
 
-#endif // ORDERGENERATOR_H
+#endif // ORDER_GENERATOR_H

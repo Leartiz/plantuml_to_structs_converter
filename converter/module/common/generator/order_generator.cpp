@@ -1,9 +1,9 @@
-#include "ordergenerator.h"
+#include "order_generator.h"
 
 namespace lenv
 {
 
-std::string OrderGenerator::next() const
+std::string Order_generator::next() const
 {
     ++m_counter;
     return std::to_string(m_counter);

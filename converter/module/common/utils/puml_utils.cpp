@@ -42,7 +42,7 @@ const std::vector<std::string> Puml_utils::arrow_heads {
     "#", "x",
     "}", "{",
     "+", "^",
-    "()" "(", ")",
+    "()", "(", ")",
 };
 
 const std::vector<char> Puml_utils::arrow_body {

@@ -1,0 +1,34 @@
+/* Use Case dia. translator */
+
+/* символ любой (даже emoji и так далее) иногда кроме символа новой строки */
+<any_char> ::= [A-Z] | [a-z] | [0-9] | " "
+/* символ для идентификатора*/
+<any_letter> ::= [A-Z] | [a-z] | [0-9] 
+<whitespace> ::= " "*
+
+/* стрелка - токен целиком; отдельная сущность, чтобы разбитьна части */
+<arrow_head> ::= E
+<arrow_left_head> ::= "<" | "<|" | <arrow_head>
+<arrow_right_head> ::= ">" | "|>" | <arrow_head>
+<arrow_body> ::= "." | "-"
+<arrow_direction> ::= ("left" | "right" | "up" | "down") | ("l" | "r" | "u" | "d")
+<arrow> ::= <arrow_left_head>? <arrow_body>+ <arrow_direction>? <arrow_body>+ <arrow_right_head>?
+
+/* токены */
+<language_letter> ::= [A-Z] | [a-z]
+<any_keyword> ::= <language_letter>+
+<any_directive> ::= "@" <language_letter>+
+<any_id> ::= <any_letter>+
+<string> ::= "\"" <any_char>+ "\""
+
+<startuml_name> ::= <any_char>*
+<directive> ::= "@startuml" (<whitespace> <startuml_name>)? | "@enduml"
+<keyword> ::= "usecase" | "actor" | "as" | "node" | "left" | "of"
+
+/* инструкции объявления/определения */
+<actor_fast_def> ::= ":" <any_char>+ ":"
+<use_case_fast_def> ::= "(" <any_char>+ ")"
+
+<node_short_def> ::= (<actor_fast_def> | <use_case_fast_def> | <any_id> | <string>) (<whitespace> "as" <whitespace> (<actor_fast_def> | <use_case_fast_def> | <any_id> | <string>))?
+<actor_whole_def> ::= "actor" <whitespace> <node_short_def>
+<use_case_whole_def> ::= "usecase" <whitespace> <node_short_def>
