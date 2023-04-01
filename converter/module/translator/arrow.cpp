@@ -20,17 +20,17 @@ std::string Arrow::raw() const
     return m_lhead + m_body + m_rhead;
 }
 
-std::string Arrow::left_head() const
+const std::string& Arrow::left_head() const
 {
     return m_lhead;
 }
 
-std::string Arrow::rght_head() const
+const std::string& Arrow::rght_head() const
 {
     return m_rhead;
 }
 
-std::string Arrow::body() const
+const std::string& Arrow::body() const
 {
     return m_body;
 }

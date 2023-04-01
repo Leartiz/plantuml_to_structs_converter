@@ -30,7 +30,7 @@ Use_Case_dia_sp UC_dia_direct_converter::conv()
 
     auto cur_line = std::string{};
     while (!m_completed && std::getline(m_in_stream, cur_line, '\n')) {
-        String_utils::trim_space_by_ref(cur_line);
+        str_utils::trim_space_by_ref(cur_line);
         m_csin.str(cur_line);
         m_csin.clear(); // to good.
 
@@ -63,22 +63,22 @@ void UC_dia_direct_converter::conv_word()
     std::string word;
     m_csin >> word; // new position!
 
-    if (String_utils::eq_ref(word, Puml_utils::kw_usecase, false)) {
+    if (str_utils::eq_ref(word, wsd_utils::kw_usecase, false)) {
         read_node_creation(UC_node::USE_CASE);
     }
-    else if (String_utils::eq_ref(word, Puml_utils::kw_actor, false)) {
+    else if (str_utils::eq_ref(word, wsd_utils::kw_actor, false)) {
         read_node_creation(UC_node::ACTOR);
     }
     /* extra */
-    else if (String_utils::eq(word, Puml_utils::kw_skinparam, false)) {
+    else if (str_utils::eq(word, wsd_utils::kw_skinparam, false)) {
         read_skinparam();
     }
-    else if (String_utils::eq(word, Puml_utils::kw_note, false)) {
+    else if (str_utils::eq(word, wsd_utils::kw_note, false)) {
         read_note();
     }
-    else if (String_utils::eq(word, Puml_utils::kw_left, false)) {}
-    else if (String_utils::eq(word, Puml_utils::kw_top, false)) {}
-    else if (Puml_utils::is_keyword(word)) {
+    else if (str_utils::eq(word, wsd_utils::kw_left, false)) {}
+    else if (str_utils::eq(word, wsd_utils::kw_top, false)) {}
+    else if (wsd_utils::is_keyword(word)) {
         throw int{  1 };
         // TODO: все остальное запрет!
     }
@@ -108,8 +108,8 @@ void UC_dia_direct_converter::read_directive()
 {
     std::string dia_id; /* eq Use_Case_dia::id; */
     const std::string cur_line{ m_csin.str() };
-    if (String_utils::start_with(cur_line, Puml_utils::startuml)) {
-        if (!Puml_utils::read_startuml_directive(cur_line, dia_id)) {
+    if (str_utils::start_with(cur_line, wsd_utils::startuml)) {
+        if (!wsd_utils::read_startuml_directive(cur_line, dia_id)) {
             throw int{}; // TODO:
         }
         if (!dia_id.empty() && dia_id != Use_Case_dia::id) {
@@ -118,8 +118,8 @@ void UC_dia_direct_converter::read_directive()
 
         m_uc_dia->reset_all(); // multiple @startuml allowed!
     }
-    else if (String_utils::start_with(cur_line, Puml_utils::enduml)) {
-        if (!Puml_utils::read_enduml_directive(cur_line)) {
+    else if (str_utils::start_with(cur_line, wsd_utils::enduml)) {
+        if (!wsd_utils::read_enduml_directive(cur_line)) {
             throw int{};
         }
         m_completed = true;
@@ -164,10 +164,10 @@ void UC_dia_direct_converter::read_node_creation(UC_node::Type primary_type)
     UC_node::Type type = primary_type;
 
     if (primary_type == UC_node::Type::ACTOR) {
-        Puml_utils::UC_dia::read_actor_creation(m_csin.str(), name, id, type);
+        wsd_utils::UC_dia::read_actor_creation(m_csin.str(), name, id, type);
     }
     else {
-        Puml_utils::UC_dia::read_use_case_creation(m_csin.str(), name, id, type);
+        wsd_utils::UC_dia::read_use_case_creation(m_csin.str(), name, id, type);
     }
 
     UC_node::Builder node_b{ id };

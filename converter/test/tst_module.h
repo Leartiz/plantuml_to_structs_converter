@@ -136,9 +136,28 @@ private slots:
     void test_Puml_utils_UC_dia_arrow_to_type_data();
     void test_Puml_utils_UC_dia_arrow_to_type();
 
-    // Direct_translator
+    // Lex_analyzer
 private slots:
+    void test_Lex_analyzer_tokenize_okk();
+    void test_Lex_analyzer_tokenize_okk1();
+    void test_Lex_analyzer_tokenize_okk2();
+    void test_Lex_analyzer_tokenize_okk3();
+    void test_Lex_analyzer_tokenize_okk4();
+    void test_Lex_analyzer_tokenize_okk5();
+    void test_Lex_analyzer_tokenize_okk6();
+    void test_Lex_analyzer_tokenize_okk7();
+    void test_Lex_analyzer_tokenize_okk8();
+    void test_Lex_analyzer_tokenize_okk9();
+    void test_Lex_analyzer_tokenize_okk10();
+    void test_Lex_analyzer_tokenize_okk11();
+    void test_Lex_analyzer_tokenize_okk12();
+    void test_Lex_analyzer_tokenize_okk13();
+    void test_Lex_analyzer_tokenize_okk14();
 
+    void test_Lex_analyzer_tokenize_err();
+    void test_Lex_analyzer_tokenize_err1();
+    void test_Lex_analyzer_tokenize_err2();
+    void test_Lex_analyzer_tokenize_err3();
 
     // Direct_translator
 private slots:
@@ -147,3 +166,4 @@ private slots:
 };
 
 #endif // TST_MODULE_H
+

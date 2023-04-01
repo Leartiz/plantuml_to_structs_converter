@@ -7,12 +7,20 @@
 namespace lenv
 {
 
-bool String_utils::is_keyword_letter(const char ch)
+bool str_utils::is_eng_letter(const char ch)
 {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
-bool String_utils::eq(char lhs, char rhs, bool sensitive)
+bool str_utils::is_brs_letter(const char ch)
+{
+    return
+            ch == '{' || ch == '}' ||
+            ch == '[' || ch == ']' ||
+            ch == '(' || ch == ')';
+}
+
+bool str_utils::eq(char lhs, char rhs, bool sensitive)
 {
     /*
        The behavior of std::tolower is undefined
@@ -27,12 +35,12 @@ bool String_utils::eq(char lhs, char rhs, bool sensitive)
     return lhs == rhs;
 }
 
-bool String_utils::ne(char lhs, char rhs, bool sensitive)
+bool str_utils::ne(char lhs, char rhs, bool sensitive)
 {
     return !eq(lhs, rhs, sensitive);
 }
 
-void String_utils::to_upper_by_ref(std::string& str)
+void str_utils::to_upper_by_ref(std::string& str)
 {
     // TODO: study std::locale!
 
@@ -42,7 +50,7 @@ void String_utils::to_upper_by_ref(std::string& str)
     });
 }
 
-void String_utils::to_lower_by_ref(std::string& str)
+void str_utils::to_lower_by_ref(std::string& str)
 {
     std::transform(str.cbegin(), str.cend(), str.begin(),
                    [](unsigned char ch) -> unsigned char {
@@ -50,7 +58,7 @@ void String_utils::to_lower_by_ref(std::string& str)
     });
 }
 
-std::string String_utils::to_upper(const std::string& str)
+std::string str_utils::to_upper(const std::string& str)
 {
     /* can it mess up emojis and characters larger than 1 byte? */
 
@@ -59,7 +67,7 @@ std::string String_utils::to_upper(const std::string& str)
     return result;
 }
 
-std::string String_utils::to_lower(const std::string& str)
+std::string str_utils::to_lower(const std::string& str)
 {
     std::string result{ str };
     to_lower_by_ref(result);
@@ -68,7 +76,7 @@ std::string String_utils::to_lower(const std::string& str)
 
 // -----------------------------------------------------------------------
 
-bool String_utils::start_with(std::string str, std::string start, bool sensitive)
+bool str_utils::start_with(std::string str, std::string start, bool sensitive)
 {
     if (!sensitive) {
         to_lower_by_ref(str);
@@ -78,7 +86,7 @@ bool String_utils::start_with(std::string str, std::string start, bool sensitive
     return !str.find(start);
 }
 
-bool String_utils::stop_with(std::string str, std::string stop, bool sensitive)
+bool str_utils::stop_with(std::string str, std::string stop, bool sensitive)
 {
     if (!sensitive) {
         to_lower_by_ref(str);
@@ -90,7 +98,7 @@ bool String_utils::stop_with(std::string str, std::string stop, bool sensitive)
 
 // -----------------------------------------------------------------------
 
-bool String_utils::eq(std::string lhs, std::string rhs, bool sensitive)
+bool str_utils::eq(std::string lhs, std::string rhs, bool sensitive)
 {
     if (!sensitive) {
         to_lower_by_ref(lhs);
@@ -100,12 +108,12 @@ bool String_utils::eq(std::string lhs, std::string rhs, bool sensitive)
     return lhs == rhs;
 }
 
-bool String_utils::ne(std::string lhs, std::string rhs, bool sensitive)
+bool str_utils::ne(std::string lhs, std::string rhs, bool sensitive)
 {
     return !eq(lhs, rhs, sensitive);
 }
 
-bool String_utils::eq_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
+bool str_utils::eq_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
 {
     if (lhs.size() != rhs.size()) return false;
     for (size_t i = 0; i < lhs.size(); ++i) {
@@ -116,14 +124,14 @@ bool String_utils::eq_ref(const std::string& lhs, const std::string& rhs, bool s
     return true;
 }
 
-bool String_utils::ne_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
+bool str_utils::ne_ref(const std::string& lhs, const std::string& rhs, bool sensitive)
 {
     return !eq_ref(lhs, rhs, sensitive);
 }
 
 // -----------------------------------------------------------------------
 
-void String_utils::trim_left_space_by_ref(std::string& str)
+void str_utils::trim_left_space_by_ref(std::string& str)
 {
     str.erase(str.begin(), std::find_if(str.begin(), str.end(),
                                         [](unsigned char ch) -> bool{
@@ -131,7 +139,7 @@ void String_utils::trim_left_space_by_ref(std::string& str)
     }));
 }
 
-void String_utils::trim_rght_space_by_ref(std::string& str)
+void str_utils::trim_rght_space_by_ref(std::string& str)
 {
     str.erase(std::find_if(str.rbegin(), str.rend(),
                            [&](unsigned char ch) {
@@ -139,25 +147,42 @@ void String_utils::trim_rght_space_by_ref(std::string& str)
     }).base(), str.end());
 }
 
-void String_utils::trim_space_by_ref(std::string& str)
+void str_utils::trim_space_by_ref(std::string& str)
 {
     trim_left_space_by_ref(str);
     trim_rght_space_by_ref(str);
 }
 
-std::string String_utils::trim_left_space(std::string str)
+void str_utils::trim_left_space_by_ref(std::string& str, std::string& wsps)
+{
+
+}
+
+void str_utils::trim_rght_space_by_ref(std::string& str,  std::string& wsps)
+{
+    wsps.clear();
+    auto nosp_it = std::find_if(str.rbegin(), str.rend(),
+                                [&](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base();
+
+    std::copy(nosp_it, str.end(), std::back_inserter(wsps));
+    str.erase(nosp_it, str.end());
+}
+
+std::string str_utils::trim_left_space(std::string str)
 {
     trim_left_space_by_ref(str);
     return str;
 }
 
-std::string String_utils::trim_rght_space(std::string str)
+std::string str_utils::trim_rght_space(std::string str)
 {
     trim_rght_space_by_ref(str);
     return str;
 }
 
-std::string String_utils::trim_space(std::string str)
+std::string str_utils::trim_space(std::string str)
 {
     trim_space_by_ref(str);
     return str;
@@ -165,7 +190,7 @@ std::string String_utils::trim_space(std::string str)
 
 // -----------------------------------------------------------------------
 
-void String_utils::trim_left_by_ref(std::string& str, const std::string& chs)
+void str_utils::trim_left_by_ref(std::string& str, const std::string& chs)
 {
     str.erase(str.begin(), std::find_if(str.begin(), str.end(),
                                         [&](unsigned char ch) {
@@ -173,7 +198,7 @@ void String_utils::trim_left_by_ref(std::string& str, const std::string& chs)
     }));
 }
 
-void String_utils::trim_rght_by_ref(std::string& str, const std::string& chs)
+void str_utils::trim_rght_by_ref(std::string& str, const std::string& chs)
 {
     str.erase(std::find_if(str.rbegin(), str.rend(),
                            [&](unsigned char ch) {
@@ -181,25 +206,25 @@ void String_utils::trim_rght_by_ref(std::string& str, const std::string& chs)
     }).base(), str.end());
 }
 
-void String_utils::trim_by_ref(std::string& str, const std::string& chs)
+void str_utils::trim_by_ref(std::string& str, const std::string& chs)
 {
     trim_left_by_ref(str, chs);
     trim_rght_by_ref(str, chs);
 }
 
-std::string String_utils::trim_left(std::string str, const std::string& chs)
+std::string str_utils::trim_left(std::string str, const std::string& chs)
 {
     trim_left_by_ref(str, chs);
     return str;
 }
 
-std::string String_utils::trim_rght(std::string str, const std::string& chs)
+std::string str_utils::trim_rght(std::string str, const std::string& chs)
 {
     trim_rght_by_ref(str, chs);
     return str;
 }
 
-std::string String_utils::trim(std::string str, const std::string& chs)
+std::string str_utils::trim(std::string str, const std::string& chs)
 {
     trim_by_ref(str, chs);
     return str;
@@ -207,13 +232,13 @@ std::string String_utils::trim(std::string str, const std::string& chs)
 
 // -----------------------------------------------------------------------
 
-std::string String_utils::un_quote(std::string str)
+std::string str_utils::un_quote(std::string str)
 {
     trim_by_ref(str, "\"");
     return str;
 }
 
-std::string String_utils::wrap_quote(std::string str)
+std::string str_utils::wrap_quote(std::string str)
 {
     return "\"" + str + "\"";
 }

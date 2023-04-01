@@ -7,35 +7,38 @@
 namespace lenv
 {
 
-const std::string Puml_utils::startuml{ "@startuml" };
-const std::string Puml_utils::enduml{ "@enduml" };
+const std::string wsd_utils::startuml{ "@startuml" };
+const std::string wsd_utils::enduml{ "@enduml" };
 
-const std::string Puml_utils::start_mcomment{ "\'" };
-const std::string Puml_utils::start_ocomment{ "'" };
+const std::string wsd_utils::kw_startuml{ "startuml" };
+const std::string wsd_utils::kw_enduml{ "enduml" };
 
-const std::string Puml_utils::kw_actor{ "actor" };
-const std::string Puml_utils::kw_usecase{ "usecase" };
-const std::string Puml_utils::kw_as{ "as" };
+const std::string wsd_utils::start_mcomment{ "\'" };
+const std::string wsd_utils::start_ocomment{ "'" };
 
-const std::string Puml_utils::kw_package{ "package" };
-const std::string Puml_utils::kw_rectangle{ "rectangle" };
+const std::string wsd_utils::kw_actor{ "actor" };
+const std::string wsd_utils::kw_usecase{ "usecase" };
+const std::string wsd_utils::kw_as{ "as" };
 
-const std::string Puml_utils::kw_left{ "left" };
-const std::string Puml_utils::kw_right{ "right" };
-const std::string Puml_utils::kw_top{ "top" };
-const std::string Puml_utils::kw_bottom{ "bottom" };
+const std::string wsd_utils::kw_package{ "package" };
+const std::string wsd_utils::kw_rectangle{ "rectangle" };
 
-const std::string Puml_utils::kw_to{ "to" };
-const std::string Puml_utils::kw_direction{ "direction" };
+const std::string wsd_utils::kw_left{ "left" };
+const std::string wsd_utils::kw_right{ "right" };
+const std::string wsd_utils::kw_top{ "top" };
+const std::string wsd_utils::kw_bottom{ "bottom" };
 
-const std::string Puml_utils::kw_skinparam{ "skinparam" };
-const std::string Puml_utils::kw_note{ "note" };
-const std::string Puml_utils::kw_of{ "of" };
-const std::string Puml_utils::kw_end{ "end" };
+const std::string wsd_utils::kw_to{ "to" };
+const std::string wsd_utils::kw_direction{ "direction" };
+
+const std::string wsd_utils::kw_skinparam{ "skinparam" };
+const std::string wsd_utils::kw_note{ "note" };
+const std::string wsd_utils::kw_of{ "of" };
+const std::string wsd_utils::kw_end{ "end" };
 
 // -----------------------------------------------------------------------
 
-const std::vector<std::string> Puml_utils::arrow_heads {
+const std::vector<std::string> wsd_utils::arrow_heads {
     "<|", "|>",
     "*", "o",
     "<", ">",
@@ -45,39 +48,39 @@ const std::vector<std::string> Puml_utils::arrow_heads {
     "()", "(", ")",
 };
 
-const std::vector<char> Puml_utils::arrow_body {
+const std::vector<char> wsd_utils::arrow_body {
     '.', '-',
 };
 
 // -----------------------------------------------------------------------
 
-bool Puml_utils::is_keyword(const std::string& str)
+bool wsd_utils::is_keyword(const std::string& str)
 {
     return false;
 }
 
-bool Puml_utils::read_startuml_directive(const std::string& line,
+bool wsd_utils::read_startuml_directive(const std::string& line,
                                          std::string& out_name)
 {
     std::istringstream sin{ line };
     std::string directive; sin >> directive;
-    if (!String_utils::eq_ref(directive, startuml, false))
+    if (!str_utils::eq_ref(directive, startuml, false))
         return false;
 
     std::getline(sin, out_name, '\n');
-    String_utils::trim_space_by_ref(out_name);
+    str_utils::trim_space_by_ref(out_name);
     return true;
 }
 
-bool Puml_utils::read_enduml_directive(const std::string& line)
+bool wsd_utils::read_enduml_directive(const std::string& line)
 {
-    std::string directive{ String_utils::trim_space(line) };
-    return String_utils::eq_ref(directive, enduml, false);
+    std::string directive{ str_utils::trim_space(line) };
+    return str_utils::eq_ref(directive, enduml, false);
 }
 
 // -----------------------------------------------------------------------
 
-bool Puml_utils::UC_dia::read_use_case_creation(const std::string& line,
+bool wsd_utils::UC_dia::read_use_case_creation(const std::string& line,
                                                 std::string& out_name,
                                                 std::string& out_id,
                                                 UC_node::Type& out_type)
@@ -86,7 +89,7 @@ bool Puml_utils::UC_dia::read_use_case_creation(const std::string& line,
     std::string keyword;
     sin >> keyword;
 
-    if (!String_utils::eq_ref(keyword, kw_usecase, false)) {
+    if (!str_utils::eq_ref(keyword, kw_usecase, false)) {
         return false;
     }
 
@@ -126,7 +129,7 @@ bool Puml_utils::UC_dia::read_use_case_creation(const std::string& line,
         return true;
     }
 
-    if (!String_utils::eq_ref(keyword, kw_as, false)) {
+    if (!str_utils::eq_ref(keyword, kw_as, false)) {
         return false;
     }
 
@@ -186,7 +189,7 @@ bool Puml_utils::UC_dia::read_use_case_creation(const std::string& line,
     return true;
 }
 
-bool Puml_utils::UC_dia::read_actor_creation(const std::string& line,
+bool wsd_utils::UC_dia::read_actor_creation(const std::string& line,
                                              std::string& out_name,
                                              std::string& out_id,
                                              UC_node::Type& out_type)
@@ -195,7 +198,7 @@ bool Puml_utils::UC_dia::read_actor_creation(const std::string& line,
     std::string keyword;
     sin >> keyword;
 
-    if (!String_utils::eq_ref(keyword, kw_actor, false)) {
+    if (!str_utils::eq_ref(keyword, kw_actor, false)) {
         return false;
     }
 
@@ -235,7 +238,7 @@ bool Puml_utils::UC_dia::read_actor_creation(const std::string& line,
         return true;
     }
 
-    if (!String_utils::eq_ref(keyword, kw_as, false)) {
+    if (!str_utils::eq_ref(keyword, kw_as, false)) {
         return false;
     }
 
@@ -295,7 +298,7 @@ bool Puml_utils::UC_dia::read_actor_creation(const std::string& line,
     return true;
 }
 
-bool Puml_utils::UC_dia::read_connection_creation(const std::string& line,
+bool wsd_utils::UC_dia::read_connection_creation(const std::string& line,
                                                   std::string& out_beg_str,
                                                   std::string& out_end_str,
                                                   UC_edge::Type& out_type)
@@ -366,7 +369,7 @@ bool Puml_utils::UC_dia::read_connection_creation(const std::string& line,
     return true;
 }
 
-bool Puml_utils::UC_dia::arrow_to_type(const std::string& arrow,
+bool wsd_utils::UC_dia::arrow_to_type(const std::string& arrow,
                                        UC_edge::Type& out_type)
 {
     if (arrow.empty()) {

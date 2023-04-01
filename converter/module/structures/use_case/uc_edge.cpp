@@ -32,16 +32,16 @@ std::string UC_edge::type_to_str(const UC_edge::Type type)
 
 UC_edge::Type UC_edge::str_to_type(const std::string& str)
 {
-    if (String_utils::eq_ref(str, type_to_str(ASSOCIATION), false)) {
+    if (str_utils::eq_ref(str, type_to_str(ASSOCIATION), false)) {
         return ASSOCIATION;
     }
-    if (String_utils::eq_ref(str, type_to_str(GENERALIZATION), false)) {
+    if (str_utils::eq_ref(str, type_to_str(GENERALIZATION), false)) {
         return GENERALIZATION;
     }
-    if (String_utils::eq_ref(str, type_to_str(INCLUDE), false)) {
+    if (str_utils::eq_ref(str, type_to_str(INCLUDE), false)) {
         return INCLUDE;
     }
-    if (String_utils::eq_ref(str, type_to_str(EXTEND), false)) {
+    if (str_utils::eq_ref(str, type_to_str(EXTEND), false)) {
         return EXTEND;
     }
 

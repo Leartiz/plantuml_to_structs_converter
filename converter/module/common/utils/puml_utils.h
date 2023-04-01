@@ -10,11 +10,14 @@ namespace lenv
 {
 
 /* correctly parse by tokens or just return a DTO! */
-class Puml_utils final
+class wsd_utils final
 {
 public:
     static const std::string startuml;
     static const std::string enduml;
+
+    static const std::string kw_startuml;
+    static const std::string kw_enduml;
 
 public:
     static const std::string start_mcomment;

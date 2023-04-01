@@ -13,10 +13,13 @@ namespace lenv
 
     Can be changed for references.
 */
-class String_utils final
+class str_utils final
 {
 public:
-    static bool is_keyword_letter(const char ch);
+    static bool is_eng_letter(const char ch);
+    static bool is_brs_letter(const char ch);
+
+public:
     static bool eq(char lhs, char rhs, bool sensitive = true);
     static bool ne(char lhs, char rhs, bool sensitive = true);
 
@@ -40,6 +43,9 @@ public:
     static void trim_left_space_by_ref(std::string& str);
     static void trim_rght_space_by_ref(std::string& str);
     static void trim_space_by_ref(std::string& str);
+
+    static void trim_left_space_by_ref(std::string& str, std::string& wsps);
+    static void trim_rght_space_by_ref(std::string& str,  std::string& wsps);
 
     static std::string trim_left_space(std::string str);
     static std::string trim_rght_space(std::string str);

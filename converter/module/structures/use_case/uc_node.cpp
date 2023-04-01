@@ -33,10 +33,10 @@ std::string UC_node::type_to_str(const UC_node::Type type)
 
 UC_node::Type UC_node::str_to_type(const std::string& str)
 {
-    if (String_utils::eq_ref(str, type_to_str(UC_node::ACTOR), false)) {
+    if (str_utils::eq_ref(str, type_to_str(UC_node::ACTOR), false)) {
         return UC_node::ACTOR;
     }
-    if (String_utils::eq_ref(str, type_to_str(UC_node::USE_CASE), false)) {
+    if (str_utils::eq_ref(str, type_to_str(UC_node::USE_CASE), false)) {
         return UC_node::USE_CASE;
     }
 
