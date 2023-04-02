@@ -2,6 +2,7 @@
 #define LEX_ANALYZER_H
 
 #include <deque>
+#include <queue>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -13,6 +14,7 @@ namespace lenv
 
 std::vector<Token> tokenize(std::istream& in);
 std::vector<Token> tokenize(const std::string& str);
+void rm_whitespaces(std::vector<Token>& tokens);
 
 class Lex_analyzer final
 {
@@ -25,7 +27,6 @@ public:
 
 public:
     bool ready() const;
-    void unget(Token token);
     bool scan_some();
 
 public:
@@ -36,21 +37,26 @@ public:
 
 private:
     uint8_t take_cur_char();
-    uint8_t take_low_char();
     uint8_t peek_cur_char();
     uint8_t peek_low_char();
     void discard_any_char();
-    void unget_any_char();
     bool can_any_char();
 
 private:
-    void try_scan_whitespace();
+    void unget_char(uint8_t one);
+    void unget_string(std::string str);
+
+private:
+    bool try_scan_whitespace();
     void scan_any_directive();
     void scan_directive_value();
 
+    void scan_some_after_colon();
     void scan_use_case_fast_apply();
     void scan_actor_fast_apply();
-    void scan_string();
+    void scan_one_line_note();
+    void scan_bracket();
+    void scan_one_string();
     void scan_arrow();
 
     void scan_kw_or_id();
@@ -65,10 +71,19 @@ private:
 
 private:
     bool is_letter(const uint8_t uch) const;
+    bool is_bracket(const uint8_t uch) const;
     bool is_separator(const uint8_t uch) const;
+    bool is_arrow_head(const uint8_t uch) const;
+    bool is_arrow_lhead(const uint8_t uch) const;
+    bool is_arrow_rhead(const uint8_t uch) const;
+    bool is_arrow_body(const uint8_t uch) const;
     bool is_part_arrow(const uint8_t uch) const;
     bool is_whitespace(const uint8_t uch) const;
     bool is_line_end(const uint8_t uch) const;
+
+    /* context! */
+private:
+    bool has_arrow_between();
 
 private:
     void push(Token token);
@@ -79,6 +94,7 @@ private:
     bool m_is_pushed{ false };
 
     std::istream& m_in_stream;
+    std::queue<char> m_backed;
     size_t m_line_number{ 1 };
 };
 

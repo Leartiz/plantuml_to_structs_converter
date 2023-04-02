@@ -1,8 +1,8 @@
 #include <sstream>
 #include <algorithm>
 
-#include "puml_utils.h"
-#include "string_utils.h"
+#include "wsd_utils.h"
+#include "str_utils.h"
 
 namespace lenv
 {
@@ -26,6 +26,7 @@ const std::string wsd_utils::kw_rectangle{ "rectangle" };
 const std::string wsd_utils::kw_left{ "left" };
 const std::string wsd_utils::kw_right{ "right" };
 const std::string wsd_utils::kw_top{ "top" };
+const std::string wsd_utils::kw_up{ "up" };
 const std::string wsd_utils::kw_bottom{ "bottom" };
 
 const std::string wsd_utils::kw_to{ "to" };

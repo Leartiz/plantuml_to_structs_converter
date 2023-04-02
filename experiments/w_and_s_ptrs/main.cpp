@@ -1,5 +1,6 @@
-#include <memory>
 #include <iostream>
+
+#include <memory>
 #include <stdexcept>
 
 int main()
@@ -11,6 +12,8 @@ int main()
 
     try {
         *int_wp.lock() = 0; // don't catch?
+
+        // -> crashed!
     }
     catch (...) {
         std::cout << "err!" << std::endl;

@@ -11,6 +11,20 @@ bool Token::is_directive(const Tag tag)
             tag == DIRECTIVE_ENDUML;
 }
 
+bool Token::is_whitespace(const Tag tag)
+{
+    return tag == WHITESPACE;
+}
+
+bool Token::is_node(const Tag tag)
+{
+    return
+            tag == IDENTIFIER ||
+            tag == ACTOR_FAST_USE ||
+            tag == USECASE_FAST_USE ||
+            tag == ONE_STRING;
+}
+
 // -----------------------------------------------------------------------
 
 Token::Token(std::string val, Token::Tag tag)

@@ -1,5 +1,5 @@
-#ifndef STRING_UTILS_H
-#define STRING_UTILS_H
+#ifndef STR_UTILS_H
+#define STR_UTILS_H
 
 #include <string>
 #include <vector>
@@ -67,5 +67,5 @@ public:
 
 }
 
-#endif // STRING_UTILS_H
+#endif // STR_UTILS_H
 

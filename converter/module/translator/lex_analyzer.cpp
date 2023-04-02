@@ -4,8 +4,8 @@
 #include <cctype>
 
 #include "lex_analyzer.h"
-#include "utils/puml_utils.h"
-#include "utils/string_utils.h"
+#include "utils/wsd_utils.h"
+#include "utils/str_utils.h"
 
 #include "errors/tltr/lexer_error.h"
 #include "errors/err_text_creator.h"
@@ -29,6 +29,14 @@ std::vector<Token> tokenize(const std::string& str)
 {
     std::istringstream sin{ str };
     return tokenize(sin);
+}
+
+void rm_whitespaces(std::vector<Token>& tokens)
+{
+    // Клас для стрелки
+    // Удалить прямой транлятор!
+    // Перед этим сделать коммиты!!!
+    // Обновить нотацию БКнаура!
 }
 
 // -----------------------------------------------------------------------
@@ -60,17 +68,12 @@ bool Lex_analyzer::ready() const
     return m_in_stream.good();
 }
 
-void Lex_analyzer::unget(Token token)
-{
-    m_tokns.push_front(std::move(token));
-}
-
 Token Lex_analyzer::actual()
 {
     if (!empty() || !scan_some()) {
         return m_tokns.front();
     }
-    throw int{};
+    throw int{}; // TODO
 }
 
 Token Lex_analyzer::take()
@@ -91,27 +94,41 @@ bool Lex_analyzer::scan_some()
         const auto uch{ peek_cur_char() };
         if (is_line_end(uch)) break;
 
+        /* which token is context dependent! */
         if (!empty()) {
             const auto one{ actual() };
             if (Token::is_directive(one.tag())) {
                 scan_directive_value();
                 continue;
             }
+
+            if (has_arrow_between()) {
+                if (uch == ':') {
+                    scan_one_line_note();
+                    continue;
+                }
+            }
         }
 
         if (uch == '@') {
             scan_any_directive();
         }
-        else if (uch == ':') {
-            scan_actor_fast_apply();
+        else if (is_bracket(uch)) {
+            scan_bracket();
         }
         else if (uch == '(') {
             scan_use_case_fast_apply();
         }
+        else if (uch == ':') {
+            scan_actor_fast_apply();
+        }
+        else if (uch == '\"') {
+            scan_one_string();
+        }
         else if (is_letter(uch)) {
             scan_kw_or_id();
         }
-        else if (is_part_arrow(uch)) {
+        else if (is_part_arrow(uch) || uch == 'o') {
             scan_arrow();
         }
         else if (is_whitespace(uch)) {
@@ -136,19 +153,28 @@ bool Lex_analyzer::scan_some()
 
 uint8_t Lex_analyzer::take_cur_char()
 {
-    /* can lead to: eof == 1 */
-    const auto ch{ m_in_stream.get() };
+    char ch{ 0 };
+    if (!m_backed.empty()) {
+        ch = m_backed.front();
+        m_backed.pop();
+    }
+    else {
+        /* can lead to: eof == 1; cannot be rolled back */
+        ch = m_in_stream.get();
+    }
     return static_cast<uint8_t>(ch);
-}
-
-uint8_t Lex_analyzer::take_low_char()
-{
-    return std::tolower(take_cur_char());
 }
 
 uint8_t Lex_analyzer::peek_cur_char()
 {
-    const auto ch{ m_in_stream.peek() };
+    char ch{ 0 };
+    if (!m_backed.empty()) {
+        ch = m_backed.front();
+    }
+    else {
+        /* can lead to: eof == 1 */
+        ch = m_in_stream.peek();
+    }
     return static_cast<uint8_t>(ch);
 }
 
@@ -162,11 +188,6 @@ void Lex_analyzer::discard_any_char()
     static_cast<void>(take_cur_char());
 }
 
-void Lex_analyzer::unget_any_char()
-{
-    m_in_stream.unget();
-}
-
 bool Lex_analyzer::can_any_char()
 {
     /* also set to: eof == 1 */
@@ -176,12 +197,26 @@ bool Lex_analyzer::can_any_char()
 
 // -----------------------------------------------------------------------
 
-void Lex_analyzer::try_scan_whitespace()
+void Lex_analyzer::unget_char(uint8_t one)
+{
+    m_backed.push(one); /* implicit conv */
+}
+
+void Lex_analyzer::unget_string(std::string str)
+{
+    // TODO
+}
+
+// -----------------------------------------------------------------------
+
+bool Lex_analyzer::try_scan_whitespace()
 {
     std::string actual;
     read_whitespace(actual);
-    if (actual.empty()) return;
+    if (actual.empty()) return false;
+
     push(Token{ actual, Token::WHITESPACE });
+    return true;
 }
 
 void Lex_analyzer::scan_any_directive()
@@ -229,6 +264,31 @@ void Lex_analyzer::scan_directive_value()
     }
 }
 
+void Lex_analyzer::scan_some_after_colon()
+{
+    discard_any_char(); // :
+    auto actual = std::string{};
+    if (read_to_line_end_or_to(':', actual)) {
+        push(Token{ actual, Token::ACTOR_FAST_USE });
+        discard_any_char(); // ':'
+        return;
+    }
+
+    /* or one line note! */
+
+    push(Token{ ':', Token::COLON });
+    str_utils::trim_space_by_ref(actual);
+    if (!actual.empty()) {
+        push(Token{ actual, Token::ONE_LINE_NOTE });
+        return;
+    };
+
+    throw Lexer_error{
+        Err_text_creator::dt("Lex_analyzer", "scan_some_after_colon",
+                             "scan failed")
+    };
+}
+
 void Lex_analyzer::scan_use_case_fast_apply()
 {
     discard_any_char(); // '('
@@ -261,6 +321,70 @@ void Lex_analyzer::scan_actor_fast_apply()
     };
 }
 
+void Lex_analyzer::scan_one_line_note()
+{
+    discard_any_char(); // ':'
+    push(Token{ ':', Token::COLON });
+
+    auto actual = std::string{};
+    static_cast<void>(read_to('\n', actual));
+    str_utils::trim_space_by_ref(actual);
+
+    if (!actual.empty()) {
+        push(Token{ actual, Token::ONE_LINE_NOTE });
+        return;
+    }
+
+    throw Lexer_error{
+        Err_text_creator::dt("Lex_analyzer", "scan_one_line_note",
+                             "scan failed")
+    };
+}
+
+void Lex_analyzer::scan_bracket()
+{
+    const auto brt{ take_cur_char() };
+    switch (brt) {
+    case '{':
+        push(Token{ '{', Token::OPN_CURLY_BR });
+        break;
+    case '}':
+        push(Token{ '}', Token::CLS_CURLY_BR });
+        break;
+    case '[':
+        push(Token{ '[', Token::OPN_SQ_BR });
+        break;
+    case ']':
+        push(Token{ ']', Token::CLS_SQ_BR });
+        break;
+
+    default:
+        throw Lexer_error{
+            Err_text_creator::dt("Lex_analyzer", "scan_bracket",
+                                 "scan failed")
+        };
+    }
+}
+
+void Lex_analyzer::scan_one_string()
+{
+    discard_any_char(); // '\"'
+    auto actual = std::string{};
+    if (read_to('\"', actual)) {
+        discard_any_char(); // '\"'
+
+        if (!actual.empty()) {
+            push(Token{ actual, Token::ONE_STRING });
+            return;
+        }
+    }
+
+    throw Lexer_error{
+        Err_text_creator::dt("Lex_analyzer", "scan_one_string",
+                             "scan failed")
+    };
+}
+
 void Lex_analyzer::scan_arrow()
 {
     auto actual = std::string{};
@@ -278,14 +402,49 @@ void Lex_analyzer::scan_kw_or_id()
     auto actual = std::string{};
     read_to_separator(actual);
 
-    if (str_utils::eq_ref(actual, wsd_utils::kw_as, false)) {
-        push(Token{ actual, Token::KW_AS });
+    if (str_utils::eq_ref(actual, wsd_utils::kw_actor, false)) {
+        push(Token{ actual, Token::KW_ACTOR });
     }
     else if (str_utils::eq_ref(actual, wsd_utils::kw_usecase, false)) {
         push(Token{ actual, Token::KW_USECASE });
     }
-    else if (str_utils::eq_ref(actual, wsd_utils::kw_actor, false)) {
-        push(Token{ actual, Token::KW_ACTOR });
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_as, false)) {
+        push(Token{ actual, Token::KW_AS });
+    }
+
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_note, false)) {
+        push(Token{ actual, Token::KW_NOTE });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_left, false)) {
+        push(Token{ actual, Token::KW_LEFT });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_right, false)) {
+        push(Token{ actual, Token::KW_RIGHT });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_top, false)) {
+        push(Token{ actual, Token::KW_TOP });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_bottom, false)) {
+        push(Token{ actual, Token::KW_BOTTOM });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_to, false)) {
+        push(Token{ actual, Token::KW_TO });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_bottom, false)) {
+        push(Token{ actual, Token::KW_OF });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_direction, false)) {
+        push(Token{ actual, Token::KW_DIRECTION });
+    }
+
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_skinparam, false)) {
+        push(Token{ actual, Token::KW_SKINPARAM });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_rectangle, false)) {
+        push(Token{ actual, Token::KW_RECTANGLE });
+    }
+    else if (str_utils::eq_ref(actual, wsd_utils::kw_package, false)) {
+        push(Token{ actual, Token::KW_PACKAGE });
     }
     // ...
     else {
@@ -296,8 +455,17 @@ void Lex_analyzer::scan_kw_or_id()
 void Lex_analyzer::scan_id()
 {
     auto actual = std::string{};
-    (void)read_to_separator(actual);
-    push(Token{ actual, Token::IDENTIFIER });
+    static_cast<void>(read_to_separator(actual));
+
+    if (!actual.empty()) {
+        push(Token{ actual, Token::IDENTIFIER });
+        return;
+    }
+
+    throw Lexer_error{
+        Err_text_creator::dt("Lex_analyzer", "scan_id",
+                             "scan failed")
+    };
 }
 
 // -----------------------------------------------------------------------
@@ -363,15 +531,43 @@ bool Lex_analyzer::is_letter(const uint8_t uch) const
     return str_utils::is_eng_letter(uch);
 }
 
+bool Lex_analyzer::is_bracket(const uint8_t uch) const
+{
+    return str_utils::is_brs_letter(uch);
+}
+
 bool Lex_analyzer::is_separator(const uint8_t uch) const
 {
-    return std::isspace(uch) || uch == ':' ||
-            str_utils::is_brs_letter(uch) || is_part_arrow(uch); // ??
+    return std::isspace(uch) || uch == ':'
+            || str_utils::is_brs_letter(uch)
+            || is_part_arrow(uch);
+}
+
+bool Lex_analyzer::is_arrow_head(const uint8_t uch) const
+{
+    return uch == '*' || uch == '|'; // <| or |>
+}
+
+bool Lex_analyzer::is_arrow_lhead(const uint8_t uch) const
+{
+    return uch == '<' || is_arrow_head(uch);
+}
+
+bool Lex_analyzer::is_arrow_rhead(const uint8_t uch) const
+{
+    return uch == '>' || is_arrow_head(uch);
+}
+
+bool Lex_analyzer::is_arrow_body(const uint8_t uch) const
+{
+    return uch == '.' || uch == '-';
 }
 
 bool Lex_analyzer::is_part_arrow(const uint8_t uch) const
 {
-    return uch == '.' || uch == '-' || uch == '<' || uch == '>';
+    return is_arrow_body(uch)
+            || is_arrow_lhead(uch)
+            || is_arrow_rhead(uch);
 }
 
 bool Lex_analyzer::is_whitespace(const uint8_t uch) const
@@ -382,6 +578,30 @@ bool Lex_analyzer::is_whitespace(const uint8_t uch) const
 bool Lex_analyzer::is_line_end(const uint8_t uch) const
 {
     return uch == '\n';
+}
+
+// -----------------------------------------------------------------------
+
+bool Lex_analyzer::has_arrow_between()
+{
+    auto it = std::find_if(m_tokns.rbegin(), m_tokns.rend(), [](const Token& token) {
+        return token.tag() == Token::LINE_END;
+    }).base();
+    auto it_arrow = std::find_if(it, m_tokns.end(), [](const Token& token) {
+        return token.tag() == Token::ARROW;
+    });
+
+    if (it_arrow != m_tokns.end()) {
+        auto it_lnode = std::find_if(it, it_arrow, [](const Token& token) {
+            return Token::is_node(token.tag());
+        });
+        auto it_rnode = std::find_if(it_arrow, m_tokns.end(), [](const Token& token) {
+            return Token::is_node(token.tag());
+        });
+
+        return it_lnode != it_arrow && it_rnode != m_tokns.end();
+    }
+    return false;
 }
 
 // -----------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #include "errors/bldr/unknown_edge_type.h"
 #include "errors/err_text_creator.h"
 
-#include "utils/string_utils.h"
+#include "utils/str_utils.h"
 
 namespace lenv
 {

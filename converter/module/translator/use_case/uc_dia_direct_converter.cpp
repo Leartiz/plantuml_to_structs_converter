@@ -4,8 +4,8 @@
 #include "use_case/use_case_dia.h"
 #include "uc_dia_direct_converter.h"
 
-#include "utils/string_utils.h"
-#include "utils/puml_utils.h"
+#include "utils/str_utils.h"
+#include "utils/wsd_utils.h"
 
 #include "errors/err_text_creator.h"
 #include "errors/tltr/unknown_directive.h"

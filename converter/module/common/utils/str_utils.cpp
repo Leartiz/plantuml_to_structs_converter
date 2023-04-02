@@ -2,7 +2,7 @@
 #include <locale>
 #include <algorithm> // std::transform, std::find_if
 
-#include "string_utils.h"
+#include "str_utils.h"
 
 namespace lenv
 {
@@ -16,8 +16,8 @@ bool str_utils::is_brs_letter(const char ch)
 {
     return
             ch == '{' || ch == '}' ||
-            ch == '[' || ch == ']' ||
-            ch == '(' || ch == ')';
+            ch == '[' || ch == ']';
+            //ch == '(' || ch == ')';
 }
 
 bool str_utils::eq(char lhs, char rhs, bool sensitive)
@@ -134,7 +134,7 @@ bool str_utils::ne_ref(const std::string& lhs, const std::string& rhs, bool sens
 void str_utils::trim_left_space_by_ref(std::string& str)
 {
     str.erase(str.begin(), std::find_if(str.begin(), str.end(),
-                                        [](unsigned char ch) -> bool{
+                                        [](unsigned char ch) -> bool {
         return !std::isspace(ch);
     }));
 }
@@ -155,7 +155,14 @@ void str_utils::trim_space_by_ref(std::string& str)
 
 void str_utils::trim_left_space_by_ref(std::string& str, std::string& wsps)
 {
+    wsps.clear();
+    auto nosp_it = std::find_if(str.begin(), str.end(),
+                                [](unsigned char ch) -> bool {
+        return !std::isspace(ch);
+    });
 
+    std::copy(str.begin(), nosp_it, std::back_inserter(wsps));
+    str.erase(str.begin(), nosp_it);
 }
 
 void str_utils::trim_rght_space_by_ref(std::string& str,  std::string& wsps)

@@ -1,5 +1,5 @@
-#ifndef PUML_UTILS_H
-#define PUML_UTILS_H
+#ifndef WSD_UTILS_H
+#define WSD_UTILS_H
 
 #include <string>
 
@@ -9,7 +9,6 @@
 namespace lenv
 {
 
-/* correctly parse by tokens or just return a DTO! */
 class wsd_utils final
 {
 public:
@@ -36,6 +35,7 @@ public:
     static const std::string kw_left;
     static const std::string kw_right;
     static const std::string kw_top;
+    static const std::string kw_up;
     static const std::string kw_bottom;
 
 public:
@@ -91,5 +91,5 @@ public:
 
 }
 
-#endif // PUML_UTILS_H
+#endif // WSD_UTILS_H
 

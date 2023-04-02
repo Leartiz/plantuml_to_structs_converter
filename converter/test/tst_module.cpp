@@ -25,8 +25,8 @@
 #include "errors/bldr/unknown_edge_type.h"
 #include "errors/bldr/unknown_node_type.h"
 
-#include "utils/string_utils.h"
-#include "utils/puml_utils.h"
+#include "utils/str_utils.h"
+#include "utils/wsd_utils.h"
 
 #include "translator/lex_analyzer.h"
 #include "errors/tltr/lexer_error.h"
@@ -1991,6 +1991,7 @@ void Module::test_Puml_utils_UC_dia_arrow_to_type()
 
 void Module::test_Lex_analyzer_tokenize_okk()
 {
+    /* PlantUML OK! */
     std::istringstream sin{
         "@startuml\n"
         "@enduml"
@@ -2353,6 +2354,291 @@ void Module::test_Lex_analyzer_tokenize_okk14()
     QCOMPARE_EQ(expect, actual);
 }
 
+void Module::test_Lex_analyzer_tokenize_okk15()
+{
+    std::istringstream sin{
+        "Registration asd a sd"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "asd", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "a", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "sd", lenv::Token::IDENTIFIER },
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk16()
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "usecase Registration as Reg\n"
+        "actor User\n"
+        "User --> Reg: <<include>>\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "User", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "User", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "-->", lenv::Token::ARROW },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ ":", lenv::Token::COLON },
+        lenv::Token{ "<<include>>", lenv::Token::ONE_LINE_NOTE },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk17() // ?
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "usecase Registration as Reg\n"
+        "Reg --> Reg --> Reg\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "-->", lenv::Token::ARROW },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "-->", lenv::Token::ARROW },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk18()
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "usecase Registration as Reg\n"
+        "Reg --> Reg:da: dasd : dsd:\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "-->", lenv::Token::ARROW },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ ":", lenv::Token::COLON },
+        lenv::Token{ "da: dasd : dsd:", lenv::Token::ONE_LINE_NOTE },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk19()
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "usecase actor as as as\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk20()
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "left to right direction\n"
+        "actor :Ресторанный критик: as fc\n"
+        "rectangle Ресторан{\n"
+        "\t  usecase (Есть) as UC1\n"
+        "    }\n"
+        "fc --> UC1\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "left", lenv::Token::KW_LEFT },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "to", lenv::Token::KW_TO },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "right", lenv::Token::KW_RIGHT },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "direction", lenv::Token::KW_DIRECTION },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Ресторанный критик", lenv::Token::ACTOR_FAST_USE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "fc", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "rectangle", lenv::Token::KW_RECTANGLE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Ресторан", lenv::Token::IDENTIFIER },
+        lenv::Token{ "{", lenv::Token::OPN_CURLY_BR },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "\t  ", lenv::Token::WHITESPACE },
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Есть", lenv::Token::USECASE_FAST_USE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "UC1", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "    ", lenv::Token::WHITESPACE },
+        lenv::Token{ "}", lenv::Token::CLS_CURLY_BR },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "fc", lenv::Token::IDENTIFIER },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "-->", lenv::Token::ARROW },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "UC1", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+
+    /*
+    for (size_t i = 0; i < actual.size(); ++i) {
+        std::cout << "\"" << actual[i].value() << "\" ;" << actual[i].tag() << std::endl;
+        std::cout << "\"" << expect[i].value() << "\" ;" << expect[i].tag() << std::endl;
+        QCOMPARE_EQ(actual[i], expect[i]);
+    }
+    */
+
+    QCOMPARE_EQ(expect.size(), actual.size());
+    QCOMPARE_EQ(expect, actual);
+}
+
+void Module::test_Lex_analyzer_tokenize_okk21()
+{
+    std::istringstream sin{
+        "@startuml\n"
+        "usecase \"Reg\" as Reg\n"
+        "Reg->Reg\n"
+        "@enduml"
+    };
+    const std::vector<lenv::Token> expect{
+        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::ONE_STRING },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "as", lenv::Token::KW_AS },
+        lenv::Token{ " ", lenv::Token::WHITESPACE },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "->", lenv::Token::ARROW },
+        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
+        lenv::Token{ "\n", lenv::Token::LINE_END },
+
+        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
+    };
+
+    std::vector<lenv::Token> actual;
+    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
+    QCOMPARE_EQ(expect, actual);
+}
+
 // -----------------------------------------------------------------------
 
 void Module::test_Lex_analyzer_tokenize_err()
@@ -2401,6 +2687,18 @@ void Module::test_Lex_analyzer_tokenize_err3()
     std::vector<lenv::Token> actual;
     QVERIFY_THROWS_EXCEPTION(lenv::Lexer_error, actual = lenv::tokenize(sin));
     QCOMPARE_EQ(actual.empty(), true);
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_Lex_analyzer_tokenize_okks()
+{
+
+}
+
+void Module::test_Lex_analyzer_tokenize_errs()
+{
+
 }
 
 // Direct_translator

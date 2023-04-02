@@ -18,9 +18,8 @@ SOURCES += \
     $$PWD/common/errors/tltr/tltr_error.cpp \
     $$PWD/common/errors/tltr/unknown_directive.cpp \
     $$PWD/common/generator/order_generator.cpp \
-    $$PWD/common/utils/conv_utils.cpp \
-    $$PWD/common/utils/puml_utils.cpp \
-    $$PWD/common/utils/string_utils.cpp \
+    $$PWD/common/utils/str_utils.cpp \
+    $$PWD/common/utils/wsd_utils.cpp \
     $$PWD/structures/class/class_dia.cpp \
     $$PWD/structures/description.cpp \
     $$PWD/structures/format.cpp \
@@ -39,7 +38,8 @@ SOURCES += \
     $$PWD/translator/lex_analyzer.cpp \
     $$PWD/translator/token.cpp \
     $$PWD/translator/translator.cpp \
-    $$PWD/translator/use_case/uc_dia_direct_converter.cpp
+    $$PWD/translator/use_case/uc_dia_direct_converter.cpp \
+    $$PWD/translator/use_case/uc_dia_syntax_analyzer.cpp
 
 HEADERS += \
     $$PWD/common/errors/any_error.h \
@@ -65,9 +65,8 @@ HEADERS += \
     $$PWD/common/ijson.h \
     $$PWD/../../dependency/nlohmann/json.hpp \
     $$PWD/common/ivalid.h \
-    $$PWD/common/utils/conv_utils.h \
-    $$PWD/common/utils/puml_utils.h \
-    $$PWD/common/utils/string_utils.h \
+    $$PWD/common/utils/str_utils.h \
+    $$PWD/common/utils/wsd_utils.h \
     $$PWD/structures/class/class_dia.h \
     $$PWD/structures/class/class_ptrs.h \
     $$PWD/structures/description.h \
@@ -94,6 +93,7 @@ HEADERS += \
     $$PWD/translator/token.h \
     $$PWD/translator/translator.h \
     $$PWD/translator/use_case/uc_dia_direct_converter.h \
+    $$PWD/translator/use_case/uc_dia_syntax_analyzer.h \
     $$PWD/translator/use_case/uc_dia_token_tag.h
 
 INCLUDEPATH += \

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 9.0.1, 2023-04-01T02:20:51. -->
+<!-- Written by QtCreator 9.0.1, 2023-04-03T01:38:14. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -113,6 +113,34 @@
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:kdasaswe">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Direct_translator_convert_uc_dia">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Direct_translator_convert_uc_dia_data">Unchecked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_err">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_err1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_err2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_err3">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_errs">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk1">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk10">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk11">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk12">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk13">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk14">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk15">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk16">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk17">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk18">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk19">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk2">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk20">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk21">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk3">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk4">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk5">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk6">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk7">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk8">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okk9">Checked</value>
+    <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Lex_analyzer_tokenize_okks">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Puml_utils_UC_dia_arrow_to_type">Checked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Puml_utils_UC_dia_arrow_to_type_data">Unchecked</value>
     <value type="Qt::CheckState" key="1@D:/education/magistracy/master_dissertation/plantuml_to_structs_converter/converter/test/tst_module.cpp:test_Puml_utils_UC_dia_read_actor_creation">Checked</value>
@@ -229,6 +257,9 @@
     <valuelist type="QVariantList" key="ClangTools.SuppressedDiagnostics"/>
     <value type="bool" key="ClangTools.UseGlobalSettings">true</value>
    </valuemap>
+   <valuemap type="QVariantMap" key="CppEditor.QuickFix">
+    <value type="bool" key="UseGlobalSettings">true</value>
+   </valuemap>
   </valuemap>
  </data>
  <data>
@@ -240,7 +271,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">qt.qt6.642.win64_mingw_kit</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="qlonglong" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
-   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
+   <value type="qlonglong" key="ProjectExplorer.Target.ActiveRunConfiguration">1</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <value type="int" key="EnableQmlDebugging">0</value>
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">D:\education\magistracy\master_dissertation\plantuml_to_structs_converter\converter\..\build-converter-Desktop_Qt_6_4_2_MinGW_64_bit-Debug</value>

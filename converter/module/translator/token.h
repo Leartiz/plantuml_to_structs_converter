@@ -28,6 +28,8 @@ public:
 
         KW_LEFT,
         KW_RIGHT,
+        KW_TOP,
+        KW_BOTTOM,
         KW_UP,
         KW_DOWN,
         KW_DIRECTION,
@@ -35,13 +37,20 @@ public:
         KW_OF,
         KW_END,
 
+        INDENT, // meaningful! TODO:
         WHITESPACE,
         LINE_END,
+
+        COLON,
         OPN_CURLY_BR,
         CLS_CURLY_BR,
-        COLON,
+        OPN_SQ_BR,
+        CLS_SQ_BR,
+        OPN_ROUND_BR,
+        CLS_ROUND_BR,
 
-        STRING,
+        ONE_STRING,
+        MULTI_STRING,
         IDENTIFIER,
         ARROW,
 
@@ -66,7 +75,11 @@ public:
 
     };
 
+
+
     static bool is_directive(const Tag tag);
+    static bool is_whitespace(const Tag tag);
+    static bool is_node(const Tag tag);
 
 public:
     Token(std::string val, Token::Tag tag);
@@ -87,3 +100,4 @@ bool operator!=(const Token& lhs, const Token& rhs);
 }
 
 #endif // TOKEN_H
+

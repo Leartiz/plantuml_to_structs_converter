@@ -153,11 +153,23 @@ private slots:
     void test_Lex_analyzer_tokenize_okk12();
     void test_Lex_analyzer_tokenize_okk13();
     void test_Lex_analyzer_tokenize_okk14();
+    void test_Lex_analyzer_tokenize_okk15();
+    void test_Lex_analyzer_tokenize_okk16();
+    void test_Lex_analyzer_tokenize_okk17();
+    void test_Lex_analyzer_tokenize_okk18();
+    void test_Lex_analyzer_tokenize_okk19();
+    void test_Lex_analyzer_tokenize_okk20();
+    void test_Lex_analyzer_tokenize_okk21();
 
+private slots:
     void test_Lex_analyzer_tokenize_err();
     void test_Lex_analyzer_tokenize_err1();
     void test_Lex_analyzer_tokenize_err2();
     void test_Lex_analyzer_tokenize_err3();
+
+private slots:
+    void test_Lex_analyzer_tokenize_okks();
+    void test_Lex_analyzer_tokenize_errs();
 
     // Direct_translator
 private slots:

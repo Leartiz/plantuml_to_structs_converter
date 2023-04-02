@@ -11,7 +11,7 @@
 #include "errors/bldr/unknown_node_type.h"
 #include "errors/err_text_creator.h"
 
-#include "utils/string_utils.h"
+#include "utils/str_utils.h"
 
 namespace lenv
 {
