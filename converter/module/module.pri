@@ -36,6 +36,7 @@ SOURCES += \
     $$PWD/translator/dia_direct_converter.cpp \
     $$PWD/translator/direct_translator.cpp \
     $$PWD/translator/lex_analyzer.cpp \
+    $$PWD/translator/regex_translator.cpp \
     $$PWD/translator/token.cpp \
     $$PWD/translator/translator.cpp \
     $$PWD/translator/use_case/uc_dia_direct_converter.cpp \
@@ -90,6 +91,7 @@ HEADERS += \
     $$PWD/translator/dia_direct_converter.h \
     $$PWD/translator/direct_translator.h \
     $$PWD/translator/lex_analyzer.h \
+    $$PWD/translator/regex_translator.h \
     $$PWD/translator/token.h \
     $$PWD/translator/translator.h \
     $$PWD/translator/use_case/uc_dia_direct_converter.h \
