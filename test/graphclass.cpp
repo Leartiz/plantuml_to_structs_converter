@@ -44,6 +44,7 @@ GraphClass::Member GraphClass::Member::from_str(string& line) {
 void GraphClass::read(istream& in) {
     stringstream stream_copy;
     stream_copy << in.rdbuf();
+    string text{ stream_copy.str() };
 
     map<string, shared_ptr<NodeClass>> name_node;
 
@@ -74,7 +75,8 @@ void GraphClass::read(istream& in) {
         name_node[node->id] = node;
     }
 
-    stream_copy << in.rdbuf();
+    stream_copy.clear();
+    stream_copy << text;
     while (stream_copy) {
 
         // A <|-- B
@@ -102,7 +104,7 @@ void GraphClass::read(istream& in) {
 
 bool GraphClass::is_allowed_line(string&)
 {
-
+    return true;
 }
 
 void GraphClass::write(ostream& sstr)
