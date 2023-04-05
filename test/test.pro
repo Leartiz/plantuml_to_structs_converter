@@ -4,11 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        graph.cpp \
         graphclass.cpp \
-        main.cpp \
-        usecasegraph.cpp
+        graphusecase.cpp \
+        main.cpp
 
 HEADERS += \
     graph.h \
     graphclass.h \
-    usecasegraph.h
+    graphusecase.h

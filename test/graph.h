@@ -18,12 +18,16 @@ struct Graph {
 
 public:
     virtual ~Graph() = default;
-    virtual void read(istream&) = 0;
-    virtual void write(ostream&) = 0;
+    virtual void read_puml(istream&) = 0;
+    virtual void write_json(ostream&) = 0;
 
 public:
     vector<shared_ptr<Node>> nodes;
     vector<shared_ptr<Edge>> edges;
+
+protected:
+    bool try_directive(string&);
+    bool try_whitespaces(string&);
 };
 
 #endif // GRAPH_H

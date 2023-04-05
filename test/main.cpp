@@ -2,16 +2,16 @@
 #include <fstream>
 #include <iostream>
 
-#include "graphclass.h"
+#include "graphusecase.h"
 
 using namespace std;
 
 void visual_test_0()
 {
-    std::ifstream fin{ "class_0.txt" };
+    std::ifstream fin{ "uc_0.txt" };
     if (fin.is_open()) {
-        GraphClass classDiag;
-        classDiag.read(fin);
+        GraphUseCase ucDiag;
+        ucDiag.read_puml(fin);
     }
 }
 

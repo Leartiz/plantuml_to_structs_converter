@@ -34,9 +34,8 @@ struct GraphClass : Graph {
         weak_ptr<NodeClass> beg, end;
     };
 
-public:
-    void read(istream&) override;
-    void write(ostream&) override;
+    void read_puml(istream&) override;
+    void write_json(ostream&) override;
 
 private:
     bool is_allowed_line(string&);

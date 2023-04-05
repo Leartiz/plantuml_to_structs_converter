@@ -41,7 +41,7 @@ GraphClass::Member GraphClass::Member::from_str(string& line) {
 
 // Edge: A --> B
 // Node: class Name {}
-void GraphClass::read(istream& in) {
+void GraphClass::read_puml(istream& in) {
     stringstream stream_copy;
     stream_copy << in.rdbuf();
     string text{ stream_copy.str() };
@@ -107,7 +107,7 @@ bool GraphClass::is_allowed_line(string&)
     return true;
 }
 
-void GraphClass::write(ostream& sstr)
+void GraphClass::write_json(ostream& sstr)
 {
 
 }
