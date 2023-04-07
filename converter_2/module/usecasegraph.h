@@ -5,6 +5,11 @@
 
 #include "graph.h"
 
+// TODO: блоки ректангле и еще что то
+// TODO: изменять напрвления
+// TODO: удалить тарый конвертер!
+
+// TODO: изменить имя на Use_case_dia?
 struct UseCaseGraph : Graph {
 
     struct UcEdge;
@@ -17,7 +22,6 @@ struct UseCaseGraph : Graph {
         UcNode(std::string id, std::string name, Type);
 
         Type type{ Actor };
-        std::vector<std::weak_ptr<UcEdge>> outs, inns;
     };
 
     struct UcEdge : public Edge {
@@ -32,7 +36,6 @@ struct UseCaseGraph : Graph {
         UcEdge(std::string id, std::string name, Type);
 
         Type type{ Association };
-        std::weak_ptr<UcNode> beg, end;
     };
 
 public:
@@ -43,6 +46,7 @@ protected:
     bool try_actor_node(std::string&);
     bool try_usecase_node(std::string&);
     bool try_connection(std::string&);
+    bool try_grouping(std::string&);
 };
 
 #endif // USECASEGRAPH_H

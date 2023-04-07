@@ -11,8 +11,14 @@ struct Graph {
         virtual ~Unit() = default;
     };
 
-    struct Node : Unit {};
-    struct Edge : Unit {};
+    struct Edge;
+    struct Node : Unit {
+        std::vector<std::weak_ptr<Edge>> outs, inns;
+    };
+
+    struct Edge : Unit {
+        std::weak_ptr<Node> beg, end;
+    };
 
 public:
     virtual ~Graph() = default;
@@ -28,6 +34,9 @@ protected:
     bool try_whitespaces(std::string&);
     bool try_directive(std::string&);
     bool try_skinparam(std::string&);
+    bool try_direction(std::string&);
+    bool try_beg_grouping(std::string&);
+    bool try_end_curly_brace(std::string&);
 };
 
 #endif // GRAPH_H
