@@ -1,4 +1,5 @@
 // Reads one line into the converter.
+
 // TODO: \s --> [\r\t\f\v ] (???)
 
 var usecase_node = /^\s*usecase\s+(\((.+)\)|\"(.+)\")\s+as\s+(\S+)\s*$/gm

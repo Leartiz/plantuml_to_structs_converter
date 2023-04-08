@@ -4,3 +4,6 @@ var direction = /^\s*((left\s+to\s+right\s+direction)|(top\s+to\s+bottom\s+direc
 var beg_grouping = /^\s*(rectangle|package)(\s+((\S+)|(\".+\")))?\s*\{\s*$/gm
 var end_curly_brace = /^\s*\}\s*$/gm
 var whitespaces = /^\s*$/gm
+var one_note = /^\s*note\s+(left|right|top|bottom)\s+of\s+(\S+)\s*:(.+)$/gm
+var beg_multi_note = /^$/gm
+var end_multi_note = /^$/gm

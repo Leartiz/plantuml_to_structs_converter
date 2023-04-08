@@ -32,6 +32,7 @@ UseCaseGraph::UcEdge::UcEdge(string id, string name, Type tp) {
 
 namespace {
 
+// TODO: сделать как поле в классе Graph? (нужно если делать read_puml общим)
 const auto ch{ make_shared<ConstructHelper>() };
 
 UseCaseGraph::UcEdge::Type edge_type_from_arrow_parts(const string& head,
@@ -70,7 +71,7 @@ shared_ptr<UseCaseGraph::UcNode> create_node_if_need(const string& str) {
 string node_type_to_str(const UseCaseGraph::UcNode::Type tp) {
     switch (tp) {
     case UseCaseGraph::UcNode::Actor: return "actor";
-    case UseCaseGraph::UcNode::UseCase: return "usecase";
+    case UseCaseGraph::UcNode::Usecase: return "usecase";
     }
 
     throw runtime_error{ "node type unknown" };
@@ -149,8 +150,7 @@ void UseCaseGraph::read_puml(istream& in) {
         ch->line_number++;
 
         if (
-                !try_actor_node(line) &&
-                !try_usecase_node(line) &&
+                !try_node(line) &&
                 !try_connection(line) &&
                 !try_whitespaces(line) &&
                 !try_grouping(line, in) &&
@@ -219,13 +219,17 @@ bool UseCaseGraph::try_usecase_node(string& line) {
 
     const string node_id{ match[4].str() };
     const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
-    const auto node{ make_shared<UcNode>(node_id, node_name, UcNode::UseCase) };
+    const auto node{ make_shared<UcNode>(node_id, node_name, UcNode::Usecase) };
 
     ch->id_node[node->id] = node;
     return true;
 }
 
 // -----------------------------------------------------------------------
+
+bool UseCaseGraph::try_node(std::string& line) {
+    return try_actor_node(line) || try_usecase_node(line);
+}
 
 bool UseCaseGraph::try_connection(string& line) {
     smatch match;
@@ -298,8 +302,7 @@ bool UseCaseGraph::try_grouping(string& line, istream& in) {
         }
 
         if (
-                !try_actor_node(line) &&
-                !try_usecase_node(line) &&
+                !try_node(line) &&
                 !try_connection(line) &&
                 !try_whitespaces(line) &&
                 !try_grouping(line, in)) {

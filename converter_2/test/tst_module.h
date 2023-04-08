@@ -17,6 +17,41 @@ private slots:
     void initTestCase() {};
     void cleanupTestCase() {};
 
+    // str_utils
+private slots:
+    void test_str_utils_to_upper_data();
+    void test_str_utils_to_upper();
+    void test_str_utils_to_lower_data();
+    void test_str_utils_to_lower();
+
+private slots:
+    void test_str_utils_start_with_data();
+    void test_str_utils_start_with();
+    void test_str_utils_stop_with_data();
+    void test_str_utils_stop_with();
+
+private slots:
+    void test_str_utils_eq_data();
+    void test_str_utils_eq();
+    void test_str_utils_eq_ref_data();
+    void test_str_utils_eq_ref();
+
+private slots:
+    void test_str_utils_trim_left_data();
+    void test_str_utils_trim_left();
+    void test_str_utils_trim_rght_data();
+    void test_str_utils_trim_rght();
+    void test_str_utils_trim_data();
+    void test_str_utils_trim();
+
+private slots:
+    void test_str_utils_trim_left_space_data();
+    void test_str_utils_trim_left_space();
+    void test_str_utils_trim_rght_space_data();
+    void test_str_utils_trim_rght_space();
+    void test_str_utils_trim_space_data();
+    void test_str_utils_trim_space();
+
     // UseCaseGraph
 private slots:
     void test_UseCaseGraph_read_okk();

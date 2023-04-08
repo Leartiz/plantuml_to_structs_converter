@@ -6,6 +6,7 @@ SOURCES += \
     $$PWD/project.cpp \
     $$PWD/robustnessgraph.cpp \
     $$PWD/sequencegraph.cpp \
+    $$PWD/str_utils.cpp \
     $$PWD/usecasegraph.cpp
 
 HEADERS += \
@@ -17,6 +18,7 @@ HEADERS += \
     $$PWD/project.h \
     $$PWD/robustnessgraph.h \
     $$PWD/sequencegraph.h \
+    $$PWD/str_utils.h \
     $$PWD/usecasegraph.h
 
 INCLUDEPATH += \

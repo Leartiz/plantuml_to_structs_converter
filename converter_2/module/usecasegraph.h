@@ -13,10 +13,9 @@ struct RobustnessGraph;
 // TODO: изменить имя на Use_case_dia?
 struct UseCaseGraph : Graph {
 
-    struct UcEdge;
     struct UcNode : public Node {
         enum Type : uint32_t {
-            Actor, UseCase,
+            Actor, Usecase, // Usecase - тип узла.
         };
 
         UcNode() = default;
@@ -48,10 +47,12 @@ public:
 protected:
     bool try_actor_node(std::string&);
     bool try_usecase_node(std::string&);
-    bool try_connection(std::string&);
+
+    bool try_node(std::string&) override;
+    bool try_connection(std::string&) override;
 
 protected:
-    bool try_grouping(std::string&, std::istream&);
+    bool try_grouping(std::string&, std::istream&) override;
     // TODO: добавить метод для заметок в документе
 };
 
