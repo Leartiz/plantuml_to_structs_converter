@@ -1,0 +1,22 @@
+@startuml
+skinparam actorStyle awesome
+
+usecase (Последний прецедент 1) as UC1 
+usecase "Последний прецедент 2" as UC2
+usecase "Последний прецедент 3" as UC3
+usecase (Последний прецедент 4) as UC4
+
+actor :Последний прецедент 1: as A1
+actor "Последний прецедент 2" as A2
+actor "Последний прецедент 3" as A3
+actor :Последний прецедент 4: as A4
+
+package {
+    UC1 <-- A1
+    UC2 --> A2
+    UC3 ..> A3 : <<include>>
+    UC4 ..> A4 : <<extend>>
+    A1 --|> A5
+}
+
+@enduml

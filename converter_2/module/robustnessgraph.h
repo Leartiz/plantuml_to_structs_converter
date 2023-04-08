@@ -3,9 +3,9 @@
 
 #include <string>
 
-struct RobustnessGraph
-{
-public:
+#include "graph.h"
+
+struct RobustnessGraph : Graph {
 
     std::string id;
 };

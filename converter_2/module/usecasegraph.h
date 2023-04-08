@@ -5,9 +5,7 @@
 
 #include "graph.h"
 
-// TODO: блоки ректангле и еще что то
-// TODO: изменять напрвления
-// TODO: удалить тарый конвертер!
+// TODO: удалить старый преобразователь (converter)
 
 struct SequenceGraph;
 struct RobustnessGraph;
@@ -18,7 +16,7 @@ struct UseCaseGraph : Graph {
     struct UcEdge;
     struct UcNode : public Node {
         enum Type : uint32_t {
-            UseCase, Actor,
+            Actor, UseCase,
         };
 
         UcNode() = default;
@@ -54,6 +52,7 @@ protected:
 
 protected:
     bool try_grouping(std::string&, std::istream&);
+    // TODO: добавить метод для заметок в документе
 };
 
 #endif // USECASEGRAPH_H

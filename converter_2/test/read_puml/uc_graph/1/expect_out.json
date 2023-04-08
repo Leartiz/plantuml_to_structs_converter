@@ -1,0 +1,33 @@
+{
+  "edges": [],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "Auth",
+      "inn_edges": [],
+      "name": "Authorization",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Reg",
+      "inn_edges": [],
+      "name": "Registration",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "User",
+      "inn_edges": [],
+      "name": "User",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    }
+  ]
+}

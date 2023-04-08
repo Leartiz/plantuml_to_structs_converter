@@ -1,0 +1,98 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "Reg"
+      },
+      "id": "1",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "Buy"
+      },
+      "id": "2",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "Show"
+      },
+      "id": "3",
+      "name": "",
+      "type": "association"
+    }
+  ],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "Buy",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "name": "Покупка",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Reg",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "name": "Регистрация",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Show",
+      "inn_edges": [
+        {
+          "id": "3"
+        }
+      ],
+      "name": "Смотреть товары",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "User",
+      "inn_edges": [],
+      "name": "Пользователь",
+      "out_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "2"
+        },
+        {
+          "id": "3"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    }
+  ]
+}

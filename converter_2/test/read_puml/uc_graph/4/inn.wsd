@@ -1,0 +1,17 @@
+@startuml
+
+left to right direction
+
+actor :Пользователь: as User
+
+rectangle "Онлайн магазин" {
+    usecase "Авторизация" as Auth 
+    usecase (Покупка) as Buy
+    usecase (Смотреть товары) as Show
+}
+
+User --> Auth 
+User --> Buy
+User --> Show
+
+@enduml

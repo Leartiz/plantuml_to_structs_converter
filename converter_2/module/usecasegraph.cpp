@@ -67,16 +67,36 @@ shared_ptr<UseCaseGraph::UcNode> create_node_if_need(const string& str) {
 
 // *** json
 
+string node_type_to_str(const UseCaseGraph::UcNode::Type tp) {
+    switch (tp) {
+    case UseCaseGraph::UcNode::Actor: return "actor";
+    case UseCaseGraph::UcNode::UseCase: return "usecase";
+    }
+
+    throw runtime_error{ "node type unknown" };
+}
+
+string edge_type_to_str(const UseCaseGraph::UcEdge::Type tp) {
+    switch (tp) {
+    case UseCaseGraph::UcEdge::Association: return "association";
+    case UseCaseGraph::UcEdge::Generalization: return "generalization";
+    case UseCaseGraph::UcEdge::Include: return "include";
+    case UseCaseGraph::UcEdge::Extend: return "extend";
+    }
+
+    throw runtime_error{ "edge type unknown" };
+}
+
 // TODO: создать новый тип исключений?
 json edge_to_json(UseCaseGraph::UcEdge& edge) {
     if (edge.beg.expired() || edge.end.expired()) {
-        throw std::runtime_error{ "beg or end expired" };
+        throw runtime_error{ "beg or end expired" };
     }
 
     json result;
     result["id"] = edge.id;
     result["name"] = edge.name;
-    result["type"] = edge.type;
+    result["type"] = edge_type_to_str(edge.type);
     result["beg"] = { { "id", edge.beg.lock()->id } };
     result["end"] = { { "id", edge.end.lock()->id } };
     return result;
@@ -84,19 +104,18 @@ json edge_to_json(UseCaseGraph::UcEdge& edge) {
 
 // TODO: вектор слабых ссылок, можно изменить?
 json edges_to_short_json(vector<weak_ptr<Graph::Edge>> edges) {
+    const string id_key{ "id" };
     auto json_edges = json::array();
-    std::for_each(std::begin(edges), std::end(edges),
-                  [&json_edges](const weak_ptr<Graph::Edge> edge_wp) -> void {
+    for_each(begin(edges), end(edges), [&](const weak_ptr<Graph::Edge> edge_wp) {
         if (const auto edge_sp = edge_wp.lock(); edge_sp) {
-            json_edges.push_back({ { "id", edge_sp->id } });
+            json_edges.push_back({ { id_key, edge_sp->id } });
             return;
         }
-        throw std::runtime_error{ "inn/out edge expired" };
+        throw runtime_error{ "inn/out edge expired" };
     });
 
-    std::sort(std::begin(json_edges), std::end(json_edges),
-              [&](const json& lhs, const json& rhs) -> bool {
-        return lhs["id"] < rhs["id"];
+    sort(begin(json_edges), end(json_edges), [&](const json& lhs, const json& rhs) {
+        return lhs[id_key] < rhs[id_key];
     });
     return json_edges;
 }
@@ -105,7 +124,7 @@ json node_to_json(UseCaseGraph::UcNode& node) {
     json result;
     result["id"] = node.id;
     result["name"] = node.name;
-    result["type"] = node.type;
+    result["type"] = node_type_to_str(node.type);
 
     result["inn_edges"] = edges_to_short_json(node.inns);
     result["out_edges"] = edges_to_short_json(node.outs);
@@ -179,26 +198,28 @@ void UseCaseGraph::write_json(ostream& out) {
 // -----------------------------------------------------------------------
 
 bool UseCaseGraph::try_actor_node(string& line) {
-    std::smatch match;
-    if (!regex_match(line, match, regex("^\\s*actor\\s+(:(.+):|\"(.+)\")\\s+as\\s+(\\S+)\\s*$"))) {
+    smatch match;
+    if (!regex_match(line, match, regex("^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$"))) {
         return false;
     }
 
     const auto node_id{ match[4].str() };
-    const auto node = make_shared<UcNode>(node_id, match[2].str(), UcNode::Actor);
+    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
+    const auto node = make_shared<UcNode>(node_id, node_name, UcNode::Actor);
 
     ch->id_node[node_id] = node;
     return true;
 }
 
 bool UseCaseGraph::try_usecase_node(string& line) {
-    std::smatch match;
+    smatch match;
     if (!regex_match(line, match, regex("^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$"))) {
         return false;
     }
 
-    const auto node_id{ match[4].str() };
-    const auto node{ make_shared<UcNode>(node_id, match[2].str(), UcNode::UseCase) };
+    const string node_id{ match[4].str() };
+    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
+    const auto node{ make_shared<UcNode>(node_id, node_name, UcNode::UseCase) };
 
     ch->id_node[node->id] = node;
     return true;
@@ -207,7 +228,7 @@ bool UseCaseGraph::try_usecase_node(string& line) {
 // -----------------------------------------------------------------------
 
 bool UseCaseGraph::try_connection(string& line) {
-    std::smatch match;
+    smatch match;
 
     if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
                                         "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$"))) {
@@ -260,8 +281,7 @@ bool UseCaseGraph::try_connection(string& line) {
 
 // -----------------------------------------------------------------------
 
-bool UseCaseGraph::try_grouping(std::string& line, std::istream& in)
-{
+bool UseCaseGraph::try_grouping(string& line, istream& in) {
     if (!try_beg_grouping(line)) {
         return false;
     }

@@ -1,0 +1,14 @@
+@startuml
+
+left to right direction
+
+actor :Пользователь: as User
+usecase "Регистрация" as Reg
+usecase (Покупка) as Buy
+usecase (Смотреть товары) as Show
+
+User -l-> Reg
+User --> Buy
+User -right-> Show
+
+@enduml

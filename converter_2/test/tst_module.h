@@ -29,11 +29,11 @@ private slots:
     void test_UseCaseGraph_read_err();
     void test_UseCaseGraph_read_err1();
 
-    void test_UseCaseGraph_read_okks();
-
-private slots:
     void test_UseCaseGraph_read_puml_data();
     void test_UseCaseGraph_read_puml();
+
+    // RobustnessGraph
+private slots:
 
 };
 

@@ -1,0 +1,7 @@
+@startuml
+
+actor "User" as User
+usecase "Registration" as Reg
+usecase "Authorization" as Auth
+
+@enduml

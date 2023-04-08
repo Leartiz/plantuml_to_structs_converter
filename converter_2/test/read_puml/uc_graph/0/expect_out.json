@@ -1,0 +1,24 @@
+{
+  "edges": [],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "Registration",
+      "inn_edges": [],
+      "name": "Registration",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Student",
+      "inn_edges": [],
+      "name": "Student",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    }
+  ]
+}

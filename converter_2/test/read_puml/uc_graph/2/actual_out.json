@@ -1,0 +1,182 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "A1"
+      },
+      "end": {
+        "id": "UC1"
+      },
+      "id": "1",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "UC2"
+      },
+      "end": {
+        "id": "A2"
+      },
+      "id": "2",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "UC3"
+      },
+      "end": {
+        "id": "A3"
+      },
+      "id": "3",
+      "name": "<<include>>",
+      "type": "include"
+    },
+    {
+      "beg": {
+        "id": "UC4"
+      },
+      "end": {
+        "id": "A4"
+      },
+      "id": "4",
+      "name": "<<extend>>",
+      "type": "extend"
+    },
+    {
+      "beg": {
+        "id": "A1"
+      },
+      "end": {
+        "id": "A5"
+      },
+      "id": "5",
+      "name": "",
+      "type": "generalization"
+    }
+  ],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "A1",
+      "inn_edges": [],
+      "name": "Последний прецедент 1",
+      "out_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "5"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "A2",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "name": "Последний прецедент 2",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "A3",
+      "inn_edges": [
+        {
+          "id": "3"
+        }
+      ],
+      "name": "Последний прецедент 3",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "A4",
+      "inn_edges": [
+        {
+          "id": "4"
+        }
+      ],
+      "name": "Последний прецедент 4",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "A5",
+      "inn_edges": [
+        {
+          "id": "5"
+        }
+      ],
+      "name": "A5",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "UC1",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "name": "Последний прецедент 1",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "UC2",
+      "inn_edges": [],
+      "name": "Последний прецедент 2",
+      "out_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "UC3",
+      "inn_edges": [],
+      "name": "Последний прецедент 3",
+      "out_edges": [
+        {
+          "id": "3"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "UC4",
+      "inn_edges": [],
+      "name": "Последний прецедент 4",
+      "out_edges": [
+        {
+          "id": "4"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    }
+  ]
+}

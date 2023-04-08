@@ -1,0 +1,6 @@
+@startuml
+
+actor "Student" as Student
+usecase "Registration" as Registration
+
+@enduml
