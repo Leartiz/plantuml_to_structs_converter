@@ -9,12 +9,15 @@
 // TODO: изменять напрвления
 // TODO: удалить тарый конвертер!
 
+struct SequenceGraph;
+struct RobustnessGraph;
+
 // TODO: изменить имя на Use_case_dia?
 struct UseCaseGraph : Graph {
 
     struct UcEdge;
     struct UcNode : public Node {
-        enum Type {
+        enum Type : uint32_t {
             UseCase, Actor,
         };
 
@@ -22,10 +25,12 @@ struct UseCaseGraph : Graph {
         UcNode(std::string id, std::string name, Type);
 
         Type type{ Actor };
+        std::shared_ptr<SequenceGraph> seq_graph;
+        std::shared_ptr<RobustnessGraph> rob_graph;
     };
 
     struct UcEdge : public Edge {
-        enum Type {
+        enum Type : uint32_t {
             Association,
             Generalization,
             Include,
@@ -46,7 +51,9 @@ protected:
     bool try_actor_node(std::string&);
     bool try_usecase_node(std::string&);
     bool try_connection(std::string&);
-    bool try_grouping(std::string&);
+
+protected:
+    bool try_grouping(std::string&, std::istream&);
 };
 
 #endif // USECASEGRAPH_H

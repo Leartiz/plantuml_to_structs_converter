@@ -25,6 +25,10 @@ private slots:
     void test_UseCaseGraph_read_okk3();
     void test_UseCaseGraph_read_okk4();
     void test_UseCaseGraph_read_okk5();
+
+    void test_UseCaseGraph_read_err();
+    void test_UseCaseGraph_read_err1();
+
     void test_UseCaseGraph_read_okks();
 
 private slots:

@@ -6,6 +6,20 @@
 
          skinparam actorStyle awesome   
 
+rectangle das{   
+}
+
+rectangle  das {
+}
+
+rectangle{
+  usecase "Есть" as UC1
+  usecase "Платить" as UC2
+  usecase "Пить" as UC3
+  usecase "Составлять отзыв" as UC4
+   }   
+
+
 package Ресторан{
   usecase "Есть" as UC1
   usecase "Платить" as UC2

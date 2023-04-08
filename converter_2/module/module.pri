@@ -4,6 +4,8 @@ SOURCES += \
     $$PWD/graph.cpp \
     $$PWD/grapherror.cpp \
     $$PWD/project.cpp \
+    $$PWD/robustnessgraph.cpp \
+    $$PWD/sequencegraph.cpp \
     $$PWD/usecasegraph.cpp
 
 HEADERS += \
@@ -13,6 +15,8 @@ HEADERS += \
     $$PWD/graph.h \
     $$PWD/grapherror.h \
     $$PWD/project.h \
+    $$PWD/robustnessgraph.h \
+    $$PWD/sequencegraph.h \
     $$PWD/usecasegraph.h
 
 INCLUDEPATH += \

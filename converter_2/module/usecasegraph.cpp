@@ -5,12 +5,16 @@
 #include <algorithm>
 
 #include "usecasegraph.h"
+#include "robustnessgraph.h"
+#include "sequencegraph.h"
+
 #include "constructhelper.h"
 #include "grapherror.h"
 
 #include "nlohmann/json.hpp"
 
 using namespace std;
+using namespace nlohmann;
 
 UseCaseGraph::UcNode::UcNode(string id, string name, Type tp)  {
     this->name = std::move(name);
@@ -63,7 +67,56 @@ shared_ptr<UseCaseGraph::UcNode> create_node_if_need(const string& str) {
 
 // *** json
 
-// TODO: и тесты.
+// TODO: создать новый тип исключений?
+json edge_to_json(UseCaseGraph::UcEdge& edge) {
+    if (edge.beg.expired() || edge.end.expired()) {
+        throw std::runtime_error{ "beg or end expired" };
+    }
+
+    json result;
+    result["id"] = edge.id;
+    result["name"] = edge.name;
+    result["type"] = edge.type;
+    result["beg"] = { { "id", edge.beg.lock()->id } };
+    result["end"] = { { "id", edge.end.lock()->id } };
+    return result;
+}
+
+// TODO: вектор слабых ссылок, можно изменить?
+json edges_to_short_json(vector<weak_ptr<Graph::Edge>> edges) {
+    auto json_edges = json::array();
+    std::for_each(std::begin(edges), std::end(edges),
+                  [&json_edges](const weak_ptr<Graph::Edge> edge_wp) -> void {
+        if (const auto edge_sp = edge_wp.lock(); edge_sp) {
+            json_edges.push_back({ { "id", edge_sp->id } });
+            return;
+        }
+        throw std::runtime_error{ "inn/out edge expired" };
+    });
+
+    std::sort(std::begin(json_edges), std::end(json_edges),
+              [&](const json& lhs, const json& rhs) -> bool {
+        return lhs["id"] < rhs["id"];
+    });
+    return json_edges;
+}
+
+json node_to_json(UseCaseGraph::UcNode& node) {
+    json result;
+    result["id"] = node.id;
+    result["name"] = node.name;
+    result["type"] = node.type;
+
+    result["inn_edges"] = edges_to_short_json(node.inns);
+    result["out_edges"] = edges_to_short_json(node.outs);
+
+    result["rob_dia"] = node.id;
+    result["seq_dia"] = node.id;
+    if (!node.rob_graph) result["rob_dia"] = nullptr;
+    if (!node.seq_graph) result["seq_dia"] = nullptr;
+
+    return result;
+}
 
 }
 
@@ -81,7 +134,7 @@ void UseCaseGraph::read_puml(istream& in) {
                 !try_usecase_node(line) &&
                 !try_connection(line) &&
                 !try_whitespaces(line) &&
-                !try_grouping(line) &&
+                !try_grouping(line, in) &&
 
                 !try_directive(line) &&
                 !try_skinparam(line) &&
@@ -100,7 +153,25 @@ void UseCaseGraph::write_json(ostream& out) {
     json json_graph;
     json_graph["id"] = "use_case_dia";
 
-    // TODO:
+    /* edges */
+    {
+        json::array_t json_edges;
+        for (const auto& edge : edges) {
+            auto uc_edge = static_pointer_cast<UcEdge>(edge);
+            json_edges.push_back(edge_to_json(*uc_edge));
+        }
+        json_graph["edges"] = json_edges;
+    }
+
+    /* nodes */
+    {
+        json::array_t json_nodes;
+        for (const auto& node : nodes) {
+            auto uc_node = static_pointer_cast<UcNode>(node);
+            json_nodes.push_back(node_to_json(*uc_node));
+        }
+        json_graph["nodes"] = json_nodes;
+    }
 
     out << setw(2) << json_graph;
 }
@@ -138,7 +209,8 @@ bool UseCaseGraph::try_usecase_node(string& line) {
 bool UseCaseGraph::try_connection(string& line) {
     std::smatch match;
 
-    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$"))) {
+    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
+                                        "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$"))) {
         return false;
     }
 
@@ -188,6 +260,36 @@ bool UseCaseGraph::try_connection(string& line) {
 
 // -----------------------------------------------------------------------
 
-bool UseCaseGraph::try_grouping(std::string& line) {
-    // TODO: автомат или глобальный поток для чтения.
+bool UseCaseGraph::try_grouping(std::string& line, std::istream& in)
+{
+    if (!try_beg_grouping(line)) {
+        return false;
+    }
+
+    bool is_closed{ false };
+    while (in) {
+        string line;
+        getline(in, line);
+        ch->line_number++;
+
+        if (try_end_curly_brace(line)) {
+            is_closed = true;
+            break;
+        }
+
+        if (
+                !try_actor_node(line) &&
+                !try_usecase_node(line) &&
+                !try_connection(line) &&
+                !try_whitespaces(line) &&
+                !try_grouping(line, in)) {
+            throw GraphError(ch->line_number, "unknown line");
+        }
+    }
+
+    if (!is_closed) {
+        throw GraphError(ch->line_number, "group is not closed");
+    }
+
+    return true;
 }

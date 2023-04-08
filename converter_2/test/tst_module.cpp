@@ -5,6 +5,7 @@
 
 #include "usecasegraph.h"
 #include "classgraph.h"
+#include "grapherror.h"
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 4, 0)
     #define QCOMPARE_EQ(lhs, rhs) QCOMPARE(lhs == rhs, true);
@@ -236,8 +237,39 @@ void Module::test_UseCaseGraph_read_okk4()
 
 void Module::test_UseCaseGraph_read_okk5()
 {
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  @startuml \n"
+        "  top to bottom   direction     \n"
+        "  package Ресторан {     \n"
+        "   }   "
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(0));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(0));
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UseCaseGraph_read_err()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  @startuml \n"
+        "  top to bottom   direction     \n"
+        "  package Ресторан {     \n"
+    };
+    QVERIFY_THROWS_EXCEPTION(GraphError, ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(0));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(0));
+}
+
+void Module::test_UseCaseGraph_read_err1()
+{
 
 }
+
+// -----------------------------------------------------------------------
 
 void Module::test_UseCaseGraph_read_okks()
 {

@@ -26,7 +26,7 @@ bool Graph::try_direction(std::string& line) {
 
 bool Graph::try_beg_grouping(std::string& line) {
     std::smatch match;
-    return regex_match(line, match, regex("^\\s*rectangle|package\\s+\\S+\\s*\\{\\s*$"));
+    return regex_match(line, match, regex("^\\s*(rectangle|package)(\\s+(\\S+))?\\s*\\{\\s*$"));
 }
 
 bool Graph::try_end_curly_brace(std::string& line) {

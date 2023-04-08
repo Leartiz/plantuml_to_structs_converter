@@ -12,11 +12,8 @@ void visual_test_0()
     if (fin.is_open()) {
         UseCaseGraph ucDiag;
         ucDiag.read_puml(fin);
-
         ucDiag.write_json(cout);
     }
-
-
 }
 
 void visual_test_1()
