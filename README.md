@@ -4,10 +4,10 @@
 ### Любая диаграмма ###
 - [x] использование директив `@startuml`/`@enduml`;
 - [x] смена направления:
-  - `left to right direction`
-  - `top to bottom direction`
+  * `left to right direction`
+  * `top to bottom direction`
 - [x] использование однострочных `skinparam`:
-  - `skinparam actorStyle Hollow`
+  * `skinparam actorStyle Hollow`
 - [ ] использование заметок с ключевым словом `note`;
 - [ ] ...
 - [x] пустые строки;
@@ -15,16 +15,16 @@
 
 ### Диаграмма прецедентов ###
 - [x] определение узлов `usecase`:
-  - `usecase (Делать что-то) as UC`
-  - `usecase "Делать что-то" as UC`
+  * `usecase (Делать что-то) as UC`
+  * `usecase "Делать что-то" as UC`
 - [x] определение узлов `actor`:
-  - `actor :Какой-то актор: as A`
-  - `actor "Какой-то актор" as A`
+  * `actor :Какой-то актор: as A`
+  * `actor "Какой-то актор" as A`
 - [x] ассоциация, включение, расширения, наследование:
-  - `UC <-- A`
-  - `UC ..> UC1 : <<include>>`
-  - `UC <.. UC1 : <<extend>>`
-  - `A1 --|> A`
+  * `UC <-- A`
+  * `UC ..> UC1 : <<include>>`
+  * `UC <.. UC1 : <<extend>>`
+  * `A1 --|> A`
 - [x] группировки `package`/`rectangle`;
 ---
 
