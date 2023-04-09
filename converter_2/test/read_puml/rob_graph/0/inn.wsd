@@ -1,0 +1,32 @@
+@startuml
+
+skinparam ActorBorderThickness 1.5
+skinparam ActorBackgroundColor #FEFECE
+skinparam ActorBorderColor #B20842
+
+skinparam BoundaryBorderThickness 1.5
+skinparam BoundaryBackgroundColor #FEFECE
+skinparam BoundaryBorderColor #B20842
+
+skinparam EntityBorderThickness 1.5
+skinparam EntityBackgroundColor #FEFECE
+skinparam EntityBorderColor #B20842
+
+skinparam ControlBorderThickness 1.5
+skinparam ControlBackgroundColor #FEFECE
+skinparam ControlBorderColor #B20842
+
+skinparam Shadowing true
+
+actor teacher
+boundary "main menu screen" as main_menu_screen
+boundary "Errr" as err_screen #red
+boundary "add student screen" as add_student_screen 
+control "display add student screen" as display_add_student_screen
+
+teacher -- err_screen
+teacher -- main_menu_screen
+teacher --> add_student_screen
+main_menu_screen --> display_add_student_screen : add button pressed
+
+@enduml

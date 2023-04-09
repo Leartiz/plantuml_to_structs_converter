@@ -1,15 +1,18 @@
 @startuml
 
-actor teacher  
+boundary ErrB #red
+control ErrC #red
+
+actor teacher  #red
 entity student_database
 boundary "main menu screen" as main_menu_screen
 boundary "add student screen" as add_student_screen 
 control "display add student screen" as display_add_student_screen
 control "display main menu" as display_main_menu
 control "display notification student added successful" as display_notification_student_added_successful
-control "add student" as add_student
+control "add student" as add_student #red
 
-teacher -- main_menu_screen 
+teacher <-- main_menu_screen : dasd
 teacher -- add_student_screen
 
 main_menu_screen --> display_add_student_screen : add button pressed
@@ -17,7 +20,7 @@ main_menu_screen --> display_add_student_screen : add button pressed
 display_add_student_screen --> add_student_screen
 display_main_menu --> main_menu_screen
 
-add_student_screen -- add_student : "next button pressed"
+add_student_screen -- add_student : next button pressed"
 add_student --> student_database : "successful"
 add_student --> display_main_menu : "successful"
 add_student --> display_notification_student_added_successful : "successful"
@@ -26,7 +29,7 @@ note right of teacher:ds
 
 
 note right of main_menu_screen : "This is boundary object"
-note right of student_database : This is entity object 
+note bottom of student_database : This is entity object 
 note right of add_student : This is control object 
 note as scenario
 Главная последовательность:

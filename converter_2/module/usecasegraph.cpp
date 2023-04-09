@@ -11,6 +11,7 @@
 #include "constructhelper.h"
 #include "grapherror.h"
 
+#include "json_utils.h"
 #include "nlohmann/json.hpp"
 
 using namespace std;
@@ -33,7 +34,7 @@ UseCaseGraph::UcEdge::UcEdge(string id, string name, Type tp) {
 namespace {
 
 // TODO: сделать как поле в классе Graph? (нужно если делать read_puml общим)
-const auto ch{ make_shared<ConstructHelper>() };
+ConstructHelper* ch{ nullptr };
 
 UseCaseGraph::UcEdge::Type edge_type_from_arrow_parts(const string& head,
                                                       const string& body,
@@ -90,51 +91,19 @@ string edge_type_to_str(const UseCaseGraph::UcEdge::Type tp) {
 
 // TODO: создать новый тип исключений?
 json edge_to_json(UseCaseGraph::UcEdge& edge) {
-    if (edge.beg.expired() || edge.end.expired()) {
-        throw runtime_error{ "beg or end expired" };
-    }
-
-    json result;
-    result["id"] = edge.id;
-    result["name"] = edge.name;
+    json result = json_utils::edge_to_json(edge);
     result["type"] = edge_type_to_str(edge.type);
-    result["beg"] = { { "id", edge.beg.lock()->id } };
-    result["end"] = { { "id", edge.end.lock()->id } };
     return result;
 }
 
-// TODO: вектор слабых ссылок, можно изменить?
-json edges_to_short_json(vector<weak_ptr<Graph::Edge>> edges) {
-    const string id_key{ "id" };
-    auto json_edges = json::array();
-    for_each(begin(edges), end(edges), [&](const weak_ptr<Graph::Edge> edge_wp) {
-        if (const auto edge_sp = edge_wp.lock(); edge_sp) {
-            json_edges.push_back({ { id_key, edge_sp->id } });
-            return;
-        }
-        throw runtime_error{ "inn/out edge expired" };
-    });
-
-    sort(begin(json_edges), end(json_edges), [&](const json& lhs, const json& rhs) {
-        return lhs[id_key] < rhs[id_key];
-    });
-    return json_edges;
-}
-
 json node_to_json(UseCaseGraph::UcNode& node) {
-    json result;
-    result["id"] = node.id;
-    result["name"] = node.name;
+    json result = json_utils::node_to_json(node);
     result["type"] = node_type_to_str(node.type);
-
-    result["inn_edges"] = edges_to_short_json(node.inns);
-    result["out_edges"] = edges_to_short_json(node.outs);
 
     result["rob_dia"] = node.id;
     result["seq_dia"] = node.id;
     if (!node.rob_graph) result["rob_dia"] = nullptr;
     if (!node.seq_graph) result["seq_dia"] = nullptr;
-
     return result;
 }
 
@@ -142,8 +111,11 @@ json node_to_json(UseCaseGraph::UcNode& node) {
 
 // -----------------------------------------------------------------------
 
+// TODO: создать базовое определение
 void UseCaseGraph::read_puml(istream& in) {
+    ch = m_ch.get();
     ch->reset();
+
     while (in) {
         string line;
         getline(in, line);
@@ -155,6 +127,7 @@ void UseCaseGraph::read_puml(istream& in) {
                 !try_whitespaces(line) &&
                 !try_grouping(line, in) &&
 
+                !try_one_note(line) &&
                 !try_directive(line) &&
                 !try_skinparam(line) &&
                 !try_direction(line)) {
@@ -164,6 +137,7 @@ void UseCaseGraph::read_puml(istream& in) {
 
     nodes = ch->to_nodes();
     edges = ch->to_edges();
+    ch = nullptr;
 }
 
 void UseCaseGraph::write_json(ostream& out) {

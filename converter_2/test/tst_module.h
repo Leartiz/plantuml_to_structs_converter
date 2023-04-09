@@ -69,6 +69,21 @@ private slots:
 
     // RobustnessGraph
 private slots:
+    void test_RobustnessGraph_read_okk();
+    void test_RobustnessGraph_read_okk1();
+    void test_RobustnessGraph_read_okk3();
+
+    void test_RobustnessGraph_read_puml_data();
+    void test_RobustnessGraph_read_puml();
+
+    // SequenceGraph
+private slots:
+
+    // ClassGraph
+private slots:
+
+    // LayoutFlowGraph
+private slots:
 
 };
 

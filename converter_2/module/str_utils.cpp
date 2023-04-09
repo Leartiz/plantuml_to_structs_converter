@@ -226,7 +226,10 @@ std::string trim(std::string str, const std::string& chs)
 
 std::string un_quote(std::string str)
 {
-    trim_by_ref(str, "\"");
+    if (str.size() < 2) return str;
+    if (str.front() == '\"' && str.back() == '\"') {
+        trim_by_ref(str, "\"");
+    }
     return str;
 }
 

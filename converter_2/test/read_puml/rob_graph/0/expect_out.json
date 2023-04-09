@@ -1,0 +1,151 @@
+{
+    "edges": [
+      {
+        "beg": {
+          "id": "teacher"
+        },
+        "end": {
+          "id": "err_screen"
+        },
+        "id": "1",
+        "name": ""
+      },
+      {
+        "beg": {
+          "id": "err_screen"
+        },
+        "end": {
+          "id": "teacher"
+        },
+        "id": "2",
+        "name": ""
+      },
+      {
+        "beg": {
+          "id": "teacher"
+        },
+        "end": {
+          "id": "main_menu_screen"
+        },
+        "id": "3",
+        "name": ""
+      },
+      {
+        "beg": {
+          "id": "main_menu_screen"
+        },
+        "end": {
+          "id": "teacher"
+        },
+        "id": "4",
+        "name": ""
+      },
+      {
+        "beg": {
+          "id": "teacher"
+        },
+        "end": {
+          "id": "add_student_screen"
+        },
+        "id": "5",
+        "name": ""
+      },
+      {
+        "beg": {
+          "id": "main_menu_screen"
+        },
+        "end": {
+          "id": "display_add_student_screen"
+        },
+        "id": "6",
+        "name": "add button pressed"
+      }
+    ],
+    "id": null,
+    "nodes": [
+      {
+        "id": "add_student_screen",
+        "inn_edges": [
+          {
+            "id": "5"
+          }
+        ],
+        "is_error": false,
+        "name": "add student screen",
+        "out_edges": [],
+        "type": "boundary"
+      },
+      {
+        "id": "display_add_student_screen",
+        "inn_edges": [
+          {
+            "id": "6"
+          }
+        ],
+        "is_error": false,
+        "name": "display add student screen",
+        "out_edges": [],
+        "type": "control"
+      },
+      {
+        "id": "err_screen",
+        "inn_edges": [
+          {
+            "id": "1"
+          }
+        ],
+        "is_error": true,
+        "name": "Errr",
+        "out_edges": [
+          {
+            "id": "2"
+          }
+        ],
+        "type": "boundary"
+      },
+      {
+        "id": "main_menu_screen",
+        "inn_edges": [
+          {
+            "id": "3"
+          }
+        ],
+        "is_error": false,
+        "name": "main menu screen",
+        "out_edges": [
+          {
+            "id": "4"
+          },
+          {
+            "id": "6"
+          }
+        ],
+        "type": "boundary"
+      },
+      {
+        "id": "teacher",
+        "inn_edges": [
+          {
+            "id": "2"
+          },
+          {
+            "id": "4"
+          }
+        ],
+        "is_error": false,
+        "name": "teacher",
+        "out_edges": [
+          {
+            "id": "1"
+          },
+          {
+            "id": "3"
+          },
+          {
+            "id": "5"
+          }
+        ],
+        "type": "actor"
+      }
+    ]
+  }

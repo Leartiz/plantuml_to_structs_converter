@@ -5,6 +5,7 @@
 #include <memory>
 #include <sstream>
 
+struct ConstructHelper;
 struct Graph {
     struct Unit {
         std::string id, name;
@@ -21,6 +22,7 @@ struct Graph {
     };
 
 public:
+    Graph();
     virtual ~Graph() = default;
 
     // TODO: в один метод - почти одинаковая логика для всех диаграмм (графов)
@@ -43,9 +45,17 @@ protected:
     bool try_end_curly_brace(std::string&);
 
 protected:
+    bool try_one_note(std::string&);
+    bool try_beg_multi_note(std::string&);
+    bool try_end_multi_note(std::string&);
+
+protected:
     virtual bool try_node(std::string&) = 0;
     virtual bool try_connection(std::string&) = 0;
     virtual bool try_grouping(std::string&, std::istream&) = 0;
+
+protected:
+    const std::shared_ptr<ConstructHelper> m_ch;
 };
 
 #endif // GRAPH_H

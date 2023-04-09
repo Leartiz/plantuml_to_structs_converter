@@ -5,6 +5,7 @@
 #include "tst_module.h"
 
 #include "usecasegraph.h"
+#include "robustnessgraph.h"
 #include "classgraph.h"
 #include "grapherror.h"
 
@@ -513,7 +514,6 @@ void Module::test_UseCaseGraph_read_okk()
     QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
     QCOMPARE_EQ(ucg.nodes.size(), size_t(2));
     QCOMPARE_EQ(ucg.edges.size(), size_t(1));
-
 }
 
 void Module::test_UseCaseGraph_read_okk1()
@@ -570,6 +570,7 @@ void Module::test_UseCaseGraph_read_okk2()
         QCOMPARE_EQ(uc_node->id, string("UC1"));
         QCOMPARE_EQ(uc_node->name, string("UC1"));
         QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
     }
     // ***
@@ -585,6 +586,7 @@ void Module::test_UseCaseGraph_read_okk2()
         QCOMPARE_EQ(uc_node->id, string("A1"));
         QCOMPARE_EQ(uc_node->name, string("A1"));
         QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
     }
     // ***
@@ -625,6 +627,7 @@ void Module::test_UseCaseGraph_read_okk3()
         QCOMPARE_EQ(uc_node->id, string("UC1"));
         QCOMPARE_EQ(uc_node->name, string("Последний прецедент"));
         QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Usecase);
     }
     // ***
@@ -640,6 +643,7 @@ void Module::test_UseCaseGraph_read_okk3()
         QCOMPARE_EQ(uc_node->id, string("A1"));
         QCOMPARE_EQ(uc_node->name, string("A1"));
         QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
     }
     // ***
@@ -682,6 +686,7 @@ void Module::test_UseCaseGraph_read_okk4()
         QCOMPARE_EQ(uc_node->id, string("UC1"));
         QCOMPARE_EQ(uc_node->name, string("Last precedent"));
         QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Usecase);
     }
     // ***
@@ -697,6 +702,7 @@ void Module::test_UseCaseGraph_read_okk4()
         QCOMPARE_EQ(uc_node->id, string("A1"));
         QCOMPARE_EQ(uc_node->name, string("Last actor"));
         QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
         QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
     }
     // ***
@@ -826,6 +832,259 @@ void Module::test_UseCaseGraph_read_puml()
     QVERIFY_THROWS_NO_EXCEPTION(uc_graph.read_puml(fin_inn));
     QVERIFY_THROWS_NO_EXCEPTION(uc_graph.write_json(fout_actual));
     QVERIFY_THROWS_NO_EXCEPTION(uc_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ(actual == expected, true);
+}
+
+// RobustnessGraph
+// -----------------------------------------------------------------------
+
+void Module::test_RobustnessGraph_read_okk()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor \"Пользователь\" as User \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "boundary \"Окно ошибки\" as ErrWin #red \n"
+        "\n"
+        "entity DbFacade \n"
+        "control load \n"
+        "\n"
+        "User -- MainWin \n"
+        "User -- ErrWin \n"
+        "\n"
+        "@enduml"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(5));
+    QCOMPARE_EQ(robG.edges.size(), size_t(4)); // important!
+}
+
+void Module::test_RobustnessGraph_read_okk1()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "actor \"Пользователь\" as User \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "\n"
+        "User --> MainWin : one line... \n"
+        "\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(robG.edges.size(), size_t(1));
+
+    // ***
+
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "User";
+        }));
+        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("User"));
+        QCOMPARE_EQ(rob_node->name, string("Пользователь"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Actor);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(0));
+    }
+    // ***
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("MainWin"));
+        QCOMPARE_EQ(rob_node->name, string("Главное окно"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Boundary);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges[0];
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->name, string("one line..."));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("User"));
+    }
+}
+
+void Module::test_RobustnessGraph_read_okk3()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "control \"display add student screen\" as display_add_student_screen \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "\n"
+        "display_add_student_screen -- MainWin : edge text \n"
+        "\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(robG.edges.size(), size_t(2));
+
+    // ***
+
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "display_add_student_screen";
+        }));
+        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(rob_node->name, string("display add student screen"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Control);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("MainWin"));
+        QCOMPARE_EQ(rob_node->name, string("Главное окно"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Boundary);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
+                                                            [](const shared_ptr<Graph::Edge> edge) {
+            return edge->id == "1";
+        }));
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->name, string("edge text"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
+                                                            [](const shared_ptr<Graph::Edge> edge) {
+            return edge->id == "2";
+        }));
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("2"));
+        QCOMPARE_EQ(uc_edge->name, string("edge text"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("MainWin"));
+    }
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_RobustnessGraph_read_puml_data()
+{
+    QTest::addColumn<string>("inn_fpath");
+    QTest::addColumn<string>("expect_out_fpath");
+    QTest::addColumn<string>("actual_out_fpath");
+
+    // ***
+
+    auto cur_dir{ QDir::current() };
+    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/rob_graph"), true);
+
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
+    QCOMPARE_EQ(test_catalogs.contains(".."), false);
+    QCOMPARE_EQ(test_catalogs.contains("."), false);
+
+    // ***
+
+    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
+        QCOMPARE_EQ(cur_test_catalog.exists(), true);
+
+        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
+        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
+        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
+
+        QCOMPARE_EQ(QFile::exists(dia_source), true);
+        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
+        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
+
+        const std::string inn_fpath{ dia_source.toStdString() };
+        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
+        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
+
+        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
+    }
+}
+
+void Module::test_RobustnessGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    RobustnessGraph rob_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.write_json(siout_actual));
 
     // ***
 

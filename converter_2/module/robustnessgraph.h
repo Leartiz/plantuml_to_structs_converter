@@ -25,6 +25,7 @@ struct RobustnessGraph : Graph {
         RobEdge(std::string id, std::string name);
     };
 
+    // TODO: сделать поле - отдельный строковый идентификатор?
     std::weak_ptr<UseCaseGraph::UcNode> uc_node;
 
 public:
@@ -32,8 +33,13 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
+    bool try_whole_node(std::string&);
+    bool try_short_node(std::string&);
+
     bool try_node(std::string&) override;
     bool try_connection(std::string&) override;
+
+protected:
     bool try_grouping(std::string&, std::istream&) override;
 };
 
