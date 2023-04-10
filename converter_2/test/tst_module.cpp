@@ -13,6 +13,8 @@
 #include "nlohmann/json.hpp"
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 4, 0)
+    Q_DECLARE_METATYPE(std::string);
+
     #define QCOMPARE_EQ(lhs, rhs) QCOMPARE(lhs == rhs, true);
     #define QCOMPARE_NE(lhs, rhs) QCOMPARE(lhs == rhs, false);
 
@@ -564,7 +566,7 @@ void Module::test_UseCaseGraph_read_okk2()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "UC1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("UC1"));
@@ -580,7 +582,7 @@ void Module::test_UseCaseGraph_read_okk2()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "A1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("A1"));
@@ -621,7 +623,7 @@ void Module::test_UseCaseGraph_read_okk3()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "UC1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("UC1"));
@@ -637,7 +639,7 @@ void Module::test_UseCaseGraph_read_okk3()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "A1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("A1"));
@@ -680,7 +682,7 @@ void Module::test_UseCaseGraph_read_okk4()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "UC1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("UC1"));
@@ -696,7 +698,7 @@ void Module::test_UseCaseGraph_read_okk4()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "A1";
         }));
-        QCOMPARE_EQ(detected_node == ucg.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
 
         auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
         QCOMPARE_EQ(uc_node->id, string("A1"));
@@ -843,7 +845,7 @@ void Module::test_UseCaseGraph_read_puml()
 
     QCOMPARE_EQ(actual.is_object(), true);
     QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
+    QCOMPARE_EQ((actual == expected), true);
 }
 
 // RobustnessGraph
@@ -895,7 +897,7 @@ void Module::test_RobustnessGraph_read_okk1()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "User";
         }));
-        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
 
         auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
         QCOMPARE_EQ(rob_node->id, string("User"));
@@ -912,7 +914,7 @@ void Module::test_RobustnessGraph_read_okk1()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "MainWin";
         }));
-        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
 
         auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
         QCOMPARE_EQ(rob_node->id, string("MainWin"));
@@ -957,7 +959,7 @@ void Module::test_RobustnessGraph_read_okk3()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "display_add_student_screen";
         }));
-        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
 
         auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
         QCOMPARE_EQ(rob_node->id, string("display_add_student_screen"));
@@ -974,7 +976,7 @@ void Module::test_RobustnessGraph_read_okk3()
                                                             [](const shared_ptr<Graph::Node> node) {
             return node->id == "MainWin";
         }));
-        QCOMPARE_EQ(detected_node == robG.nodes.end(), false);
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
 
         auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
         QCOMPARE_EQ(rob_node->id, string("MainWin"));
@@ -1096,7 +1098,7 @@ void Module::test_RobustnessGraph_read_puml()
 
     QCOMPARE_EQ(actual.is_object(), true);
     QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
+    QCOMPARE_EQ((actual == expected), true);
 }
 
 QTEST_APPLESS_MAIN(Module)

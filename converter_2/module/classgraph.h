@@ -1,25 +1,30 @@
 #ifndef CLASSGRAPH_H
 #define CLASSGRAPH_H
 
+#include <vector>
+
 #include "graph.h"
 
 struct ClassGraph : Graph {
     struct Member {
-        enum Mark : unsigned char {
-            Public = '+',
-            Private = '-',
-            Protected = '#',
+        enum Mark : uint32_t {
+            Public = '+', Private = '-', Protected = '#',
         };
 
         static Member from_str(std::string&);
 
         Mark mark{ Public };
-        std::string name;
+        std::string name, type;
+        std::vector<std::string> args;
+
     };
 
     struct ClassEdge;
     struct ClassNode : public Node {
-        std::vector<std::weak_ptr<ClassEdge>> outs, inns;
+        enum Type : uint32_t {
+            Class, Enum, Interface,
+        };
+
         std::vector<Member> datas, funcs;
     };
 
@@ -34,7 +39,6 @@ struct ClassGraph : Graph {
         };
 
         Type type{ Association };
-        std::weak_ptr<ClassNode> beg, end;
     };
 
 public:

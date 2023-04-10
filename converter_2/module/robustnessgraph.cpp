@@ -71,29 +71,7 @@ json node_to_json(RobustnessGraph::RobNode& node) {
 
 void RobustnessGraph::read_puml(std::istream& in) {
     ch = m_ch.get();
-    ch->reset();
-
-    while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
-        if (
-                !try_node(line) &&
-                !try_connection(line) &&
-                !try_whitespaces(line) &&
-                !try_grouping(line, in) &&
-
-                !try_one_note(line) &&
-                !try_directive(line) &&
-                !try_skinparam(line) &&
-                !try_direction(line)) {
-            throw GraphError(ch->line_number, "unknown line");
-        }
-    }
-
-    nodes = ch->to_nodes();
-    edges = ch->to_edges();
+    Graph::read_puml(in);
     ch = nullptr;
 }
 

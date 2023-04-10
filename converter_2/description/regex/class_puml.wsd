@@ -1,0 +1,30 @@
+@startuml
+
+enum TimeUnit {
+  DAYS
+  HOURS
+  MINUTES
+}
+
+class Foo{
+  +val : Number
+  +fn(int, bool) : Number
+}
+note left: On last defined class
+
+note top of Foo : das
+
+note top of Foo
+  In java, <size:18>every</size> <u>class</u>
+  <b>extends</b>
+  <i>this</i> one.
+end note
+
+note as N1
+  Эта заметка <u>также</u>
+  <b><color:royalBlue>состоит из</color>
+  <s>нескольких</s> строчек.
+  And this is hosted by <img:sourceforge.jpg>
+end note
+
+@enduml

@@ -41,6 +41,8 @@
   *  `boundary "Главное окно" as main_screen`
 - [x] отношения между элементами:
   * `User -- MainWin`
+  * `AnyActor --> AnyBoundary`
+  * `start_game <-- main_game_screen : нажата кнопка "старт"`
 - [x] альтернативные последовательности цветом `#red`:
   *  `boundary ErrB #red`
   *  `control ErrC #red`

@@ -40,7 +40,7 @@ bool Graph::try_end_curly_brace(string& line) {
 
 bool Graph::try_one_note(string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*note\\s+(left|right|top|bottom)\\s+of\\s+(\\S+)\\s*:(.+)$"))) {
+    if (!regex_match(line, match, regex("^\\s*note\\s+(left|right|top|bottom)\\s*(\\s+of\\s+(\\S+))?\\s*:(.+)$"))) {
         return false;
     }
 
@@ -55,6 +55,38 @@ bool Graph::try_beg_multi_note(string&) {
     return false; // TODO: многострочная заметка?
 }
 
+bool try_beg_note_with_id(std::string&) {
+    return false;
+}
+
 bool Graph::try_end_multi_note(string&) {
     return false;
+}
+
+// -----------------------------------------------------------------------
+
+void Graph::read_puml(std::istream& in) {
+    m_ch->reset();
+
+    while (in) {
+        string line;
+        getline(in, line);
+        m_ch->line_number++;
+
+        if (
+                !try_node(line) &&
+                !try_connection(line) &&
+                !try_whitespaces(line) &&
+                !try_grouping(line, in) &&
+
+                !try_one_note(line) &&
+                !try_directive(line) &&
+                !try_skinparam(line) &&
+                !try_direction(line)) {
+            throw GraphError(m_ch->line_number, "unknown line");
+        }
+    }
+
+    nodes = m_ch->to_nodes();
+    edges = m_ch->to_edges();
 }

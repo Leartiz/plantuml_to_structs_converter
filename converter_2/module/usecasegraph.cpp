@@ -114,30 +114,8 @@ json node_to_json(UseCaseGraph::UcNode& node) {
 // TODO: создать базовое определение
 void UseCaseGraph::read_puml(istream& in) {
     ch = m_ch.get();
-    ch->reset();
-
-    while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
-        if (
-                !try_node(line) &&
-                !try_connection(line) &&
-                !try_whitespaces(line) &&
-                !try_grouping(line, in) &&
-
-                !try_one_note(line) &&
-                !try_directive(line) &&
-                !try_skinparam(line) &&
-                !try_direction(line)) {
-            throw GraphError(ch->line_number, "unknown line");
-        }
-    }
-
-    nodes = ch->to_nodes();
-    edges = ch->to_edges();
-    ch = nullptr;
+    Graph::read_puml(in);
+    ch = nullptr; // raw ptr.
 }
 
 void UseCaseGraph::write_json(ostream& out) {

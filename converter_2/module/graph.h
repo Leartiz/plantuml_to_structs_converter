@@ -47,6 +47,7 @@ protected:
 protected:
     bool try_one_note(std::string&);
     bool try_beg_multi_note(std::string&);
+    bool try_beg_note_with_id(std::string&);
     bool try_end_multi_note(std::string&);
 
 protected:
