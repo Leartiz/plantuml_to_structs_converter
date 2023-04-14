@@ -33,7 +33,6 @@ UseCaseGraph::UcEdge::UcEdge(string id, string name, Type tp) {
 
 namespace {
 
-// TODO: сделать как поле в классе Graph? (нужно если делать read_puml общим)
 ConstructHelper* ch{ nullptr };
 
 UseCaseGraph::UcEdge::Type edge_type_from_arrow_parts(const string& head,

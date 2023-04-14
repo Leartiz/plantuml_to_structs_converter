@@ -3,9 +3,7 @@
 #include <stdexcept>
 
 #include "robustnessgraph.h"
-
 #include "constructhelper.h"
-#include "grapherror.h"
 
 #include "str_utils.h"
 #include "json_utils.h"

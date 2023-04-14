@@ -5,105 +5,64 @@
 
 #include "classgraph.h"
 
+#include "constructhelper.h"
+#include "grapherror.h"
+
+#include "json_utils.h"
+#include "nlohmann/json.hpp"
+
 using namespace std;
+using namespace nlohmann;
 
-// [+-#] Name : Type
-ClassGraph::Member ClassGraph::Member::from_str(string& line) {
-    std::smatch match;
+using Member = ClassGraph::ClassNode::Member;
 
-    if (!std::regex_match (line, match, std::regex("\\s*([+#-]?)\\s*(\\S+)\\s*:\\s*(\\S+)")))
-        throw std::runtime_error("member not found");
-
-    Member field;
-    if (match[1].str().empty()) {
-        field.mark = Private;
-    }
-    else {
-        switch (match[1].str()[0]) {
-        case '#':
-            field.mark = Protected;
-            break;
-        case '-':
-            field.mark = Private;
-            break;
-        case '+':
-            field.mark = Public;
-            break;
-        default:
-            throw std::runtime_error("unknown mark");
-        }
-    }
-
-    field.name = match[2];
-
-    // TODO: types
-
-    return field;
+ClassGraph::ClassNode::ClassNode(std::string id, std::string name, Type tp) {
+    this->name = std::move(name);
+    this->id = std::move(id);
+    this->type = tp;
 }
 
-// Edge: A --> B
-// Node: class Name {}
-void ClassGraph::read_puml(istream& in) {
-    stringstream stream_copy;
-    stream_copy << in.rdbuf();
-    string text{ stream_copy.str() };
-
-    map<string, shared_ptr<ClassNode>> name_node;
-
-    while (stream_copy) {
-        string line;
-        getline(stream_copy, line);
-
-        std::smatch match;
-        if (!regex_match(line, match, regex("\\s*class\\s+(\\S+)\\s*\\{\\s*"))) {
-
-        }
-
-        auto node = make_shared<ClassNode>();
-        node->id = node->name = match[1];
-
-        while (stream_copy) {
-            getline(stream_copy, line);
-            if (!regex_match(line, match, regex("\\s*\\}\\s*")))
-                node->datas.push_back(Member::from_str(line)); // throw!
-            break;
-        }
-
-        nodes.push_back(node);
-        if (name_node.count(node->id))
-            throw std::runtime_error("node already defined");
-
-        name_node[node->id] = node;
-    }
-
-    stream_copy.clear();
-    stream_copy << text;
-    while (stream_copy) {
-
-        // A <|-- B
-        // A <|- B
-
-        // В другую строну
-
-        string line;
-        std::getline(stream_copy, line);
-
-        std::smatch match;
-        if (false == std::regex_match (line, match, std::regex("(\\S+)\\s*<|--*\\s+(\\S+)")))
-            continue;
-
-        //TODO: проверить что начало и конец созданы (есть в мапе)
-
-        auto edge = shared_ptr<ClassEdge>();
-
-        edge->beg = name_node[match[1]];
-        edge->end = name_node[match[2]];
-
-        edges.push_back(edge);
-    }
+ClassGraph::ClassEdge::ClassEdge(std::string id, std::string name, Type tp) {
+    this->name = std::move(name);
+    this->id = std::move(id);
+    this->type = tp;
 }
 
-void ClassGraph::write_json(ostream& sstr)
-{
+// -----------------------------------------------------------------------
+
+
+namespace {
+
+ConstructHelper* ch{ nullptr };
+
+// *** json
+
+json member_data_to_json(Member data) {
+
+}
+
+json member_func_to_json(Member data) {
+
+}
+
+}
+
+// -----------------------------------------------------------------------
+
+void ClassGraph::read_puml(std::istream& in) {
+    ch = m_ch.get();
+    Graph::read_puml(in);
+    ch = nullptr;
+}
+
+void ClassGraph::write_json(std::ostream&) {
+
+}
+
+bool ClassGraph::try_node(std::string&) {
+
+}
+
+bool ClassGraph::try_connection(std::string&) {
 
 }

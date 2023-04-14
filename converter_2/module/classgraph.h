@@ -6,37 +6,41 @@
 #include "graph.h"
 
 struct ClassGraph : Graph {
-    struct Member {
-        enum Mark : uint32_t {
-            Public = '+', Private = '-', Protected = '#',
+
+    struct ClassNode : public Node {
+        // TODO: separate data and funcs?
+        struct Member final {
+            enum Mark : uint32_t {
+                Public = '+', Private = '-', Protected = '#',
+            };
+
+            static Member from_str(std::string&);
+
+            Mark mark{ Public };
+            std::string name, type; // or return type!
+            std::vector<std::string> param_types;
         };
 
-        static Member from_str(std::string&);
-
-        Mark mark{ Public };
-        std::string name, type;
-        std::vector<std::string> args;
-
-    };
-
-    struct ClassEdge;
-    struct ClassNode : public Node {
         enum Type : uint32_t {
             Class, Enum, Interface,
         };
 
+        ClassNode() = default;
+        ClassNode(std::string id, std::string name, Type);
+
+        Type type{ Class };
         std::vector<Member> datas, funcs;
     };
 
     struct ClassEdge : public Edge {
-        enum Type {
-            Dependency,
-            Association,
-            Aggregation,
-            Composition,
-            Implementation,
-            Generalization,
+        enum Type : uint32_t {
+            Dependency, Association,
+            Aggregation, Composition,
+            Implementation, Generalization,
         };
+
+        ClassEdge() = default;
+        ClassEdge(std::string id, std::string name, Type);
 
         Type type{ Association };
     };
@@ -44,6 +48,10 @@ struct ClassGraph : Graph {
 public:
     void read_puml(std::istream&) override;
     void write_json(std::ostream&) override;
+
+protected:
+    bool try_node(std::string&) override;
+    bool try_connection(std::string&) override;
 };
 
 #endif // CLASSGRAPH_H
