@@ -118,8 +118,6 @@ void UseCaseGraph::read_puml(istream& in) {
 }
 
 void UseCaseGraph::write_json(ostream& out) {
-    using namespace nlohmann;
-
     json json_graph;
     json_graph["id"] = "use_case_dia";
 
@@ -150,7 +148,8 @@ void UseCaseGraph::write_json(ostream& out) {
 
 bool UseCaseGraph::try_actor_node(string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$"))) {
+    static const regex rx{ "^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -164,7 +163,8 @@ bool UseCaseGraph::try_actor_node(string& line) {
 
 bool UseCaseGraph::try_usecase_node(string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$"))) {
+    static const regex rx{ "^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -178,15 +178,15 @@ bool UseCaseGraph::try_usecase_node(string& line) {
 
 // -----------------------------------------------------------------------
 
-bool UseCaseGraph::try_node(std::string& line) {
+bool UseCaseGraph::try_node(std::string& line, std::istream&) {
     return try_actor_node(line) || try_usecase_node(line);
 }
 
-bool UseCaseGraph::try_connection(string& line) {
+bool UseCaseGraph::try_connection(string& line, std::istream&) {
     smatch match;
-
-    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
-                                        "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$"))) {
+    static const regex rx{ "^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
+                           "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -253,8 +253,8 @@ bool UseCaseGraph::try_grouping(string& line, istream& in) {
         }
 
         if (
-                !try_node(line) &&
-                !try_connection(line) &&
+                !try_node(line, in) &&
+                !try_connection(line, in) &&
                 !try_whitespaces(line) &&
                 !try_grouping(line, in)) {
             throw GraphError(ch->line_number, "unknown line");

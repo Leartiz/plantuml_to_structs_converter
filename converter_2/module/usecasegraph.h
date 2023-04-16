@@ -48,8 +48,8 @@ protected:
     bool try_actor_node(std::string&);
     bool try_usecase_node(std::string&);
 
-    bool try_node(std::string&) override;
-    bool try_connection(std::string&) override;
+    bool try_node(std::string&, std::istream&) override;
+    bool try_connection(std::string&, std::istream&) override;
 
 protected:
     bool try_grouping(std::string&, std::istream&) override;

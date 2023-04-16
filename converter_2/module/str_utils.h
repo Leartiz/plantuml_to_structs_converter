@@ -16,7 +16,6 @@ void to_lower_by_ref(std::string& str);
 std::string to_upper(const std::string& str);
 std::string to_lower(const std::string& str);
 
-
 bool start_with(std::string str, std::string start, bool sensitive = true);
 bool stop_with(std::string str, std::string stop, bool sensitive = true);
 

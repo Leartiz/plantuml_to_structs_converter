@@ -14,8 +14,6 @@ struct ClassGraph : Graph {
                 Public = '+', Private = '-', Protected = '#',
             };
 
-            static Member from_str(std::string&);
-
             Mark mark{ Public };
             std::string name, type; // or return type!
             std::vector<std::string> param_types;
@@ -30,6 +28,7 @@ struct ClassGraph : Graph {
 
         Type type{ Class };
         std::vector<Member> datas, funcs;
+        std::vector<std::string> enum_values;
     };
 
     struct ClassEdge : public Edge {
@@ -50,8 +49,15 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_node(std::string&) override;
-    bool try_connection(std::string&) override;
+    bool try_node(std::string&, std::istream&) override;
+    bool try_connection(std::string&, std::istream&) override;
+    bool try_grouping(std::string&, std::istream&) override;
+
+protected:
+    void try_class_body(const std::string&, std::istream&);
+    void try_enum_body(const std::string&, std::istream&);
+    void try_interface_body(const std::string&, std::istream&);
+    bool try_class_member(const std::string&);
 };
 
 #endif // CLASSGRAPH_H

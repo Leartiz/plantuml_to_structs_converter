@@ -7,10 +7,17 @@ enum TimeUnit {
 }
 
 class Foo{
-  +val : Number
+  +vals : Number
+  +val() : Number
   +fn(int, bool) : Number
 }
 note left: On last defined class
+
+enum TimeUnit {
+  DAYS
+  HOURS
+  MINUTES
+}
 
 note top of Foo : das
 
@@ -26,5 +33,8 @@ note as N1
   <s>нескольких</s> строчек.
   And this is hosted by <img:sourceforge.jpg>
 end note
+
+A --o B : das
+A --* B
 
 @enduml

@@ -1101,4 +1101,18 @@ void Module::test_RobustnessGraph_read_puml()
     QCOMPARE_EQ((actual == expected), true);
 }
 
+// ClassGraph
+// -----------------------------------------------------------------------
+void Module::test_ClassGraph_read_okk()
+{
+    ClassGraph classG;
+    istringstream sin{
+        "control \"display add student screen\" as display_add_student_screen \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "\n"
+        "display_add_student_screen -- MainWin : edge text \n"
+        "\n"
+    };
+}
+
 QTEST_APPLESS_MAIN(Module)

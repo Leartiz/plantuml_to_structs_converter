@@ -39,7 +39,7 @@ string node_type_to_str(const RobustnessGraph::RobNode::Type tp) {
     case RobustnessGraph::RobNode::Entity: return "entity";
     }
 
-    throw runtime_error{ "edge type unknown" };
+    throw runtime_error{ "node type unknown" };
 }
 
 RobustnessGraph::RobNode::Type str_to_node_type(const string& str) {
@@ -48,7 +48,7 @@ RobustnessGraph::RobNode::Type str_to_node_type(const string& str) {
     if (node_type_to_str(Type::Boundary) == str) return Type::Boundary;
     if (node_type_to_str(Type::Control) == str) return Type::Control;
     if (node_type_to_str(Type::Entity) == str) return Type::Entity;
-    throw runtime_error{ "edge type as str unknown" };
+    throw runtime_error{ "node type as str unknown" };
 }
 
 json edge_to_json(RobustnessGraph::RobEdge& edge) {
@@ -107,11 +107,11 @@ void RobustnessGraph::write_json(std::ostream& out) {
 
 // -----------------------------------------------------------------------
 
-bool RobustnessGraph::try_node(std::string& line) {
+bool RobustnessGraph::try_node(std::string& line, std::istream&) {
     return try_whole_node(line) || try_short_node(line);
 }
 
-bool RobustnessGraph::try_connection(std::string& line) {
+bool RobustnessGraph::try_connection(std::string& line, std::istream&) {
     smatch match;
     if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+([lrdu]|left|right|up|down)[-]+|[-]+)(>)?)"
                                         "\\s+(\\S+)\\s*(:(.*))?$"))) {
@@ -213,15 +213,14 @@ bool RobustnessGraph::try_short_node(std::string& line) {
         return false;
     }
 
-    const auto node_id = match[2].str();
-    const auto node_name = match[2].str();
+    const auto node_nmid = match[2].str();
     const auto node_type = str_to_node_type(match[1].str());
-    const auto node{ make_shared<RobNode>(node_id, node_name, node_type) };
+    const auto node{ make_shared<RobNode>(node_nmid, node_nmid, node_type) };
 
     if (match[3].matched) {
         node->is_error = true;
     }
 
-    ch->id_node[node_id] = node;
+    ch->id_node[node_nmid] = node;
     return true;
 }

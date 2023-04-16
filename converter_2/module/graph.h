@@ -49,10 +49,11 @@ protected:
     bool try_beg_multi_note(std::string&);
     bool try_beg_note_with_id(std::string&);
     bool try_end_multi_note(std::string&);
+    bool try_note(std::string&, std::istream&);
 
 protected:
-    virtual bool try_node(std::string&) = 0;
-    virtual bool try_connection(std::string&) = 0;
+    virtual bool try_node(std::string&, std::istream&) = 0;
+    virtual bool try_connection(std::string&, std::istream&) = 0;
     virtual bool try_grouping(std::string&, std::istream&) = 0;
 
 protected:
