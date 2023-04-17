@@ -20,6 +20,4 @@ asd
 
 }
 
-Bar <|-down-|> Foo : dasda
-
 @enduml

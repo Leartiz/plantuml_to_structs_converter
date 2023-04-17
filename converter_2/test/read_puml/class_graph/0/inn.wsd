@@ -1,0 +1,12 @@
+@startuml
+
+class Foo{
+  +val : Number
+  +get_val(das,) : Number
+}
+
+class Bar{
+
+}
+
+@enduml

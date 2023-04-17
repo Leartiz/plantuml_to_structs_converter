@@ -1105,14 +1105,226 @@ void Module::test_RobustnessGraph_read_puml()
 // -----------------------------------------------------------------------
 void Module::test_ClassGraph_read_okk()
 {
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
     ClassGraph classG;
     istringstream sin{
-        "control \"display add student screen\" as display_add_student_screen \n"
-        "boundary \"Главное окно\" as MainWin \n"
+        "@startuml\n"
         "\n"
-        "display_add_student_screen -- MainWin : edge text \n"
+        "class Foo{\n"
+        "   +val : Number\n"
+        "   -val1 : String\n"
+        "}\n"
         "\n"
+        "class Bar{\n"
+        "\n"
+        "}\n"
+        "@enduml"
     };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(2));
+        QCOMPARE_EQ(class_node->datas[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->datas[0].name, "val");
+        QCOMPARE_EQ(class_node->datas[0].type, "Number");
+        QCOMPARE_EQ(class_node->datas[0].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->datas[1].mark, Member::Private);
+        QCOMPARE_EQ(class_node->datas[1].name, "val1");
+        QCOMPARE_EQ(class_node->datas[1].type, "String");
+        QCOMPARE_EQ(class_node->datas[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+    // ***
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Bar";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Bar"));
+        QCOMPARE_EQ(class_node->name, string("Bar"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk1()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "   +fn(Int, Double) : String\n"
+        "   #fn2()\n"
+        "}\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(1));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->funcs[0].name, "fn");
+        QCOMPARE_EQ(class_node->funcs[0].type, "String");
+
+        QCOMPARE_EQ(class_node->funcs[0].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].param_types[0], "Int");
+        QCOMPARE_EQ(class_node->funcs[0].param_types[1], "Double");
+
+        QCOMPARE_EQ(class_node->funcs[1].mark, Member::Protected);
+        QCOMPARE_EQ(class_node->funcs[1].name, "fn2");
+        QCOMPARE_EQ(class_node->funcs[1].type, "");
+        QCOMPARE_EQ(class_node->funcs[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk2()
+{
+
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_ClassGraph_read_puml_data()
+{
+    QTest::addColumn<string>("inn_fpath");
+    QTest::addColumn<string>("expect_out_fpath");
+    QTest::addColumn<string>("actual_out_fpath");
+
+    // ***
+
+    auto cur_dir{ QDir::current() };
+    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/class_graph"), true);
+
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
+    QCOMPARE_EQ(test_catalogs.contains(".."), false);
+    QCOMPARE_EQ(test_catalogs.contains("."), false);
+
+    // ***
+
+    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
+        QCOMPARE_EQ(cur_test_catalog.exists(), true);
+
+        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
+        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
+        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
+
+        QCOMPARE_EQ(QFile::exists(dia_source), true);
+        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
+        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
+
+        const std::string inn_fpath{ dia_source.toStdString() };
+        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
+        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
+
+        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
+    }
+}
+
+void Module::test_ClassGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    ClassGraph class_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
 }
 
 QTEST_APPLESS_MAIN(Module)

@@ -82,6 +82,11 @@ private slots:
     // ClassGraph
 private slots:
     void test_ClassGraph_read_okk();
+    void test_ClassGraph_read_okk1();
+    void test_ClassGraph_read_okk2();
+
+    void test_ClassGraph_read_puml_data();
+    void test_ClassGraph_read_puml();
 
     // LayoutFlowGraph
 private slots:

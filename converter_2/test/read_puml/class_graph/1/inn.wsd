@@ -1,0 +1,17 @@
+@startuml
+
+class Foo{
+  +val : Number
+  +get_val(das,) : Number
+}
+
+enum Class_edge_type {
+    DEPENDENCY
+    ASSOCIATION
+    AGGREGATION
+    COMPOSITION
+    IMPLEMENTATION
+    GENERALIZATION
+}
+
+@enduml

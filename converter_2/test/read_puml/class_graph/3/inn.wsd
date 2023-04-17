@@ -9,17 +9,6 @@ class Bar{
 
 }
 
-interface FF {
-  do_it()
-  +do_it()
-}
-
-enum das {
-das 
-asd
-
-}
-
-Bar <|-down-|> Foo : dasda
+Bar <|-down-* Foo : dsad
 
 @enduml

@@ -1,0 +1,45 @@
+{
+  "edges": [],
+  "id": "class_dia",
+  "nodes": [
+    {
+      "enum_values": [
+        "DEPENDENCY",
+        "ASSOCIATION",
+        "AGGREGATION",
+        "COMPOSITION",
+        "IMPLEMENTATION",
+        "GENERALIZATION"
+      ],
+      "id": "Class_edge_type",
+      "inn_edges": [],
+      "name": "Class_edge_type",
+      "out_edges": [],
+      "type": "enum"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "val",
+          "type": "Number"
+        }
+      ],
+      "funcs": [
+        {
+          "mark": "+",
+          "name": "get_val",
+          "param_types": [
+            "das"
+          ],
+          "type": "Number"
+        }
+      ],
+      "id": "Foo",
+      "inn_edges": [],
+      "name": "Foo",
+      "out_edges": [],
+      "type": "class"
+    }
+  ]
+}

@@ -14,6 +14,8 @@ struct ClassGraph : Graph {
                 Public = '+', Private = '-', Protected = '#',
             };
 
+            Member(Mark, std::string name, std::string type);
+
             Mark mark{ Public };
             std::string name, type; // or return type!
             std::vector<std::string> param_types;
@@ -54,10 +56,15 @@ protected:
     bool try_grouping(std::string&, std::istream&) override;
 
 protected:
+    void try_interface_body(const std::string&, std::istream&);
     void try_class_body(const std::string&, std::istream&);
     void try_enum_body(const std::string&, std::istream&);
-    void try_interface_body(const std::string&, std::istream&);
-    bool try_class_member(const std::string&);
+
+protected:
+    // TODO: или вообще убрать в анонимный namespace?
+    bool try_interface_member_func(std::shared_ptr<ClassNode>, const std::string&);
+    bool try_class_member(std::shared_ptr<ClassNode>, const std::string&);
+    bool try_enum_value(std::shared_ptr<ClassNode>, const std::string&);
 };
 
 #endif // CLASSGRAPH_H

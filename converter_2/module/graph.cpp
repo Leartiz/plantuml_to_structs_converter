@@ -114,7 +114,7 @@ void Graph::read_puml(std::istream& in) {
 
         if (
                 !try_node(line, in) &&
-                !try_connection(line) &&
+                !try_connection(line, in) &&
                 !try_whitespaces(line) &&
                 !try_grouping(line, in) &&
 
