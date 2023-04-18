@@ -500,6 +500,87 @@ void Module::test_str_utils_trim_space()
     QCOMPARE_EQ(got, res);
 }
 
+// -----------------------------------------------------------------------
+
+void Module::test_str_utils_is_bracket_balance_err()
+{
+    QVERIFY_THROWS_EXCEPTION(std::runtime_error, str_utils::is_bracket_balance("(123(123))", 'A'));
+    // ...
+}
+
+void Module::test_str_utils_is_bracket_balance_data()
+{
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<char>("open_br");
+    QTest::addColumn<bool>("result");
+
+    // *** (
+    {
+        const std::string str{ "(123(123))" };
+        QTest::newRow("(123(123))") << str << '(' << true;
+    }
+    {
+        const std::string str{ "(123(123))(" };
+        QTest::newRow("(123(123))(") << str << '(' << false;
+    }
+    {
+        const std::string str{ "))(())" };
+        QTest::newRow("))(())") << str << '(' << false;
+    }
+    {
+        const std::string str{ "((()()))" };
+        QTest::newRow("((()()))") << str << '(' << true;
+    }
+
+    // *** [
+    {
+        const std::string str{ "[[[x[]][][][]]]" };
+        QTest::newRow("[[[x[]][][][]]]") << str << '[' << true;
+    }
+    {
+        const std::string str{ "[][[]" };
+        QTest::newRow("[][[]") << str << '[' << false;
+    }
+
+    // *** {
+    {
+        const std::string str{ "{}{}{{{}}}{{}}" };
+        QTest::newRow("{}{}{{{}}}{{}}") << str << '{' << true;
+    }
+    {
+        const std::string str{ "List{int}{}" };
+        QTest::newRow("List{int}{}") << str << '{' << true;
+    }
+    {
+        const std::string str{ "L{{}}{{" };
+        QTest::newRow("L{{}}{{") << str << '{' << false;
+    }
+
+    // *** <
+    {
+        const std::string str{ "List<Number>" };
+        QTest::newRow("List<Number>") << str << '<' << true;
+    }
+    {
+        const std::string str{ "List<Pair<int;double>>" };
+        QTest::newRow("List<Pair<int;double>>") << str << '<' << true;
+    }
+    {
+        const std::string str{ "List<Pair>>" };
+        QTest::newRow("List<Pair>>") << str << '<' << false;
+    }
+}
+
+void Module::test_str_utils_is_bracket_balance()
+{
+    QFETCH(std::string, str);
+    QFETCH(char, open_br);
+    QFETCH(bool, result);
+
+    auto got{ str_utils::is_bracket_balance(str, open_br) };
+    QCOMPARE_EQ(got, result);
+}
+
 // UseCaseGraph
 // -----------------------------------------------------------------------
 
@@ -1191,7 +1272,7 @@ void Module::test_ClassGraph_read_okk1()
         "\n"
         "class Foo{\n"
         "   +fn(Int, Double) : String\n"
-        "   #fn2()\n"
+        "   #fn2() : void\n"
         "}\n"
         "\n"
         "@enduml"
@@ -1229,7 +1310,7 @@ void Module::test_ClassGraph_read_okk1()
 
         QCOMPARE_EQ(class_node->funcs[1].mark, Member::Protected);
         QCOMPARE_EQ(class_node->funcs[1].name, "fn2");
-        QCOMPARE_EQ(class_node->funcs[1].type, "");
+        QCOMPARE_EQ(class_node->funcs[1].type, "void");
         QCOMPARE_EQ(class_node->funcs[1].param_types.size(), size_t(0));
 
         QCOMPARE_EQ(class_node->datas.size(), size_t(0));
@@ -1238,6 +1319,94 @@ void Module::test_ClassGraph_read_okk1()
 }
 
 void Module::test_ClassGraph_read_okk2()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "   +fn(Int, Double) : List<String>\n"
+        "   #fn2() : Number\n"
+        "   -fn3(List<Number>, String) : None\n"
+        "}\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(1));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(3));
+        QCOMPARE_EQ(class_node->funcs[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->funcs[0].name, "fn");
+        QCOMPARE_EQ(class_node->funcs[0].type, "List<String>");
+        QCOMPARE_EQ(class_node->funcs[0].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].param_types[0], "Int");
+        QCOMPARE_EQ(class_node->funcs[0].param_types[1], "Double");
+
+        QCOMPARE_EQ(class_node->funcs[1].mark, Member::Protected);
+        QCOMPARE_EQ(class_node->funcs[1].name, "fn2");
+        QCOMPARE_EQ(class_node->funcs[1].type, "Number");
+        QCOMPARE_EQ(class_node->funcs[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->funcs[2].mark, Member::Private);
+        QCOMPARE_EQ(class_node->funcs[2].name, "fn3");
+        QCOMPARE_EQ(class_node->funcs[2].type, "None");
+        QCOMPARE_EQ(class_node->funcs[2].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[2].param_types[0], "List<Number>");
+        QCOMPARE_EQ(class_node->funcs[2].param_types[1], "String");
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk3()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "}\n"
+        "\n"
+        "Foo --> Bar\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(classG.edges.size(), size_t(1));
+
+    // TODO:
+}
+
+void Module::test_ClassGraph_read_okk4()
 {
 
 }

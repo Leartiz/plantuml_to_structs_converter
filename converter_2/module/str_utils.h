@@ -46,6 +46,12 @@ std::string trim(std::string str, const std::string& chs);
 std::string un_quote(std::string str);
 std::string wrap_quote(std::string str);
 
+bool is_bracket_balance(const std::string& str, char br);
+bool is_round_bracket_balance(const std::string& str);
+bool is_curly_bracket_balance(const std::string& str);
+bool is_trgle_bracket_balance(const std::string& str);
+bool is_squar_bracket_balance(const std::string& str);
+
 }
 
 #endif // STR_UTILS_H

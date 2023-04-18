@@ -1,4 +1,5 @@
 #include <map>
+#include <stack>
 #include <regex>
 #include <iostream>
 #include <stdexcept>
@@ -124,7 +125,13 @@ vector<string> str_to_param_types(const string& str) {
         getline(sin, param_type, ',');
         str_utils::trim_space_by_ref(param_type);
         if (param_type.empty()) continue;
-        result.push_back(param_type);
+
+        if (str_utils::is_trgle_bracket_balance(param_type)) {
+            result.push_back(param_type);
+            continue;
+        }
+
+        throw GraphError{ ch->line_number, "invalid param type" };
     }
     return result;
 }
@@ -454,7 +461,7 @@ bool ClassGraph::try_interface_member_func(std::shared_ptr<ClassNode> node, cons
 
 bool ClassGraph::try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) {
     smatch match;
-    static const regex rx{ "^\\s*([+#-])?(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))?\\s*$" };
+    static const regex rx{ "^\\s*([+#-])?(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }

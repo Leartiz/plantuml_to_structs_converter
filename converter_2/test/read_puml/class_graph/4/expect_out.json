@@ -61,13 +61,13 @@
           "mark": "+",
           "name": "addNode",
           "param_types": [],
-          "type": ""
+          "type": "void"
         },
         {
           "mark": "+",
           "name": "addEdge",
           "param_types": [],
-          "type": ""
+          "type": "void"
         }
       ],
       "id": "Class_dia",
@@ -157,14 +157,14 @@
       "id": "Class_node",
       "inn_edges": [
         {
+          "id": "1"
+        },
+        {
           "id": "3"
         }
       ],
       "name": "Class_node",
       "out_edges": [
-        {
-          "id": "1"
-        },
         {
           "id": "4"
         }

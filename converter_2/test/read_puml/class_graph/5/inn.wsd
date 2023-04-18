@@ -1,0 +1,25 @@
+@startuml
+
+interface IA {
+
+}
+
+class A {
+
+}
+
+class B {
++dasda : NUmber
+}
+
+class C {
+
+}
+
+A ..|> IA
+
+A <|-- B
+A --* C
+C o-- B
+
+@enduml

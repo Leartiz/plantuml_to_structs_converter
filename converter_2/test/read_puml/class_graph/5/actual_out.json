@@ -1,0 +1,122 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "A"
+      },
+      "end": {
+        "id": "IA"
+      },
+      "id": "1",
+      "name": "",
+      "type": "implementation"
+    },
+    {
+      "beg": {
+        "id": "B"
+      },
+      "end": {
+        "id": "A"
+      },
+      "id": "2",
+      "name": "",
+      "type": "generalization"
+    },
+    {
+      "beg": {
+        "id": "C"
+      },
+      "end": {
+        "id": "A"
+      },
+      "id": "3",
+      "name": "",
+      "type": "composition"
+    },
+    {
+      "beg": {
+        "id": "C"
+      },
+      "end": {
+        "id": "B"
+      },
+      "id": "4",
+      "name": "",
+      "type": "aggregation"
+    }
+  ],
+  "id": "class_dia",
+  "nodes": [
+    {
+      "datas": [],
+      "funcs": [],
+      "id": "A",
+      "inn_edges": [
+        {
+          "id": "2"
+        },
+        {
+          "id": "3"
+        }
+      ],
+      "name": "A",
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "dasda",
+          "type": "NUmber"
+        }
+      ],
+      "funcs": [],
+      "id": "B",
+      "inn_edges": [
+        {
+          "id": "4"
+        }
+      ],
+      "name": "B",
+      "out_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [],
+      "funcs": [],
+      "id": "C",
+      "inn_edges": [],
+      "name": "C",
+      "out_edges": [
+        {
+          "id": "3"
+        },
+        {
+          "id": "4"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "funcs": [],
+      "id": "IA",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "name": "IA",
+      "out_edges": [],
+      "type": "interface"
+    }
+  ]
+}

@@ -3,10 +3,17 @@
 
 #include <string>
 
-struct SequenceGraph
-{
-public:
-    std::string id;
+#include "graph.h"
+
+struct SequenceGraph : Graph {
+    struct SeqNode : public Node {
+        enum Type : uint32_t {
+            Actor, Boundary, Control, Entity,
+        };
+
+        bool is_error{ false };
+        Type type{ Actor };
+    };
 };
 
 #endif // SEQUENCEGRAPH_H

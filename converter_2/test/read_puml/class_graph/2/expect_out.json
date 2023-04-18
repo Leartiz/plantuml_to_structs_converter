@@ -17,13 +17,13 @@
           "mark": "+",
           "name": "do_it",
           "param_types": [],
-          "type": ""
+          "type": "void"
         },
         {
           "mark": "+",
           "name": "do_it",
           "param_types": [],
-          "type": ""
+          "type": "void"
         }
       ],
       "id": "FF",

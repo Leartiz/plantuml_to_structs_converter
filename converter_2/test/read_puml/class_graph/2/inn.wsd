@@ -10,8 +10,8 @@ class Bar{
 }
 
 interface FF {
-  do_it()
-  +do_it()
+  do_it(): void
+  +do_it():void
 }
 
 enum das {

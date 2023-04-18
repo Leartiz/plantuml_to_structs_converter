@@ -1,6 +1,8 @@
+#include <stack>
 #include <cctype>
 #include <locale>
 #include <algorithm> // std::transform, std::find_if
+#include <stdexcept>
 
 #include "str_utils.h"
 
@@ -236,6 +238,54 @@ std::string un_quote(std::string str)
 std::string wrap_quote(std::string str)
 {
     return "\"" + str + "\"";
+}
+
+// -----------------------------------------------------------------------
+
+bool is_bracket_balance(const std::string& str, char open_br)
+{
+    char clos_br(0);
+    switch (open_br) {
+    case '(': clos_br = ')'; break;
+    case '{': clos_br = '}'; break;
+    case '<': clos_br = '>'; break;
+    case '[': clos_br = ']'; break;
+    default:
+        throw std::runtime_error("bracket unknown");
+    }
+
+    std::stack<char> brs;
+    for (auto it = str.begin(); it != str.end(); ++it) {
+        if (*it == open_br) {
+            brs.push(*it);
+        }
+        else if (*it == clos_br) {
+            if (brs.empty())
+                return false;
+            brs.pop();
+        }
+    }
+    return brs.empty();
+}
+
+bool is_round_bracket_balance(const std::string& str)
+{
+    return is_bracket_balance(str, '(');
+}
+
+bool is_curly_bracket_balance(const std::string& str)
+{
+    return is_bracket_balance(str, '{');
+}
+
+bool is_trgle_bracket_balance(const std::string& str)
+{
+    return is_bracket_balance(str, '<');
+}
+
+bool is_squar_bracket_balance(const std::string& str)
+{
+    return is_bracket_balance(str, '[');
 }
 
 }

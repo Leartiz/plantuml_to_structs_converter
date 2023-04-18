@@ -52,6 +52,11 @@ private slots:
     void test_str_utils_trim_space_data();
     void test_str_utils_trim_space();
 
+private slots:
+    void test_str_utils_is_bracket_balance_err();
+    void test_str_utils_is_bracket_balance_data();
+    void test_str_utils_is_bracket_balance();
+
     // UseCaseGraph
 private slots:
     void test_UseCaseGraph_read_okk();
@@ -84,6 +89,8 @@ private slots:
     void test_ClassGraph_read_okk();
     void test_ClassGraph_read_okk1();
     void test_ClassGraph_read_okk2();
+    void test_ClassGraph_read_okk3();
+    void test_ClassGraph_read_okk4();
 
     void test_ClassGraph_read_puml_data();
     void test_ClassGraph_read_puml();

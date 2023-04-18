@@ -20,8 +20,8 @@ enum Class_edge_type {
 class Class_dia {
     nodes: List<Class_node>
 
-    addNode()
-    addEdge()
+    addNode():void
+    addEdge():void
 }
 
 ' -----------------------------------------------
