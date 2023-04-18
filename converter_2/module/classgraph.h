@@ -65,6 +65,9 @@ protected:
     bool try_interface_member_func(std::shared_ptr<ClassNode>, const std::string&);
     bool try_class_member(std::shared_ptr<ClassNode>, const std::string&);
     bool try_enum_value(std::shared_ptr<ClassNode>, const std::string&);
+
+protected:
+    bool try_hide_empty_members(const std::string&);
 };
 
 #endif // CLASSGRAPH_H

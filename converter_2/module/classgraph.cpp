@@ -36,13 +36,52 @@ ClassGraph::ClassEdge::ClassEdge(std::string id, std::string name, Type tp) {
 
 // -----------------------------------------------------------------------
 
-
 namespace {
 
 ConstructHelper* ch{ nullptr };
 
+ClassGraph::ClassEdge::Type edge_type_from_arrow_parts(const string& head,
+                                                       const string& body) {
+    using Type = ClassGraph::ClassEdge::Type;
+    const auto it{ find(begin(body), end(body), '.') };
+    const auto detected_dot{ it != end(body) ? true : false };
+
+    if ((head == "<" || head == ">") && detected_dot) {
+        return Type::Dependency;
+    }
+    else if ((head == "<" || head == ">") && !detected_dot) {
+        return Type::Association;
+    }
+    else if (head == "o" && !detected_dot) {
+        return Type::Aggregation;
+    }
+    else if (head == "*" && !detected_dot) {
+        return Type::Composition;
+    }
+    else if ((head == "<|" || head == "|>") && detected_dot) {
+        return Type::Implementation;
+    }
+    else if ((head == "<|" || head == "|>") && !detected_dot) {
+        return Type::Generalization;
+    }
+
+    throw GraphError(ch->line_number, "unknown edge type");
+}
+
+shared_ptr<ClassGraph::ClassNode> create_node_if_need(const string& str) {
+    shared_ptr<ClassGraph::ClassNode> res_node;
+    if (!ch->id_node.count(str)) {
+        res_node = make_shared<ClassGraph::ClassNode>(str, str, ClassGraph::ClassNode::Class);
+        ch->id_node[str] = res_node;
+    }
+    else {
+        res_node = static_pointer_cast<ClassGraph::ClassNode>(ch->id_node[str]);
+    }
+    return res_node;
+}
+
 Member::Mark str_to_mark(const string str) {
-    auto result{ Member::Private };
+    auto result{ Member::Public };
     if (str.empty()) {
         return result;
     }
@@ -261,10 +300,54 @@ bool ClassGraph::try_connection(std::string& line, std::istream&) {
         return false;
     }
 
-    int i = 0;
-    for (auto m : match) {
-        std::cout << i++ << " " << m.str() << std::endl;
+    auto left_head_arrow{ match[3].str() };
+    auto rght_head_arrow{ match[6].str() };
+
+    if (!left_head_arrow.empty() && !rght_head_arrow.empty()) {
+        throw GraphError(ch->line_number, "double-sided arrow");
     }
+
+    string arrow_head;
+    bool is_left_to_rght{ true };
+    // <--
+    if (rght_head_arrow.empty()) {
+        arrow_head = left_head_arrow;
+        if (arrow_head != "*" && arrow_head != "o") {
+            is_left_to_rght = false;
+        }
+    }
+    // -->
+    else {
+        arrow_head = rght_head_arrow;
+        if (arrow_head == "*" || arrow_head == "o") {
+            is_left_to_rght = false;
+        }
+    }
+
+    auto arrow_body{ match[4].str() };
+    auto etype{ edge_type_from_arrow_parts(arrow_head, arrow_body) };
+
+    const auto left_node{ create_node_if_need(match[1].str()) };
+    const auto rght_node{ create_node_if_need(match[7].str()) };
+
+    auto edge_text = str_utils::trim_space(match[9].str());
+    edge_text = str_utils::un_quote(edge_text);
+    const auto edge{ make_shared<ClassEdge>(ch->next_edge_id(), edge_text, etype) };
+    if (is_left_to_rght) {
+        edge->beg = left_node;
+        edge->end = rght_node;
+
+        left_node->outs.push_back(edge);
+        rght_node->inns.push_back(edge);
+    }
+    else {
+        edge->beg = rght_node;
+        edge->end = left_node;
+
+        left_node->inns.push_back(edge);
+        rght_node->outs.push_back(edge);
+    }
+    ch->id_edge[edge->id] = edge;
 
     return true;
 }
@@ -371,7 +454,7 @@ bool ClassGraph::try_interface_member_func(std::shared_ptr<ClassNode> node, cons
 
 bool ClassGraph::try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) {
     smatch match;
-    static const regex rx{ "^\\s*([+#-])(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))?\\s*$" };
+    static const regex rx{ "^\\s*([+#-])?(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))?\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
@@ -400,4 +483,10 @@ bool ClassGraph::try_enum_value(std::shared_ptr<ClassNode> node, const std::stri
     const auto eval{ match[1].str() };
     node->enum_values.push_back(eval);
     return true;
+}
+
+// -----------------------------------------------------------------------
+
+bool ClassGraph::try_hide_empty_members(const std::string&) {
+    return false;
 }

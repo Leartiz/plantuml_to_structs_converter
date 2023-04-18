@@ -9,6 +9,6 @@ class Bar{
 
 }
 
-Bar <|-down-* Foo : dsad
+Bar -down-|> Foo : dsad
 
 @enduml

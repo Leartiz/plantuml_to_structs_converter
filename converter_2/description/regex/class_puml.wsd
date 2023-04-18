@@ -21,5 +21,6 @@ asd
 }
 
 Bar <|-down-|> Foo : dasda
+АААА --> DDD
 
 @enduml

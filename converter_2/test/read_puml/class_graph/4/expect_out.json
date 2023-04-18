@@ -1,0 +1,175 @@
+{
+  "id": "class_dia",
+
+  "edges": [
+    {
+      "beg": {
+        "id": "Class_dia"
+      },
+      "end": {
+        "id": "Class_node"
+      },
+      "id": "1",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Class_edge"
+      },
+      "end": {
+        "id": "Class_edge_type"
+      },
+      "id": "2",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Class_edge"
+      },
+      "end": {
+        "id": "Class_node"
+      },
+      "id": "3",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Class_node"
+      },
+      "end": {
+        "id": "Class_edge"
+      },
+      "id": "4",
+      "name": "",
+      "type": "aggregation"
+    }
+  ],
+  "nodes": [
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "nodes",
+          "type": "List<Class_node>"
+        }
+      ],
+      "funcs": [
+        {
+          "mark": "+",
+          "name": "addNode",
+          "param_types": [],
+          "type": ""
+        },
+        {
+          "mark": "+",
+          "name": "addEdge",
+          "param_types": [],
+          "type": ""
+        }
+      ],
+      "id": "Class_dia",
+      "inn_edges": [],
+      "name": "Class_dia",
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "type",
+          "type": "Class_edge_type"
+        },
+        {
+          "mark": "+",
+          "name": "begin",
+          "type": "Class_node"
+        },
+        {
+          "mark": "+",
+          "name": "end",
+          "type": "Class_node"
+        }
+      ],
+      "funcs": [],
+      "id": "Class_edge",
+      "inn_edges": [
+        {
+          "id": "4"
+        }
+      ],
+      "name": "Class_edge",
+      "out_edges": [
+        {
+          "id": "2"
+        },
+        {
+          "id": "3"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "enum_values": [
+        "DEPENDENCY",
+        "ASSOCIATION",
+        "AGGREGATION",
+        "COMPOSITION",
+        "IMPLEMENTATION",
+        "GENERALIZATION"
+      ],
+      "id": "Class_edge_type",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "name": "Class_edge_type",
+      "out_edges": [],
+      "type": "enum"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "nodes",
+          "type": "List<Class_node>"
+        }
+      ],
+      "funcs": [],
+      "id": "Class_node",
+      "inn_edges": [
+        {
+          "id": "3"
+        }
+      ],
+      "name": "Class_node",
+      "out_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "4"
+        }
+      ],
+      "type": "class"
+    }
+  ]
+}

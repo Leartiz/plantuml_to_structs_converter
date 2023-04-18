@@ -1,0 +1,51 @@
+@startuml
+
+' Из обсуждения:
+' - на диа. классов бывают пространства имён;
+' -
+
+' -----------------------------------------------
+
+enum Class_edge_type {
+    DEPENDENCY
+    ASSOCIATION
+    AGGREGATION
+    COMPOSITION
+    IMPLEMENTATION
+    GENERALIZATION
+}
+
+' -----------------------------------------------
+
+class Class_dia {
+    nodes: List<Class_node>
+
+    addNode()
+    addEdge()
+}
+
+' -----------------------------------------------
+
+class Class_node {
+    name: String
+    nodes: List<Class_node>
+}
+
+class Class_edge {
+    name: String
+    type: Class_edge_type
+    begin: Class_node
+    end: Class_node
+}
+
+' -----------------------------------------------
+
+' left to right direction
+
+Class_dia o-r- Class_node
+
+Class_edge -l-> Class_edge_type
+Class_edge o-d- Class_node
+Class_edge -u-o Class_node
+
+@enduml

@@ -52,6 +52,10 @@ protected:
     bool try_note(std::string&, std::istream&);
 
 protected:
+    bool try_one_comment(std::string&);
+    bool try_multi_comment(std::string&, std::istream&);
+
+protected:
     virtual bool try_node(std::string&, std::istream&) = 0;
     virtual bool try_connection(std::string&, std::istream&) = 0;
     virtual bool try_grouping(std::string&, std::istream&) = 0;

@@ -104,6 +104,18 @@ bool Graph::try_note(string& line, istream& in) {
 
 // -----------------------------------------------------------------------
 
+bool Graph::try_one_comment(std::string& line) {
+    static const regex rx{ "^\\s*'.*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_multi_comment(std::string&, std::istream&) {
+    // TODO:
+    return false;
+}
+
+// -----------------------------------------------------------------------
+
 void Graph::read_puml(std::istream& in) {
     m_ch->reset();
 
@@ -119,6 +131,7 @@ void Graph::read_puml(std::istream& in) {
                 !try_grouping(line, in) &&
 
                 !try_note(line, in) &&
+                !try_one_comment(line) &&
                 !try_directive(line) &&
                 !try_skinparam(line) &&
                 !try_direction(line)) {

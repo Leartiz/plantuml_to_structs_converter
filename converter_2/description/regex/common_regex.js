@@ -10,3 +10,5 @@ var one_note1 = /^\s*note\s+(left|right|top|bottom)\s*:(.+)$/gm
 var beg_note_with_id = /^\s*note\s+as\s+(\S+)\s*$/gm
 var beg_multi_note = /^\s*note\s+(left|right|top|bottom)\s+of\s+(\S+)\s*$/gm
 var end_multi_note = /^\s*end\s+note\s*$/gm
+
+var one_comment = /^\s*'.*$/gm

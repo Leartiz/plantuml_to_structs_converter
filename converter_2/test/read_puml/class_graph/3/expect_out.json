@@ -1,0 +1,62 @@
+{
+  "id": "class_dia",
+
+  "edges": [
+    {
+      "beg": {
+        "id": "Bar"
+      },
+      "end": {
+        "id": "Foo"
+      },
+      "id": "1",
+      "name": "dsad",
+      "type": "generalization"
+    }
+  ],
+
+  "nodes": [
+    {
+      "id": "Bar",
+      "name": "Bar",
+      "type": "class",
+
+      "datas": [],
+      "funcs": [],
+
+      "inn_edges": [],
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ]
+    },
+    {
+      "id": "Foo",
+      "name": "Foo",
+      "type": "interface",
+
+      "funcs": [
+        {
+          "mark": "+",
+          "name": "val",
+          "param_types": [],
+          "type": "Number"
+        },
+        {
+          "mark": "+",
+          "name": "get_val",
+          "param_types": ["das"],
+          "type": "Number"
+        }
+      ],
+
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "out_edges": []
+    }
+  ]
+}

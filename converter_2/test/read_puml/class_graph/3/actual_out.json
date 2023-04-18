@@ -1,5 +1,17 @@
 {
-  "edges": [],
+  "edges": [
+    {
+      "beg": {
+        "id": "Bar"
+      },
+      "end": {
+        "id": "Foo"
+      },
+      "id": "1",
+      "name": "dsad",
+      "type": "generalization"
+    }
+  ],
   "id": "class_dia",
   "nodes": [
     {
@@ -8,7 +20,11 @@
       "id": "Bar",
       "inn_edges": [],
       "name": "Bar",
-      "out_edges": [],
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ],
       "type": "class"
     },
     {
@@ -29,7 +45,11 @@
         }
       ],
       "id": "Foo",
-      "inn_edges": [],
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
       "name": "Foo",
       "out_edges": [],
       "type": "interface"

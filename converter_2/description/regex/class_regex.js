@@ -1,3 +1,4 @@
+var hide_empty_members = /^\s*hide\s+empty\s+(methods|members)\s*$/gm
 var any_node = /^\s*(class|enum|interface)\s+(\S+)\s*{\s*$/gm
 var class_node = /^\s*class\s+\S+\s*{\s*$/gm
 var enum_node = /^\s*enum\s+\S+\s*{\s*$/gm
