@@ -5,7 +5,7 @@
 
 #include "graph.h"
 
-struct ClassGraph : Graph {
+struct ClassGraph final : Graph {
 
     struct ClassNode : public Node {
         // TODO: separate data and funcs?
@@ -53,14 +53,13 @@ public:
 protected:
     bool try_node(std::string&, std::istream&) override;
     bool try_connection(std::string&, std::istream&) override;
-    bool try_grouping(std::string&, std::istream&) override;
 
 protected:
     void try_interface_body(const std::string&, std::istream&);
     void try_class_body(const std::string&, std::istream&);
     void try_enum_body(const std::string&, std::istream&);
 
-protected:
+private:
     // TODO: или вообще убрать в анонимный namespace?
     bool try_interface_member_func(std::shared_ptr<ClassNode>, const std::string&);
     bool try_class_member(std::shared_ptr<ClassNode>, const std::string&);

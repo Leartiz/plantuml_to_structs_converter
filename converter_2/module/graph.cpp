@@ -8,6 +8,35 @@ using namespace std;
 
 Graph::Graph() : m_ch{ make_shared<ConstructHelper>() } {}
 
+void Graph::read_puml(std::istream& in) {
+    m_ch->reset();
+
+    while (in) {
+        string line;
+        getline(in, line);
+        m_ch->line_number++;
+
+        if (
+                !try_node(line, in) &&
+                !try_connection(line, in) &&
+                !try_whitespaces(line) &&
+                !try_grouping(line, in) &&
+
+                !try_note(line, in) &&
+                !try_one_comment(line) &&
+                !try_directive(line) &&
+                !try_skinparam(line) &&
+                !try_direction(line)) {
+            throw GraphError(m_ch->line_number, "unknown line");
+        }
+    }
+
+    nodes = m_ch->to_nodes();
+    edges = m_ch->to_edges();
+}
+
+// -----------------------------------------------------------------------
+
 bool Graph::try_whitespaces(string& line) {
     static const regex rx{ "^\\s*$" };
     return regex_match(line, rx);
@@ -28,6 +57,8 @@ bool Graph::try_direction(string& line) {
     return regex_match(line, rx);
 }
 
+// -----------------------------------------------------------------------
+
 bool Graph::try_beg_grouping(string& line) {
     static const regex rx{ "^\\s*(rectangle|package)(\\s+((\\S+)|(\\\".+\\\")))?\\s*\\{\\s*$" };
     return regex_match(line, rx);
@@ -37,6 +68,8 @@ bool Graph::try_end_curly_brace(string& line) {
     static const regex rx{ "^\\s*\\}\\s*$" };
     return regex_match(line, rx);
 }
+
+// -----------------------------------------------------------------------
 
 bool Graph::try_one_note(string& line) {
     smatch match;
@@ -116,29 +149,6 @@ bool Graph::try_multi_comment(std::string&, std::istream&) {
 
 // -----------------------------------------------------------------------
 
-void Graph::read_puml(std::istream& in) {
-    m_ch->reset();
-
-    while (in) {
-        string line;
-        getline(in, line);
-        m_ch->line_number++;
-
-        if (
-                !try_node(line, in) &&
-                !try_connection(line, in) &&
-                !try_whitespaces(line) &&
-                !try_grouping(line, in) &&
-
-                !try_note(line, in) &&
-                !try_one_comment(line) &&
-                !try_directive(line) &&
-                !try_skinparam(line) &&
-                !try_direction(line)) {
-            throw GraphError(m_ch->line_number, "unknown line");
-        }
-    }
-
-    nodes = m_ch->to_nodes();
-    edges = m_ch->to_edges();
+bool Graph::try_grouping(std::string&, std::istream&) {
+    return false;
 }

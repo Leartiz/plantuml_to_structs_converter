@@ -359,10 +359,6 @@ bool ClassGraph::try_connection(std::string& line, std::istream&) {
     return true;
 }
 
-bool ClassGraph::try_grouping(std::string&, std::istream&) {
-    return false; // groups are prohibited in this diagram!
-}
-
 // TODO: много дублирующегося кода - подумать как убрать
 // -----------------------------------------------------------------------
 

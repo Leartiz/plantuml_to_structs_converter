@@ -12,6 +12,9 @@
 using namespace std;
 using namespace nlohmann;
 
+using RobNode = RobustnessGraph::RobNode;
+using RobEdge = RobustnessGraph::RobEdge;
+
 RobustnessGraph::RobNode::RobNode(string id, string name, Type tp) {
     this->name = std::move(name);
     this->id = std::move(id);
@@ -29,21 +32,21 @@ namespace {
 
 ConstructHelper* ch{ nullptr };
 
-// *** json
+// *** json and not only
 
-string node_type_to_str(const RobustnessGraph::RobNode::Type tp) {
+string node_type_to_str(const RobNode::Type tp) {
     switch (tp) {
-    case RobustnessGraph::RobNode::Actor: return "actor";
-    case RobustnessGraph::RobNode::Boundary: return "boundary";
-    case RobustnessGraph::RobNode::Control: return "control";
-    case RobustnessGraph::RobNode::Entity: return "entity";
+    case RobNode::Actor: return "actor";
+    case RobNode::Boundary: return "boundary";
+    case RobNode::Control: return "control";
+    case RobNode::Entity: return "entity";
     }
 
     throw runtime_error{ "node type unknown" };
 }
 
-RobustnessGraph::RobNode::Type str_to_node_type(const string& str) {
-    using Type = RobustnessGraph::RobNode::Type;
+RobNode::Type str_to_node_type(const string& str) {
+    using Type = RobNode::Type;
     if (node_type_to_str(Type::Actor) == str) return Type::Actor;
     if (node_type_to_str(Type::Boundary) == str) return Type::Boundary;
     if (node_type_to_str(Type::Control) == str) return Type::Control;
@@ -63,7 +66,46 @@ json node_to_json(RobustnessGraph::RobNode& node) {
     return result;
 }
 
+// -----------------------------------------------------------------------
+
+bool try_whole_node(std::string& line) {
+    smatch match;
+    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+        return false;
+    }
+
+    const auto node_id = match[3].str();
+    const auto node_name = match[2].str();
+    const auto node_type = str_to_node_type(match[1].str());
+    const auto node{ make_shared<RobNode>(node_id, node_name, node_type) };
+
+    if (match[4].matched) {
+        node->is_error = true;
+    }
+
+    ch->id_node[node_id] = node;
+    return true;
 }
+
+bool try_short_node(std::string& line) {
+    smatch match;
+    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+        return false;
+    }
+
+    const auto node_nmid = match[2].str();
+    const auto node_type = str_to_node_type(match[1].str());
+    const auto node{ make_shared<RobNode>(node_nmid, node_nmid, node_type) };
+
+    if (match[3].matched) {
+        node->is_error = true;
+    }
+
+    ch->id_node[node_nmid] = node;
+    return true;
+}
+
+} // <anonymous>
 
 // -----------------------------------------------------------------------
 
@@ -78,7 +120,8 @@ void RobustnessGraph::write_json(std::ostream& out) {
 
     json json_graph;
     json_graph["id"] = nullptr;
-    if (auto uc_node_sp = uc_node.lock(); uc_node_sp) {
+    if (!uc_node.expired()) {
+        auto uc_node_sp = uc_node.lock();
         json_graph["id"] = uc_node_sp->id;
     }
 
@@ -179,48 +222,5 @@ bool RobustnessGraph::try_connection(std::string& line, std::istream&) {
         rght_node->outs.push_back(edge);
     }
     ch->id_edge[edge->id] = edge;
-    return true;
-}
-
-bool RobustnessGraph::try_grouping(std::string&, std::istream&) {
-    return false; // groups are prohibited in this diagram!
-}
-
-// -----------------------------------------------------------------------
-
-bool RobustnessGraph::try_whole_node(std::string& line) {
-    smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
-        return false;
-    }
-
-    const auto node_id = match[3].str();
-    const auto node_name = match[2].str();
-    const auto node_type = str_to_node_type(match[1].str());
-    const auto node{ make_shared<RobNode>(node_id, node_name, node_type) };
-
-    if (match[4].matched) {
-        node->is_error = true;
-    }
-
-    ch->id_node[node_id] = node;
-    return true;
-}
-
-bool RobustnessGraph::try_short_node(std::string& line) {
-    smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
-        return false;
-    }
-
-    const auto node_nmid = match[2].str();
-    const auto node_type = str_to_node_type(match[1].str());
-    const auto node{ make_shared<RobNode>(node_nmid, node_nmid, node_type) };
-
-    if (match[3].matched) {
-        node->is_error = true;
-    }
-
-    ch->id_node[node_nmid] = node;
     return true;
 }
