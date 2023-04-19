@@ -16,6 +16,20 @@ class C {
 
 }
 
+note left of C
+asdas
+end note
+
+' one line комментарий
+
+/'
+
+МНОГО
+МНОГО
+МНОГО
+
+'/
+
 A ..|> IA
 
 A <|-- B

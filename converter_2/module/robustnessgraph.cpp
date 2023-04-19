@@ -15,13 +15,15 @@ using namespace nlohmann;
 using RobNode = RobustnessGraph::RobNode;
 using RobEdge = RobustnessGraph::RobEdge;
 
-RobustnessGraph::RobNode::RobNode(string id, string name, Type tp) {
+// -----------------------------------------------------------------------
+
+RobNode::RobNode(string id, string name, Type tp) {
     this->name = std::move(name);
     this->id = std::move(id);
     this->type = tp;
 }
 
-RobustnessGraph::RobEdge::RobEdge(std::string id, std::string name) {
+RobEdge::RobEdge(std::string id, std::string name) {
     this->name = std::move(name);
     this->id = std::move(id);
 }
@@ -42,7 +44,7 @@ string node_type_to_str(const RobNode::Type tp) {
     case RobNode::Entity: return "entity";
     }
 
-    throw runtime_error{ "node type unknown" };
+    throw runtime_error{ "rob node type unknown" };
 }
 
 RobNode::Type str_to_node_type(const string& str) {
@@ -51,7 +53,7 @@ RobNode::Type str_to_node_type(const string& str) {
     if (node_type_to_str(Type::Boundary) == str) return Type::Boundary;
     if (node_type_to_str(Type::Control) == str) return Type::Control;
     if (node_type_to_str(Type::Entity) == str) return Type::Entity;
-    throw runtime_error{ "node type as str unknown" };
+    throw runtime_error{ "rob node type as str unknown" };
 }
 
 json edge_to_json(RobustnessGraph::RobEdge& edge) {
@@ -68,7 +70,7 @@ json node_to_json(RobustnessGraph::RobNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_whole_node(std::string& line) {
+bool try_whole_node(const std::string& line) {
     smatch match;
     if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
         return false;
@@ -87,7 +89,7 @@ bool try_whole_node(std::string& line) {
     return true;
 }
 
-bool try_short_node(std::string& line) {
+bool try_short_node(const std::string& line) {
     smatch match;
     if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
         return false;
@@ -150,11 +152,11 @@ void RobustnessGraph::write_json(std::ostream& out) {
 
 // -----------------------------------------------------------------------
 
-bool RobustnessGraph::try_node(std::string& line, std::istream&) {
+bool RobustnessGraph::try_node(const std::string& line, std::istream&) {
     return try_whole_node(line) || try_short_node(line);
 }
 
-bool RobustnessGraph::try_connection(std::string& line, std::istream&) {
+bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
     smatch match;
     if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+([lrdu]|left|right|up|down)[-]+|[-]+)(>)?)"
                                         "\\s+(\\S+)\\s*(:(.*))?$"))) {

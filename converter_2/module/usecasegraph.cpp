@@ -17,13 +17,18 @@
 using namespace std;
 using namespace nlohmann;
 
-UseCaseGraph::UcNode::UcNode(string id, string name, Type tp)  {
+using UcNode = UseCaseGraph::UcNode;
+using UcEdge = UseCaseGraph::UcEdge;
+
+// -----------------------------------------------------------------------
+
+UcNode::UcNode(string id, string name, Type tp)  {
     this->name = std::move(name);
     this->id = std::move(id);
     this->type = tp;
 }
 
-UseCaseGraph::UcEdge::UcEdge(string id, string name, Type tp) {
+UcEdge::UcEdge(string id, string name, Type tp) {
     this->name = std::move(name);
     this->id = std::move(id);
     this->type = tp;
@@ -35,32 +40,32 @@ namespace {
 
 ConstructHelper* ch{ nullptr };
 
-UseCaseGraph::UcEdge::Type edge_type_from_arrow_parts(const string& head,
-                                                      const string& body,
-                                                      const string& note) {
+UcEdge::Type edge_type_from_arrow_parts(const string& head,
+                                        const string& body,
+                                        const string& note) {
     const auto it{ find(begin(body), end(body), '.') };
     const auto detected_dot{ it != end(body) ? true : false };
 
     if ((head == "<" || head == ">") && !detected_dot && note.empty())
-        return UseCaseGraph::UcEdge::Association;
+        return UcEdge::Association;
     if ((head == "<|" || head == "|>") && !detected_dot && note.empty())
-        return UseCaseGraph::UcEdge::Generalization;
+        return UcEdge::Generalization;
 
     if ((head == "<" || head == ">") && detected_dot && note == "extend")
-        return UseCaseGraph::UcEdge::Extend;
+        return UcEdge::Extend;
     if ((head == "<" || head == ">") && detected_dot && note == "include")
-        return UseCaseGraph::UcEdge::Include;
+        return UcEdge::Include;
     throw GraphError(ch->line_number, "unknown edge type");
 }
 
-shared_ptr<UseCaseGraph::UcNode> create_node_if_need(const string& str) {
-    shared_ptr<UseCaseGraph::UcNode> res_node;
+shared_ptr<UcNode> create_node_if_need(const string& str) {
+    shared_ptr<UcNode> res_node;
     if (!ch->id_node.count(str)) {
-        res_node = make_shared<UseCaseGraph::UcNode>(str, str, UseCaseGraph::UcNode::Actor);
+        res_node = make_shared<UcNode>(str, str, UcNode::Actor);
         ch->id_node[str] = res_node;
     }
     else {
-        res_node = static_pointer_cast<UseCaseGraph::UcNode>(
+        res_node = static_pointer_cast<UcNode>(
                     ch->id_node[str]);
     }
     return res_node;
@@ -68,34 +73,33 @@ shared_ptr<UseCaseGraph::UcNode> create_node_if_need(const string& str) {
 
 // *** json
 
-string node_type_to_str(const UseCaseGraph::UcNode::Type tp) {
+string node_type_to_str(const UcNode::Type tp) {
     switch (tp) {
-    case UseCaseGraph::UcNode::Actor: return "actor";
-    case UseCaseGraph::UcNode::Usecase: return "usecase";
+    case UcNode::Actor: return "actor";
+    case UcNode::Usecase: return "usecase";
     }
 
     throw runtime_error{ "node type unknown" };
 }
 
-string edge_type_to_str(const UseCaseGraph::UcEdge::Type tp) {
+string edge_type_to_str(const UcEdge::Type tp) {
     switch (tp) {
-    case UseCaseGraph::UcEdge::Association: return "association";
-    case UseCaseGraph::UcEdge::Generalization: return "generalization";
-    case UseCaseGraph::UcEdge::Include: return "include";
-    case UseCaseGraph::UcEdge::Extend: return "extend";
+    case UcEdge::Association: return "association";
+    case UcEdge::Generalization: return "generalization";
+    case UcEdge::Include: return "include";
+    case UcEdge::Extend: return "extend";
     }
 
     throw runtime_error{ "edge type unknown" };
 }
 
-// TODO: создать новый тип исключений?
-json edge_to_json(UseCaseGraph::UcEdge& edge) {
+json edge_to_json(UcEdge& edge) {
     json result = json_utils::edge_to_json(edge);
     result["type"] = edge_type_to_str(edge.type);
     return result;
 }
 
-json node_to_json(UseCaseGraph::UcNode& node) {
+json node_to_json(UcNode& node) {
     json result = json_utils::node_to_json(node);
     result["type"] = node_type_to_str(node.type);
 
@@ -106,7 +110,39 @@ json node_to_json(UseCaseGraph::UcNode& node) {
     return result;
 }
 
+// -----------------------------------------------------------------------
+
+bool try_actor_node(const std::string& line) {
+    smatch match;
+    static const regex rx{ "^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
+        return false;
+    }
+
+    const auto node_id{ match[4].str() };
+    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
+    const auto node = make_shared<UcNode>(node_id, node_name, UcNode::Actor);
+
+    ch->id_node[node_id] = node;
+    return true;
 }
+
+bool try_usecase_node(const std::string& line) {
+    smatch match;
+    static const regex rx{ "^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
+        return false;
+    }
+
+    const string node_id{ match[4].str() };
+    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
+    const auto node{ make_shared<UcNode>(node_id, node_name, UcNode::Usecase) };
+
+    ch->id_node[node->id] = node;
+    return true;
+}
+
+} // <anonymous>
 
 // -----------------------------------------------------------------------
 
@@ -146,43 +182,11 @@ void UseCaseGraph::write_json(ostream& out) {
 
 // -----------------------------------------------------------------------
 
-bool UseCaseGraph::try_actor_node(string& line) {
-    smatch match;
-    static const regex rx{ "^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
-    if (!regex_match(line, match, rx)) {
-        return false;
-    }
-
-    const auto node_id{ match[4].str() };
-    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
-    const auto node = make_shared<UcNode>(node_id, node_name, UcNode::Actor);
-
-    ch->id_node[node_id] = node;
-    return true;
-}
-
-bool UseCaseGraph::try_usecase_node(string& line) {
-    smatch match;
-    static const regex rx{ "^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
-    if (!regex_match(line, match, rx)) {
-        return false;
-    }
-
-    const string node_id{ match[4].str() };
-    const string node_name{ match[2].str().empty() ? match[3].str() : match[2].str()};
-    const auto node{ make_shared<UcNode>(node_id, node_name, UcNode::Usecase) };
-
-    ch->id_node[node->id] = node;
-    return true;
-}
-
-// -----------------------------------------------------------------------
-
-bool UseCaseGraph::try_node(std::string& line, std::istream&) {
+bool UseCaseGraph::try_node(const std::string& line, std::istream&) {
     return try_actor_node(line) || try_usecase_node(line);
 }
 
-bool UseCaseGraph::try_connection(string& line, std::istream&) {
+bool UseCaseGraph::try_connection(const string& line, std::istream&) {
     smatch match;
     static const regex rx{ "^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
                            "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$" };
@@ -236,7 +240,7 @@ bool UseCaseGraph::try_connection(string& line, std::istream&) {
 
 // -----------------------------------------------------------------------
 
-bool UseCaseGraph::try_grouping(string& line, istream& in) {
+bool UseCaseGraph::try_grouping(const string& line, istream& in) {
     if (!try_beg_grouping(line)) {
         return false;
     }
@@ -256,6 +260,10 @@ bool UseCaseGraph::try_grouping(string& line, istream& in) {
                 !try_node(line, in) &&
                 !try_connection(line, in) &&
                 !try_whitespaces(line) &&
+
+                !try_note(line, in) &&
+                !try_comment(line, in) &&
+
                 !try_grouping(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }

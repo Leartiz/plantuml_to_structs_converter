@@ -5,13 +5,11 @@
 
 #include "graph.h"
 
-// TODO: удалить старый преобразователь (converter)
-
 struct SequenceGraph;
 struct RobustnessGraph;
 
 // TODO: изменить имя на Use_case_dia?
-struct UseCaseGraph : Graph {
+struct UseCaseGraph final : Graph {
 
     struct UcNode : public Node {
         enum Type : uint32_t {
@@ -45,15 +43,9 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_actor_node(std::string&);
-    bool try_usecase_node(std::string&);
-
-    bool try_node(std::string&, std::istream&) override;
-    bool try_connection(std::string&, std::istream&) override;
-
-protected:
-    bool try_grouping(std::string&, std::istream&) override;
-    // TODO: добавить метод для заметок в документе
+    bool try_node(const std::string&, std::istream&) override;
+    bool try_connection(const std::string&, std::istream&) override;
+    bool try_grouping(const std::string&, std::istream&) override;
 };
 
 #endif // USECASEGRAPH_H

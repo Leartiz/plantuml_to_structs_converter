@@ -6,7 +6,7 @@
 #include "graph.h"
 #include "usecasegraph.h"
 
-struct RobustnessGraph : Graph {
+struct RobustnessGraph final : Graph {
 
     struct RobNode : public Node {
         enum Type : uint32_t {
@@ -33,8 +33,8 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_node(std::string&, std::istream&) override;
-    bool try_connection(std::string&, std::istream&) override;
+    bool try_node(const std::string&, std::istream&) override;
+    bool try_connection(const std::string&, std::istream&) override;
 };
 
 #endif // ROBUSTNESSGRAPH_H

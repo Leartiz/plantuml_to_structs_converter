@@ -16,6 +16,7 @@ void Graph::read_puml(std::istream& in) {
         getline(in, line);
         m_ch->line_number++;
 
+        // TODO: сделать как отдельный метод!
         if (
                 !try_node(line, in) &&
                 !try_connection(line, in) &&
@@ -23,7 +24,7 @@ void Graph::read_puml(std::istream& in) {
                 !try_grouping(line, in) &&
 
                 !try_note(line, in) &&
-                !try_one_comment(line) &&
+                !try_comment(line, in) &&
                 !try_directive(line) &&
                 !try_skinparam(line) &&
                 !try_direction(line)) {
@@ -37,41 +38,41 @@ void Graph::read_puml(std::istream& in) {
 
 // -----------------------------------------------------------------------
 
-bool Graph::try_whitespaces(string& line) {
-    static const regex rx{ "^\\s*$" };
-    return regex_match(line, rx);
-}
-
-bool Graph::try_directive(string& line) {
+bool Graph::try_directive(const string& line) const {
     static const regex rx{ "^\\s*(@startuml|@enduml)\\s*$" };
     return regex_match(line, rx);
 }
 
-bool Graph::try_skinparam(string& line) {
+bool Graph::try_skinparam(const string& line) const {
     static const regex rx{ "^\\s*skinparam\\s+\\S+\\s+\\S+\\s*$" };
     return regex_match(line, rx);
 }
 
-bool Graph::try_direction(string& line) {
+bool Graph::try_direction(const string& line) const {
     static const regex rx{ "^\\s*((left\\s+to\\s+right\\s+direction)|(top\\s+to\\s+bottom\\s+direction))\\s*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_whitespaces(const string& line) const {
+    static const regex rx{ "^\\s*$" };
     return regex_match(line, rx);
 }
 
 // -----------------------------------------------------------------------
 
-bool Graph::try_beg_grouping(string& line) {
+bool Graph::try_beg_grouping(const string& line) const {
     static const regex rx{ "^\\s*(rectangle|package)(\\s+((\\S+)|(\\\".+\\\")))?\\s*\\{\\s*$" };
     return regex_match(line, rx);
 }
 
-bool Graph::try_end_curly_brace(string& line) {
+bool Graph::try_end_curly_brace(const string& line) const {
     static const regex rx{ "^\\s*\\}\\s*$" };
     return regex_match(line, rx);
 }
 
 // -----------------------------------------------------------------------
 
-bool Graph::try_one_note(string& line) {
+bool Graph::try_one_note(const string& line) const {
     smatch match;
     static const regex rx{ "^\\s*note\\s+(left|right|top|bottom)\\s*(\\s+of\\s+(\\S+))?\\s*:(.+)$" };
     if (!regex_match(line, match, rx)) {
@@ -85,29 +86,39 @@ bool Graph::try_one_note(string& line) {
     return true;
 }
 
-bool Graph::try_beg_multi_note(string&) {
-    return false; // TODO: многострочная заметка?
-}
-
-bool Graph::try_beg_note_with_id(std::string& line) {
+bool Graph::try_beg_note_with_id(const string& line) const {
     smatch match;
     static const regex rx{ "^\\s*note\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
 
-    return true; // TODO: нужна ли вообще такая заметка?
+    // TODO: нужна ли вообще такая заметка?
+    static_cast<void>(match);
+
+    return true;
 }
 
-bool Graph::try_end_multi_note(string& line) {
-    static const regex rx{ "^\\s*end\\s+note\\s*$" };
-    if (!regex_match(line, rx)) {
+bool Graph::try_beg_multi_note(const string& line) const {
+    smatch match;
+    static const regex rx{ "^\\s*note\\s+(left|right|top|bottom)\\s+of\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
+    }
+
+    const auto node_name{ match[2].str() };
+    if (!m_ch->id_node.count(node_name)) {
+        throw GraphError(m_ch->line_number, "node not defined");
     }
     return true;
 }
 
-bool Graph::try_note(string& line, istream& in) {
+bool Graph::try_end_multi_note(const string& line) const {
+    static const regex rx{ "^\\s*end\\s+note\\s*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_note(const string& line, istream& in) {
     if (try_one_note(line)) {
         return true;
     }
@@ -116,39 +127,58 @@ bool Graph::try_note(string& line, istream& in) {
         return false;
     }
 
-    bool is_closed{ false };
+    while (in) {
+        string line;
+        getline(in, line);
+        m_ch->line_number++; // TODO: создать абстракцию над этим?
+
+        if (try_end_multi_note(line)) {
+            return true;
+        }
+    }
+    throw GraphError(m_ch->line_number, "note is not closed");
+}
+
+// -----------------------------------------------------------------------
+
+bool Graph::try_one_comment(const std::string& line) const {
+    static const regex rx{ "^\\s*'.*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_beg_multi_comment(const std::string& line) const {
+    static const regex rx{ "^\\s*\\/'.*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_end_multi_comment(const std::string& line) const {
+    static const regex rx{ "^.*'\\/\\s*$" };
+    return regex_match(line, rx);
+}
+
+bool Graph::try_comment(const std::string& line, std::istream& in) {
+    if (try_one_comment(line)) {
+        return true;
+    }
+
+    if (!try_beg_multi_comment(line)) {
+        return false;
+    }
+
     while (in) {
         string line;
         getline(in, line);
         m_ch->line_number++;
 
-        if (try_end_multi_note(line)) {
-            is_closed = true;
-            break;
+        if (try_end_multi_comment(line)) {
+            return true;
         }
     }
-
-    if (!is_closed) {
-        throw GraphError(m_ch->line_number, "group is not closed");
-    }
-
-    return true;
+    throw GraphError(m_ch->line_number, "comment is not closed");
 }
 
 // -----------------------------------------------------------------------
 
-bool Graph::try_one_comment(std::string& line) {
-    static const regex rx{ "^\\s*'.*$" };
-    return regex_match(line, rx);
-}
-
-bool Graph::try_multi_comment(std::string&, std::istream&) {
-    // TODO:
-    return false;
-}
-
-// -----------------------------------------------------------------------
-
-bool Graph::try_grouping(std::string&, std::istream&) {
+bool Graph::try_grouping(const std::string&, std::istream&) {
     return false;
 }

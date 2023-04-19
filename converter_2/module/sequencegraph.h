@@ -4,12 +4,20 @@
 #include <string>
 
 #include "graph.h"
+#include "usecasegraph.h"
 
 struct SequenceGraph final : Graph {
     struct SeqOpd;
     struct SeqFrag {
-        std::string name;
+        enum Type : uint32_t {
+            Ref, Loop, Alt, Opt
+        };
+
+        std::string id;
+        Type type{ Type::Ref };
         std::vector<std::shared_ptr<SeqOpd>> opds;
+
+        uint32_t opd_pos();
     };
 
     struct SeqOpd {
@@ -35,25 +43,25 @@ struct SequenceGraph final : Graph {
         };
 
         SeqEdge() = default;
-        SeqEdge(std::string id, std::string name);
+        SeqEdge(std::string id, std::string name, Type);
 
         Type type;
         std::weak_ptr<SeqOpd> opd;
     };
+
+    std::weak_ptr<UseCaseGraph::UcNode> uc_node;
+    std::vector<std::shared_ptr<SeqFrag>> frags;
 
 public:
     void read_puml(std::istream&) override;
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_node(std::string&, std::istream&) override;
-    bool try_connection(std::string&, std::istream&) override;
-
-private:
-    bool try_whole_node(std::string&);
-    bool try_short_node(std::string&);
+    bool try_node(const std::string&, std::istream&) override;
+    bool try_connection(const std::string&, std::istream&) override;
 };
 
 #endif // SEQUENCEGRAPH_H
 
 // TODO: сделать описание через БНФ
+// TODO: сделать эксперимент  Json массив объектов!

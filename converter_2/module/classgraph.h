@@ -51,22 +51,13 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_node(std::string&, std::istream&) override;
-    bool try_connection(std::string&, std::istream&) override;
+    bool try_node(const std::string&, std::istream&) override;
+    bool try_connection(const std::string&, std::istream&) override;
 
-protected:
+private:
     void try_interface_body(const std::string&, std::istream&);
     void try_class_body(const std::string&, std::istream&);
     void try_enum_body(const std::string&, std::istream&);
-
-private:
-    // TODO: или вообще убрать в анонимный namespace?
-    bool try_interface_member_func(std::shared_ptr<ClassNode>, const std::string&);
-    bool try_class_member(std::shared_ptr<ClassNode>, const std::string&);
-    bool try_enum_value(std::shared_ptr<ClassNode>, const std::string&);
-
-protected:
-    bool try_hide_empty_members(const std::string&);
 };
 
 #endif // CLASSGRAPH_H

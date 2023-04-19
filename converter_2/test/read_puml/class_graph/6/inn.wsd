@@ -1,0 +1,99 @@
+@startuml
+
+skinparam ArrowThickness 1.25
+skinparam ClassBorderThickness 1.5
+skinparam ClassBackgroundColor #FEFECE
+skinparam ClassBorderColor #B20842
+
+skinparam Shadowing true
+
+' -----------------------------------------------
+
+class UC_node {
+}
+
+' Дуги упорядочены по времени появления.
+class Sequence_dia {
+  +uc_node: UC_node
+  +nodes: List<Seq_node>
+  +edges: List<Seq_edge>
+  +frags: List<Seq_frag>
+}
+
+note as N1
+  Sequence - Seq
+  Use Case - UC
+  operand - opd
+  fragment - frag
+end note
+
+class Seq_frag {
+  +name: String
+  +opds: List<Seq_opd>
+}
+
+class Seq_opd {
+  +condition: String
+  +frag: Seq_frag
+}
+
+' -----------------------------------------------
+
+enum Seq_node_type {
+  ACTOR
+  BOUNDARY
+  CONTROL
+  ENTITY
+}
+
+enum Seq_edge_type {
+  SYNC
+  REPLY
+}
+
+class Seq_edge {
+  +name: String
+  +type: Seq_edge_type
+  +begin: Seq_node
+  +end: Seq_node
+  +operand: Seq_operand
+}
+
+class Seq_node {
+  +name: String
+  +type: Seq_node_type
+  +is_error: bool
+  +inn_edges: List<Seq_edge>
+  +out_edges: List<Seq_edge>
+}
+
+' -----------------------------------------------
+
+class Format {
+}
+class Layout {
+}
+
+' -----------------------------------------------
+
+left to right direction
+
+Sequence_dia o-r- UC_node
+Sequence_dia -r-o UC_node
+
+Sequence_dia o-- Seq_edge : edges
+Sequence_dia o-- Seq_node : nodes
+
+Sequence_dia o-r- Seq_frag 
+
+Seq_node -u-> Seq_node_type
+Seq_edge -u-> Seq_edge_type
+
+Seq_edge o-l- Seq_node
+Seq_edge -l-o Seq_node
+Seq_edge o-r- Seq_opd
+
+Seq_opd o-u- Seq_frag
+Seq_opd -u-o Seq_frag
+
+@enduml

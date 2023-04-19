@@ -1,0 +1,416 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Sequence_dia"
+      },
+      "end": {
+        "id": "UC_node"
+      },
+      "id": "1",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Seq_edge"
+      },
+      "end": {
+        "id": "Seq_opd"
+      },
+      "id": "10",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Seq_opd"
+      },
+      "end": {
+        "id": "Seq_frag"
+      },
+      "id": "11",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Seq_frag"
+      },
+      "end": {
+        "id": "Seq_opd"
+      },
+      "id": "12",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "UC_node"
+      },
+      "end": {
+        "id": "Sequence_dia"
+      },
+      "id": "2",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Sequence_dia"
+      },
+      "end": {
+        "id": "Seq_edge"
+      },
+      "id": "3",
+      "name": "edges",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Sequence_dia"
+      },
+      "end": {
+        "id": "Seq_node"
+      },
+      "id": "4",
+      "name": "nodes",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Sequence_dia"
+      },
+      "end": {
+        "id": "Seq_frag"
+      },
+      "id": "5",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Seq_node"
+      },
+      "end": {
+        "id": "Seq_node_type"
+      },
+      "id": "6",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Seq_edge"
+      },
+      "end": {
+        "id": "Seq_edge_type"
+      },
+      "id": "7",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Seq_edge"
+      },
+      "end": {
+        "id": "Seq_node"
+      },
+      "id": "8",
+      "name": "",
+      "type": "aggregation"
+    },
+    {
+      "beg": {
+        "id": "Seq_node"
+      },
+      "end": {
+        "id": "Seq_edge"
+      },
+      "id": "9",
+      "name": "",
+      "type": "aggregation"
+    }
+  ],
+  "id": "class_dia",
+  "nodes": [
+    {
+      "datas": [],
+      "funcs": [],
+      "id": "Format",
+      "inn_edges": [],
+      "name": "Format",
+      "out_edges": [],
+      "type": "class"
+    },
+    {
+      "datas": [],
+      "funcs": [],
+      "id": "Layout",
+      "inn_edges": [],
+      "name": "Layout",
+      "out_edges": [],
+      "type": "class"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "type",
+          "type": "Seq_edge_type"
+        },
+        {
+          "mark": "+",
+          "name": "begin",
+          "type": "Seq_node"
+        },
+        {
+          "mark": "+",
+          "name": "end",
+          "type": "Seq_node"
+        },
+        {
+          "mark": "+",
+          "name": "operand",
+          "type": "Seq_operand"
+        }
+      ],
+      "funcs": [],
+      "id": "Seq_edge",
+      "inn_edges": [
+        {
+          "id": "3"
+        },
+        {
+          "id": "9"
+        }
+      ],
+      "name": "Seq_edge",
+      "out_edges": [
+        {
+          "id": "10"
+        },
+        {
+          "id": "7"
+        },
+        {
+          "id": "8"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "enum_values": [
+        "SYNC",
+        "REPLY"
+      ],
+      "id": "Seq_edge_type",
+      "inn_edges": [
+        {
+          "id": "7"
+        }
+      ],
+      "name": "Seq_edge_type",
+      "out_edges": [],
+      "type": "enum"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "opds",
+          "type": "List<Seq_opd>"
+        }
+      ],
+      "funcs": [],
+      "id": "Seq_frag",
+      "inn_edges": [
+        {
+          "id": "11"
+        },
+        {
+          "id": "5"
+        }
+      ],
+      "name": "Seq_frag",
+      "out_edges": [
+        {
+          "id": "12"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "type",
+          "type": "Seq_node_type"
+        },
+        {
+          "mark": "+",
+          "name": "is_error",
+          "type": "bool"
+        },
+        {
+          "mark": "+",
+          "name": "inn_edges",
+          "type": "List<Seq_edge>"
+        },
+        {
+          "mark": "+",
+          "name": "out_edges",
+          "type": "List<Seq_edge>"
+        }
+      ],
+      "funcs": [],
+      "id": "Seq_node",
+      "inn_edges": [
+        {
+          "id": "4"
+        },
+        {
+          "id": "8"
+        }
+      ],
+      "name": "Seq_node",
+      "out_edges": [
+        {
+          "id": "6"
+        },
+        {
+          "id": "9"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "enum_values": [
+        "ACTOR",
+        "BOUNDARY",
+        "CONTROL",
+        "ENTITY"
+      ],
+      "id": "Seq_node_type",
+      "inn_edges": [
+        {
+          "id": "6"
+        }
+      ],
+      "name": "Seq_node_type",
+      "out_edges": [],
+      "type": "enum"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "condition",
+          "type": "String"
+        },
+        {
+          "mark": "+",
+          "name": "frag",
+          "type": "Seq_frag"
+        }
+      ],
+      "funcs": [],
+      "id": "Seq_opd",
+      "inn_edges": [
+        {
+          "id": "10"
+        },
+        {
+          "id": "12"
+        }
+      ],
+      "name": "Seq_opd",
+      "out_edges": [
+        {
+          "id": "11"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [
+        {
+          "mark": "+",
+          "name": "uc_node",
+          "type": "UC_node"
+        },
+        {
+          "mark": "+",
+          "name": "nodes",
+          "type": "List<Seq_node>"
+        },
+        {
+          "mark": "+",
+          "name": "edges",
+          "type": "List<Seq_edge>"
+        },
+        {
+          "mark": "+",
+          "name": "frags",
+          "type": "List<Seq_frag>"
+        }
+      ],
+      "funcs": [],
+      "id": "Sequence_dia",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "name": "Sequence_dia",
+      "out_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "3"
+        },
+        {
+          "id": "4"
+        },
+        {
+          "id": "5"
+        }
+      ],
+      "type": "class"
+    },
+    {
+      "datas": [],
+      "funcs": [],
+      "id": "UC_node",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "name": "UC_node",
+      "out_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "type": "class"
+    }
+  ]
+}

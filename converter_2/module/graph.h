@@ -25,7 +25,7 @@ public:
     Graph();
     virtual ~Graph() = default;
 
-    // TODO: в один метод - почти одинаковая логика для всех диаграмм (графов)
+    // enough.
     virtual void read_puml(std::istream&) = 0;
     virtual void write_json(std::ostream&) = 0;
 
@@ -35,30 +35,32 @@ public:
     std::vector<std::shared_ptr<Edge>> edges;
 
 protected:
-    bool try_whitespaces(std::string&);
-    bool try_directive(std::string&);
-    bool try_skinparam(std::string&);
-    bool try_direction(std::string&);
+    bool try_directive(const std::string&) const;
+    bool try_skinparam(const std::string&) const;
+    bool try_direction(const std::string&) const;
+    bool try_whitespaces(const std::string&) const;
 
 protected:
-    bool try_beg_grouping(std::string&);
-    bool try_end_curly_brace(std::string&);
+    bool try_beg_grouping(const std::string&) const;
+    bool try_end_curly_brace(const std::string&) const;
 
 protected:
-    bool try_one_note(std::string&);
-    bool try_beg_multi_note(std::string&);
-    bool try_beg_note_with_id(std::string&);
-    bool try_end_multi_note(std::string&);
-    bool try_note(std::string&, std::istream&);
+    bool try_one_note(const std::string&) const;
+    bool try_beg_note_with_id(const std::string&) const;
+    bool try_beg_multi_note(const std::string&) const;
+    bool try_end_multi_note(const std::string&) const;
+    bool try_note(const std::string&, std::istream&);
 
 protected:
-    bool try_one_comment(std::string&);
-    bool try_multi_comment(std::string&, std::istream&);
+    bool try_one_comment(const std::string&) const;
+    bool try_beg_multi_comment(const std::string&) const;
+    bool try_end_multi_comment(const std::string&) const;
+    bool try_comment(const std::string&, std::istream&);
 
 protected:
-    virtual bool try_node(std::string&, std::istream&) = 0;
-    virtual bool try_connection(std::string&, std::istream&) = 0;
-    virtual bool try_grouping(std::string&, std::istream&);
+    virtual bool try_node(const std::string&, std::istream&) = 0;
+    virtual bool try_connection(const std::string&, std::istream&) = 0;
+    virtual bool try_grouping(const std::string&, std::istream&);
 
 protected:
     const std::shared_ptr<ConstructHelper> m_ch;
