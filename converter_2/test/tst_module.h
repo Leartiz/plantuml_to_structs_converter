@@ -83,6 +83,16 @@ private slots:
 
     // SequenceGraph
 private slots:
+    void test_SequenceGraph_read_okk();
+    void test_SequenceGraph_read_okk1();
+
+
+    void test_SequenceGraph_read_err();
+    void test_SequenceGraph_read_err1();
+    void test_SequenceGraph_read_err2();
+
+    void test_SequenceGraph_read_puml_data();
+    void test_SequenceGraph_read_puml();
 
     // ClassGraph
 private slots:

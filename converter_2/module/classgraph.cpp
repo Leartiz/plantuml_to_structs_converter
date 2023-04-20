@@ -44,7 +44,7 @@ namespace {
 
 ConstructHelper* ch{ nullptr };
 
-ClassEdge::Type edge_type_from_arrow_parts(const string& head,
+ClassEdge::Type edge_type_from_arrow_part(const string& head,
                                            const string& body) {
     using Type = ClassEdge::Type;
     const auto it{ find(begin(body), end(body), '.') };
@@ -391,7 +391,7 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
     }
 
     auto arrow_body{ match[4].str() };
-    auto etype{ edge_type_from_arrow_parts(arrow_head, arrow_body) };
+    auto etype{ edge_type_from_arrow_part(arrow_head, arrow_body) };
     if (etype == ClassEdge::Composition || etype == ClassEdge::Aggregation) {
         is_left_to_rght = !is_left_to_rght;
     }

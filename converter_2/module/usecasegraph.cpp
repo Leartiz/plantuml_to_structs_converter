@@ -40,7 +40,7 @@ namespace {
 
 ConstructHelper* ch{ nullptr };
 
-UcEdge::Type edge_type_from_arrow_parts(const string& head,
+UcEdge::Type edge_type_from_arrow_part(const string& head,
                                         const string& body,
                                         const string& note) {
     const auto it{ find(begin(body), end(body), '.') };
@@ -214,7 +214,7 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
     }
 
     auto arrow_body{ match[4].str() };
-    auto etype{ edge_type_from_arrow_parts(arrow_head, arrow_body, match[10].str()) };
+    auto etype{ edge_type_from_arrow_part(arrow_head, arrow_body, match[10].str()) };
 
     const auto left_node{ create_node_if_need(match[1].str()) };
     const auto rght_node{ create_node_if_need(match[7].str()) };

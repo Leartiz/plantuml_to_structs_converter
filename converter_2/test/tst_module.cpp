@@ -6,6 +6,7 @@
 
 #include "usecasegraph.h"
 #include "robustnessgraph.h"
+#include "sequencegraph.h"
 #include "classgraph.h"
 #include "grapherror.h"
 
@@ -953,6 +954,7 @@ void Module::test_RobustnessGraph_read_okk()
     QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
     QCOMPARE_EQ(robG.nodes.size(), size_t(5));
     QCOMPARE_EQ(robG.edges.size(), size_t(4)); // important!
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
 }
 
 void Module::test_RobustnessGraph_read_okk1()
@@ -969,6 +971,7 @@ void Module::test_RobustnessGraph_read_okk1()
     QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
     QCOMPARE_EQ(robG.nodes.size(), size_t(2));
     QCOMPARE_EQ(robG.edges.size(), size_t(1));
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
 
     // ***
 
@@ -1031,6 +1034,7 @@ void Module::test_RobustnessGraph_read_okk3()
     QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
     QCOMPARE_EQ(robG.nodes.size(), size_t(2));
     QCOMPARE_EQ(robG.edges.size(), size_t(2));
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
 
     // ***
 
@@ -1180,6 +1184,163 @@ void Module::test_RobustnessGraph_read_puml()
     QCOMPARE_EQ(actual.is_object(), true);
     QCOMPARE_EQ(expected.is_object(), true);
     QCOMPARE_EQ((actual == expected), true);
+}
+
+// SequenceGraph
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_okk()
+{
+    using SeqNode = SequenceGraph::SeqNode;
+    using SeqEdge = SequenceGraph::SeqEdge;
+
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob -> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(seqG.read_puml(sin));
+    QCOMPARE_EQ(seqG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(seqG.edges.size(), size_t(2));
+    QCOMPARE_EQ(seqG.frags.size(), size_t(0));
+    QCOMPARE_EQ(seqG.uc_node.expired(), true);
+
+    // ***
+
+    {
+        auto detected_node = seqG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(seqG.nodes), end(seqG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Bob";
+        }));
+        QCOMPARE_EQ((detected_node == seqG.nodes.end()), false);
+
+        auto seq_node = static_pointer_cast<SeqNode>(*detected_node);
+        QCOMPARE_EQ(seq_node->id, string("Bob"));
+        QCOMPARE_EQ(seq_node->name, string("Bob"));
+        QCOMPARE_EQ(seq_node->type, SeqNode::Actor);
+        QCOMPARE_EQ(seq_node->is_error, false);
+        QCOMPARE_EQ(seq_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(seq_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_node = seqG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(seqG.nodes), end(seqG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ((detected_node == seqG.nodes.end()), false);
+
+        auto seq_node = static_pointer_cast<SeqNode>(*detected_node);
+        QCOMPARE_EQ(seq_node->id, string("MainWin"));
+        QCOMPARE_EQ(seq_node->name, string("MainWin"));
+        QCOMPARE_EQ(seq_node->type, SeqNode::Boundary);
+        QCOMPARE_EQ(seq_node->is_error, false);
+        QCOMPARE_EQ(seq_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(seq_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[0]);
+        QCOMPARE_EQ(seq_edge->id, string("1"));
+        QCOMPARE_EQ(seq_edge->name, string("on_clicked_menu()"));
+        QCOMPARE_EQ(seq_edge->type, SeqEdge::Sync);
+        QCOMPARE_EQ(seq_edge->beg.lock()->id, string("Bob"));
+        QCOMPARE_EQ(seq_edge->end.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(seq_edge->opd.expired(), true);
+    }
+    // ***
+    {
+        auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[1]);
+        QCOMPARE_EQ(seq_edge->id, string("2"));
+        QCOMPARE_EQ(seq_edge->name, string(""));
+        QCOMPARE_EQ(seq_edge->type, SeqEdge::Reply);
+        QCOMPARE_EQ(seq_edge->beg.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(seq_edge->end.lock()->id, string("Bob"));
+        QCOMPARE_EQ(seq_edge->opd.expired(), true);
+    }
+}
+
+void Module::test_SequenceGraph_read_okk1()
+{
+
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_err()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob ..> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err1()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob <--> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err2()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob -- MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_puml_data()
+{
+
+}
+
+void Module::test_SequenceGraph_read_puml()
+{
+
 }
 
 // ClassGraph

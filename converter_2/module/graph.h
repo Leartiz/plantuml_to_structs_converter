@@ -58,12 +58,14 @@ protected:
     bool try_comment(const std::string&, std::istream&);
 
 protected:
+    virtual bool try_any(const std::string&, std::istream&);
     virtual bool try_node(const std::string&, std::istream&) = 0;
     virtual bool try_connection(const std::string&, std::istream&) = 0;
     virtual bool try_grouping(const std::string&, std::istream&);
 
 protected:
     const std::shared_ptr<ConstructHelper> m_ch;
+    std::string read_line(std::istream&);
 };
 
 #endif // GRAPH_H

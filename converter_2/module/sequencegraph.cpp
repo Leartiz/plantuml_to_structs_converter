@@ -1,9 +1,11 @@
 #include <regex>
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 #include "sequencegraph.h"
 #include "constructhelper.h"
+#include "grapherror.h"
 
 #include "str_utils.h"
 #include "json_utils.h"
@@ -36,6 +38,15 @@ SequenceGraph::SeqEdge::SeqEdge(string id, string name, Type tp) {
 namespace {
 
 ConstructHelper* ch{ nullptr };
+
+SeqEdge::Type edge_type_from_arrow_part(const string& body) {
+    const auto part_count{ count(begin(body), end(body), '-') };
+
+    if (part_count == 1)
+        return SeqEdge::Sync;
+    return SeqEdge::Reply;
+}
+
 
 // *** json and not only
 
@@ -168,19 +179,22 @@ void SequenceGraph::write_json(std::ostream& out) {
 
 // -----------------------------------------------------------------------
 
+bool SequenceGraph::try_any(const std::string& line, std::istream& in) {
+    return Graph::try_any(line, in);
+}
+
 bool SequenceGraph::try_node(const std::string& line, std::istream&) {
     return try_whole_node(line) || try_short_node(line);
 }
 
 bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+([lrdu]|left|right|up|down)[-]+|[-]+)(>)?)"
-                                        "\\s+(\\S+)\\s*(:(.*))?$"))) {
+    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+)(>)?)\\s+(\\S+)\\s*(:(.*))?\\s*$"))) {
         return false;
     }
 
     const auto left_node_name = match[1].str();
-    const auto rght_node_name = match[7].str();
+    const auto rght_node_name = match[6].str();
     if (!ch->id_node.count(left_node_name) || !ch->id_node.count(rght_node_name)) {
         throw runtime_error{ "node not defined" };
     }
@@ -189,13 +203,18 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     const auto rght_node{ static_pointer_cast<SeqNode>(ch->id_node[rght_node_name]) };
 
     const auto left_head_arrow{ match[3].str() };
-    const auto rght_head_arrow{ match[6].str() };
-    auto edge_text = str_utils::trim_space(match[9].str());
+    const auto rght_head_arrow{ match[5].str() };
+    if (
+            (!left_head_arrow.empty() && !rght_head_arrow.empty()) ||
+            (left_head_arrow.empty() && rght_head_arrow.empty())) {
+        throw GraphError(ch->line_number, "double-sided arrow");
+    }
+
+    const auto edge_type = edge_type_from_arrow_part(match[4].str());
+    auto edge_text = str_utils::trim_space(match[8].str());
     edge_text = str_utils::un_quote(edge_text);
 
-    // TODO:
-
-    const auto edge{ make_shared<SeqEdge>(ch->next_edge_id(), edge_text) };
+    const auto edge{ make_shared<SeqEdge>(ch->next_edge_id(), edge_text, edge_type) };
     // -->
     if (left_head_arrow.empty()) {
         edge->beg = left_node;

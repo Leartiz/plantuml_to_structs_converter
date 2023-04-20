@@ -16,12 +16,10 @@ struct SequenceGraph final : Graph {
         std::string id;
         Type type{ Type::Ref };
         std::vector<std::shared_ptr<SeqOpd>> opds;
-
-        uint32_t opd_pos();
     };
 
     struct SeqOpd {
-        std::string condition;
+        std::string id, condition;
         std::weak_ptr<SeqFrag> frag;
     };
 
@@ -57,6 +55,7 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
+    bool try_any(const std::string&, std::istream&) override;
     bool try_node(const std::string&, std::istream&) override;
     bool try_connection(const std::string&, std::istream&) override;
 };

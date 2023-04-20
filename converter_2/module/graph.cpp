@@ -8,26 +8,19 @@ using namespace std;
 
 Graph::Graph() : m_ch{ make_shared<ConstructHelper>() } {}
 
+string Graph::read_line(istream& in) {
+    string line;
+    getline(in, line);
+    m_ch->line_number++;
+    return line;
+}
+
 void Graph::read_puml(std::istream& in) {
     m_ch->reset();
 
     while (in) {
-        string line;
-        getline(in, line);
-        m_ch->line_number++;
-
-        // TODO: сделать как отдельный метод!
-        if (
-                !try_node(line, in) &&
-                !try_connection(line, in) &&
-                !try_whitespaces(line) &&
-                !try_grouping(line, in) &&
-
-                !try_note(line, in) &&
-                !try_comment(line, in) &&
-                !try_directive(line) &&
-                !try_skinparam(line) &&
-                !try_direction(line)) {
+        const auto line{ read_line(in) };
+        if (!try_any(line, in)) {
             throw GraphError(m_ch->line_number, "unknown line");
         }
     }
@@ -128,10 +121,7 @@ bool Graph::try_note(const string& line, istream& in) {
     }
 
     while (in) {
-        string line;
-        getline(in, line);
-        m_ch->line_number++; // TODO: создать абстракцию над этим?
-
+        const auto line{ read_line(in) };
         if (try_end_multi_note(line)) {
             return true;
         }
@@ -166,10 +156,7 @@ bool Graph::try_comment(const std::string& line, std::istream& in) {
     }
 
     while (in) {
-        string line;
-        getline(in, line);
-        m_ch->line_number++;
-
+        const auto line{ read_line(in) };
         if (try_end_multi_comment(line)) {
             return true;
         }
@@ -178,6 +165,20 @@ bool Graph::try_comment(const std::string& line, std::istream& in) {
 }
 
 // -----------------------------------------------------------------------
+
+bool Graph::try_any(const std::string& line, std::istream& in) {
+    return
+            (try_node(line, in) ||
+             try_connection(line, in) ||
+             try_whitespaces(line) ||
+             try_grouping(line, in) ||
+
+             try_note(line, in) ||
+             try_comment(line, in) ||
+             try_directive(line) ||
+             try_skinparam(line) ||
+             try_direction(line));
+}
 
 bool Graph::try_grouping(const std::string&, std::istream&) {
     return false;
