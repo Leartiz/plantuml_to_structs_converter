@@ -289,12 +289,10 @@ bool try_enum_value(std::shared_ptr<ClassNode> node, const std::string& line) {
 
 // -----------------------------------------------------------------------
 
-/*
 bool try_hide_empty_members(const std::string& line) {
     static const regex rx{ "^\\s*hide\\s+empty\\s+(methods|members)\\s*$" };
     return regex_match(line, rx);
 }
-*/
 
 } // <anonymous>
 
@@ -335,6 +333,10 @@ void ClassGraph::write_json(std::ostream& out) {
 }
 
 // -----------------------------------------------------------------------
+
+bool ClassGraph::try_any(const std::string& line, std::istream& in) {
+    return Graph::try_any(line, in) || try_hide_empty_members(line);
+}
 
 bool ClassGraph::try_node(const std::string& line, std::istream& in) {
     using ClassNode = ClassGraph::ClassNode;
@@ -426,23 +428,19 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
 
 void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
-    if (node->type != ClassGraph::ClassNode::Interface) {
+    if (node->type != ClassNode::Interface) {
         throw GraphError(ch->line_number, "node has no interface type");
     }
 
     while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
+        const auto line{ read_line(in) };
         if (try_end_curly_brace(line)) {
             return;
         }
 
         if (
                 !try_interface_member_func(node, line) &&
-                !try_whitespaces(line) &&
-                !try_comment(line, in)) {
+                !try_whitespaces(line) && !try_comment(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }
     }
@@ -452,23 +450,19 @@ void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
 
 void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
-    if (node->type != ClassGraph::ClassNode::Class) {
+    if (node->type != ClassNode::Class) {
         throw GraphError(ch->line_number, "node has no class type");
     }
 
     while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
+        const auto line{ read_line(in) };
         if (try_end_curly_brace(line)) {
             return;
         }
 
         if (
                 !try_class_member(node, line) &&
-                !try_whitespaces(line) &&
-                !try_comment(line, in)) {
+                !try_whitespaces(line) && !try_comment(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }
     }
@@ -478,26 +472,22 @@ void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
 
 void ClassGraph::try_enum_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
-    if (node->type != ClassGraph::ClassNode::Enum) {
+    if (node->type != ClassNode::Enum) {
         throw GraphError(ch->line_number, "node has no enum type");
     }
 
     while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
+        const auto line{ read_line(in) };
         if (try_end_curly_brace(line)) {
             return;
         }
 
         if (
                 !try_enum_value(node, line) &&
-                !try_whitespaces(line) &&
-                !try_comment(line, in)) {
+                !try_whitespaces(line) && !try_comment(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }
     }
 
-    throw GraphError(ch->line_number, "interface body is not closed");
+    throw GraphError(ch->line_number, "enum body is not closed");
 }

@@ -9,6 +9,11 @@ skinparam Shadowing true
 
 ' -----------------------------------------------
 
+hide empty members
+hide empty methods
+
+' -----------------------------------------------
+
 class UC_node {
 }
 

@@ -1,0 +1,82 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "MainWin"
+      },
+      "id": "1",
+      "name": "on_clicked_menu()",
+      "opd": "1",
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "MainWin"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "2",
+      "name": "",
+      "opd": "2",
+      "type": "reply"
+    }
+  ],
+  "frags": [
+    {
+      "id": "1",
+      "opds": [
+        {
+          "condition": "ads dasd",
+          "frag": "1",
+          "id": "1"
+        },
+        {
+          "condition": "asd",
+          "frag": "1",
+          "id": "2"
+        }
+      ],
+      "root_frag": null,
+      "type": "alt"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Bob",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "MainWin",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "is_error": false,
+      "name": "MainWin",
+      "out_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "type": "boundary"
+    }
+  ]
+}

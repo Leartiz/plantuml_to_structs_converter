@@ -5,7 +5,7 @@ interface Foo{
   +get_val(das,) : Number
 }
 
-class Bar{
+class Bar {
 
 }
 

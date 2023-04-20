@@ -245,15 +245,10 @@ bool UseCaseGraph::try_grouping(const string& line, istream& in) {
         return false;
     }
 
-    bool is_closed{ false };
     while (in) {
-        string line;
-        getline(in, line);
-        ch->line_number++;
-
+        const auto line{ read_line(in) };
         if (try_end_curly_brace(line)) {
-            is_closed = true;
-            break;
+            return true;
         }
 
         if (
@@ -268,10 +263,5 @@ bool UseCaseGraph::try_grouping(const string& line, istream& in) {
             throw GraphError(ch->line_number, "unknown line");
         }
     }
-
-    if (!is_closed) {
-        throw GraphError(ch->line_number, "group is not closed");
-    }
-
-    return true;
+    throw GraphError(ch->line_number, "group is not closed");
 }

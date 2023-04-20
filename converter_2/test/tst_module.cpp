@@ -1335,12 +1335,85 @@ void Module::test_SequenceGraph_read_err2()
 
 void Module::test_SequenceGraph_read_puml_data()
 {
+    QTest::addColumn<string>("inn_fpath");
+    QTest::addColumn<string>("expect_out_fpath");
+    QTest::addColumn<string>("actual_out_fpath");
 
+    // ***
+
+    auto cur_dir{ QDir::current() };
+    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/seq_graph"), true);
+
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false); // tests should be!
+    QCOMPARE_EQ(test_catalogs.contains(".."), false);
+    QCOMPARE_EQ(test_catalogs.contains("."), false);
+
+    // ***
+
+    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
+        QCOMPARE_EQ(cur_test_catalog.exists(), true);
+
+        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
+        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
+        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
+
+        QCOMPARE_EQ(QFile::exists(dia_source), true);
+        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
+        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
+
+        const std::string inn_fpath{ dia_source.toStdString() };
+        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
+        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
+
+        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
+    }
 }
 
 void Module::test_SequenceGraph_read_puml()
 {
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
 
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    SequenceGraph seq_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
 }
 
 // ClassGraph

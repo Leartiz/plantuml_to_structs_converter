@@ -13,16 +13,24 @@ struct SequenceGraph final : Graph {
             Ref, Loop, Alt, Opt
         };
 
+        SeqFrag(std::string id, Type, std::shared_ptr<SeqFrag> = {});
+        size_t opd_pos(std::shared_ptr<SeqOpd>) const;
+
         std::string id;
         Type type{ Type::Ref };
+
+        std::weak_ptr<SeqFrag> root_frag;
         std::vector<std::shared_ptr<SeqOpd>> opds;
     };
 
     struct SeqOpd {
+        SeqOpd(std::string id, std::string condition);
+
         std::string id, condition;
         std::weak_ptr<SeqFrag> frag;
     };
 
+public:
     struct SeqNode : public Node {
         enum Type : uint32_t {
             Actor, Boundary, Control, Entity,
@@ -55,12 +63,14 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
-    bool try_any(const std::string&, std::istream&) override;
     bool try_node(const std::string&, std::istream&) override;
     bool try_connection(const std::string&, std::istream&) override;
+    bool try_grouping(const std::string&, std::istream&) override;
+
+private:
+    bool try_fragment(const std::string&, std::istream&);
+    bool try_ref_over(const std::string&, std::istream&);
 };
 
 #endif // SEQUENCEGRAPH_H
 
-// TODO: сделать описание через БНФ
-// TODO: сделать эксперимент  Json массив объектов!

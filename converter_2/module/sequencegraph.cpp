@@ -21,6 +21,23 @@ using SeqOpd = SequenceGraph::SeqOpd;
 
 // -----------------------------------------------------------------------
 
+SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqFrag> root) {
+    this->id = std::move(id);
+    this->root_frag = root;
+    this->type = tp;
+}
+
+size_t SeqFrag::opd_pos(std::shared_ptr<SeqOpd> opd) const {
+    // TODO:
+}
+
+SeqOpd::SeqOpd(std::string id, std::string condition) {
+    this->condition = std::move(condition);
+    this->id = std::move(id);
+}
+
+// -----------------------------------------------------------------------
+
 SequenceGraph::SeqNode::SeqNode(string id, string name, Type tp) {
     this->name = std::move(name);
     this->id = std::move(id);
@@ -79,12 +96,69 @@ SeqNode::Type str_to_node_type(const string& str) {
     throw runtime_error{ "seq node type as str unknown" };
 }
 
+// ***
+
+string frag_type_to_str(const SeqFrag::Type tp) {
+    switch (tp) {
+    case SeqFrag::Ref: return "ref";
+    case SeqFrag::Loop: return "loop";
+    case SeqFrag::Alt: return "alt";
+    case SeqFrag::Opt: return "opt";
+    }
+
+    throw runtime_error{ "seq fragment type unknown" };
+}
+
+SeqFrag::Type str_to_frag_type(const string& str) {
+    using Type = SeqFrag::Type;
+    if (frag_type_to_str(Type::Ref) == str) return Type::Ref;
+    if (frag_type_to_str(Type::Loop) == str) return Type::Loop;
+    if (frag_type_to_str(Type::Alt) == str) return Type::Alt;
+    if (frag_type_to_str(Type::Opt) == str) return Type::Opt;
+    throw runtime_error{ "seq fragment type as str unknown" };
+}
+
+// ***
+
+json opd_to_json(SeqOpd& opd) {
+    json result;
+    result["id"] = opd.id;
+    result["condition"] = opd.condition;
+
+    if (opd.frag.expired()) {
+        throw runtime_error{ "lost seq operand" };
+    }
+
+    result["frag"] = opd.frag.lock()->id;
+    return result;
+}
+
+json frag_to_json(SeqFrag& frag) {
+    json result;
+    result["id"] = frag.id;
+    result["type"] = frag_type_to_str(frag.type);
+
+    result["root_frag"] = nullptr;
+    if (!frag.root_frag.expired()) {
+        result["root_frag"] = frag.root_frag.lock()->id;
+    }
+
+    json::array_t json_opds;
+    for (const auto& opd : frag.opds) {
+        json_opds.push_back(opd_to_json(*opd));
+    }
+
+    result["opds"] = json_opds;
+    return result;
+}
+
 json edge_to_json(SeqEdge& edge) {
     json result = json_utils::edge_to_json(edge);
     result["type"] = edge_type_to_str(edge.type);
 
     result["opd"] = nullptr;
-    // TODO:
+    if (!edge.opd.expired())
+        result["opd"] = edge.opd.lock()->id;
     return result;
 }
 
@@ -134,6 +208,35 @@ bool try_short_node(const std::string& line) {
     return true;
 }
 
+// -----------------------------------------------------------------------
+
+bool try_three_dots(const std::string& line) {
+    static const regex rx{ "^\\s*[.]{3}\\s*$" };
+    return regex_match(line, rx);
+}
+
+bool try_operand_body(const std::string& line) {
+    return false;
+}
+
+bool try_operand_else(const std::string& line, shared_ptr<SeqFrag> frag) {
+    smatch match;
+    if (!regex_match(line, match, regex("^\\s*else\\s+(.*)$"))) {
+        return false;
+    }
+
+    const auto opd_cond = str_utils::trim_space(match[1].str());
+    auto opd = make_shared<SeqOpd>(ch->next_opd_id(), opd_cond);
+    frag->opds.push_back(opd);
+    opd->frag = frag;
+    return true;
+}
+
+bool try_operand_end(const std::string& line) {
+    static const regex rx{ "^\\s*end\\s*$" };
+    return regex_match(line, rx);
+}
+
 } // <anonymous>
 
 // -----------------------------------------------------------------------
@@ -174,14 +277,19 @@ void SequenceGraph::write_json(std::ostream& out) {
         json_graph["nodes"] = json_nodes;
     }
 
+    /* frags */
+    {
+        json::array_t json_frags;
+        for (const auto& frag : frags) {
+            json_frags.push_back(frag_to_json(*frag));
+        }
+        json_graph["frags"] = json_frags;
+    }
+
     out << setw(2) << json_graph;
 }
 
 // -----------------------------------------------------------------------
-
-bool SequenceGraph::try_any(const std::string& line, std::istream& in) {
-    return Graph::try_any(line, in);
-}
 
 bool SequenceGraph::try_node(const std::string& line, std::istream&) {
     return try_whole_node(line) || try_short_node(line);
@@ -233,4 +341,58 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     }
     ch->id_edge[edge->id] = edge;
     return true;
+}
+
+// -----------------------------------------------------------------------
+
+bool SequenceGraph::try_grouping(const std::string& line, std::istream& in) {
+    return try_fragment(line, in) || try_ref_over(line, in);
+}
+
+bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
+    smatch match;
+    if (!regex_match(line, match, regex("^\\s*(alt|opt|loop)\\s+(.*)$"))) {
+        return false;
+    }
+
+    const auto frag_id = to_string(frags.size() + 1);
+    const auto frag_type = str_to_frag_type(match[1].str());
+    const auto opd_cond = str_utils::trim_space(match[2].str());
+
+    // TODO: стек фрагментов, для вложенности
+    auto frag = make_shared<SeqFrag>(frag_id, frag_type);
+    auto opd = make_shared<SeqOpd>(ch->next_opd_id(), opd_cond);
+    frag->opds.push_back(opd);
+    opd->frag = frag;
+
+    while (in) {
+        const auto line{ read_line(in) };
+        if (try_operand_end(line)) {
+            frags.push_back(frag);
+            return true;
+        }
+
+        if (try_operand_else(line, frag)) {
+            opd = frag->opds.back();
+            continue;
+        }
+
+        if (try_connection(line, in)) {
+            auto edge = ch->id_edge[ch->last_edge_id()];
+            auto seq_edge = static_pointer_cast<SeqEdge>(edge);
+            seq_edge->opd = opd;
+            continue;
+        }
+
+        if (!try_whitespaces(line) && !try_three_dots(line)) {
+            throw GraphError(ch->line_number, "unknown line");
+        }
+    }
+    throw GraphError(ch->line_number, "fragment is not closed");
+}
+
+bool SequenceGraph::try_ref_over(const std::string&, std::istream&) {
+
+    // TODO:
+    return false;
 }

@@ -1,0 +1,13 @@
+<opt_whitespace> ::= " "*
+<req_whitespace> ::= " "+
+
+<digit>          ::= [0-9]
+<letter>         ::= [A-Z] | [a-z] 
+<character>      ::= <letter> | <digit>
+
+<string>    ::= "\"" <character>+ "\""
+<node_name> ::= (<letter> | "_") <character>+
+ 
+<directive>  ::= "@startuml" | "@enduml"
+<short_node> ::= ("boundary" | "entity" | "actor" | "control") <req_whitespace> <node_name>
+<whole_node> ::= ("boundary" | "entity" | "actor" | "control") <req_whitespace> <string> <req_whitespace> "as" <req_whitespace> <node_name>
