@@ -1,7 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QMainWindow>
+
+#include "jsonmodel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,6 +23,10 @@ private slots:
     void on_pushBtnConvert_clicked();
 
 private:
+
+
+private:
     Ui::MainWindow *ui;
+    JsonModel *m_model = nullptr;
 };
 #endif // MAINWINDOW_H

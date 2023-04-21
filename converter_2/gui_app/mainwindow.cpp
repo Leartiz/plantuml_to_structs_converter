@@ -1,6 +1,10 @@
 #include <sstream>
 
 #include <QString>
+#include <QByteArray>
+
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "usecasegraph.h"
 #include "robustnessgraph.h"
@@ -14,8 +18,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , m_model(new JsonModel(this))
 {
     ui->setupUi(this);
+    ui->treeViewJson->setModel(m_model);
 }
 
 MainWindow::~MainWindow()
@@ -23,10 +29,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+// -----------------------------------------------------------------------
+
 void MainWindow::on_pushBtnConvert_clicked()
 {
     ui->textEditJson->clear();
-    ui->statusbar->clearMessage();
+    m_model->setJson(QJsonObject{});
 
     std::istringstream sin{ ui->textEditWsd->toPlainText().toStdString() };
     std::ostringstream sout;
@@ -50,16 +58,18 @@ void MainWindow::on_pushBtnConvert_clicked()
         }
 
         ui->textEditJson->setText(QString::fromStdString(sout.str()));
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(QString::fromStdString(sout.str()).toUtf8());
+        m_model->setJson(jsonDoc.object());
     }
     catch (const GraphError& err) {
-        ui->statusbar->showMessage(QString::fromStdString(err.complete_message()));
+        ui->textEditJson->setText(QString::fromStdString(err.complete_message()));
         return;
     }
     catch (const std::runtime_error& err) {
-        ui->statusbar->showMessage(err.what());
+        ui->textEditJson->setText(QString::fromStdString(err.what()));
         return;
     }
-
-    ui->statusbar->showMessage("[OK]");
 }
+
+
 

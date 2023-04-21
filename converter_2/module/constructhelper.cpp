@@ -3,6 +3,7 @@
 using namespace std;
 
 void ConstructHelper::reset() {
+    nested_opds = {};
     id_node.clear();
     id_edge.clear();
     line_number = 0;
@@ -19,6 +20,12 @@ string ConstructHelper::last_edge_id() {
 
 string ConstructHelper::next_opd_id() {
     return to_string((opd_number++) + 1);
+}
+
+std::shared_ptr<SequenceGraph::SeqOpd> ConstructHelper::current_opd() {
+    if (nested_opds.empty())
+        return nullptr;
+    return nested_opds.top();
 }
 
 vector<shared_ptr<Graph::Node>> ConstructHelper::to_nodes() const {

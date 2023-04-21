@@ -13,13 +13,13 @@ struct SequenceGraph final : Graph {
             Ref, Loop, Alt, Opt
         };
 
-        SeqFrag(std::string id, Type, std::shared_ptr<SeqFrag> = {});
+        SeqFrag(std::string id, Type, std::shared_ptr<SeqOpd> = {});
         size_t opd_pos(std::shared_ptr<SeqOpd>) const;
 
         std::string id;
         Type type{ Type::Ref };
 
-        std::weak_ptr<SeqFrag> root_frag;
+        std::weak_ptr<SeqOpd> root_opd;
         std::vector<std::shared_ptr<SeqOpd>> opds;
     };
 

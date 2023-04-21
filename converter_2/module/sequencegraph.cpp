@@ -21,9 +21,9 @@ using SeqOpd = SequenceGraph::SeqOpd;
 
 // -----------------------------------------------------------------------
 
-SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqFrag> root) {
+SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqOpd> root) {
     this->id = std::move(id);
-    this->root_frag = root;
+    this->root_opd = root;
     this->type = tp;
 }
 
@@ -138,9 +138,9 @@ json frag_to_json(SeqFrag& frag) {
     result["id"] = frag.id;
     result["type"] = frag_type_to_str(frag.type);
 
-    result["root_frag"] = nullptr;
-    if (!frag.root_frag.expired()) {
-        result["root_frag"] = frag.root_frag.lock()->id;
+    result["root_opd"] = nullptr;
+    if (!frag.root_opd.expired()) {
+        result["root_opd"] = frag.root_opd.lock()->id;
     }
 
     json::array_t json_opds;
@@ -173,7 +173,8 @@ json node_to_json(SeqNode& node) {
 
 bool try_whole_node(const std::string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -192,7 +193,8 @@ bool try_whole_node(const std::string& line) {
 
 bool try_short_node(const std::string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -215,13 +217,10 @@ bool try_three_dots(const std::string& line) {
     return regex_match(line, rx);
 }
 
-bool try_operand_body(const std::string& line) {
-    return false;
-}
-
 bool try_operand_else(const std::string& line, shared_ptr<SeqFrag> frag) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*else\\s+(.*)$"))) {
+    static const regex rx{ "^\\s*else\\s+(.*)$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -280,9 +279,8 @@ void SequenceGraph::write_json(std::ostream& out) {
     /* frags */
     {
         json::array_t json_frags;
-        for (const auto& frag : frags) {
+        for (const auto& frag : frags)
             json_frags.push_back(frag_to_json(*frag));
-        }
         json_graph["frags"] = json_frags;
     }
 
@@ -297,7 +295,8 @@ bool SequenceGraph::try_node(const std::string& line, std::istream&) {
 
 bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+)(>)?)\\s+(\\S+)\\s*(:(.*))?\\s*$"))) {
+    static const regex rx{ "^\\s*(\\S+)\\s+((<)?([-]+)(>)?)\\s+(\\S+)\\s*(:(.*))?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -351,7 +350,8 @@ bool SequenceGraph::try_grouping(const std::string& line, std::istream& in) {
 
 bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(alt|opt|loop)\\s+(.*)$"))) {
+    static const regex rx{ "^\\s*(alt|opt|loop)\\s+(.*)$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -359,21 +359,24 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     const auto frag_type = str_to_frag_type(match[1].str());
     const auto opd_cond = str_utils::trim_space(match[2].str());
 
-    // TODO: стек фрагментов, для вложенности
-    auto frag = make_shared<SeqFrag>(frag_id, frag_type);
+    auto frag = make_shared<SeqFrag>(frag_id, frag_type, ch->current_opd());
     auto opd = make_shared<SeqOpd>(ch->next_opd_id(), opd_cond);
+    frags.push_back(frag);
+
+    ch->nested_opds.push(opd);
     frag->opds.push_back(opd);
-    opd->frag = frag;
+    opd->frag = frag; // enable_shared_from_this!
 
     while (in) {
         const auto line{ read_line(in) };
         if (try_operand_end(line)) {
-            frags.push_back(frag);
+            ch->nested_opds.pop();
             return true;
         }
 
         if (try_operand_else(line, frag)) {
             opd = frag->opds.back();
+            ch->nested_opds.top() = opd;
             continue;
         }
 
@@ -384,7 +387,7 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
             continue;
         }
 
-        if (!try_whitespaces(line) && !try_three_dots(line)) {
+        if (!try_whitespaces(line) && !try_three_dots(line) && !try_grouping(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }
     }

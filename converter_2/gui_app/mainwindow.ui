@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>573</height>
+    <width>819</width>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,31 @@
        <widget class="QTextEdit" name="textEditWsd"/>
       </item>
       <item>
-       <widget class="QTextEdit" name="textEditJson"/>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tabRaw">
+         <attribute name="title">
+          <string>Raw</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QTextEdit" name="textEditJson"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabTree">
+         <attribute name="title">
+          <string>Tree</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QTreeView" name="treeViewJson"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </item>
      </layout>
     </item>
@@ -89,7 +113,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

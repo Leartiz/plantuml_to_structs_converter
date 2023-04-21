@@ -45,7 +45,7 @@ namespace {
 ConstructHelper* ch{ nullptr };
 
 ClassEdge::Type edge_type_from_arrow_part(const string& head,
-                                           const string& body) {
+                                          const string& body) {
     using Type = ClassEdge::Type;
     const auto it{ find(begin(body), end(body), '.') };
     const auto detected_dot{ it != end(body) ? true : false };

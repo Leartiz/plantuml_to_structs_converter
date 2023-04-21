@@ -72,7 +72,8 @@ json node_to_json(RobustnessGraph::RobNode& node) {
 
 bool try_whole_node(const std::string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -91,7 +92,8 @@ bool try_whole_node(const std::string& line) {
 
 bool try_short_node(const std::string& line) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$"))) {
+    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
@@ -158,8 +160,9 @@ bool RobustnessGraph::try_node(const std::string& line, std::istream&) {
 
 bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
     smatch match;
-    if (!regex_match(line, match, regex("^\\s*(\\S+)\\s+((<)?([-]+([lrdu]|left|right|up|down)[-]+|[-]+)(>)?)"
-                                        "\\s+(\\S+)\\s*(:(.*))?$"))) {
+    static const regex rx{ "^\\s*(\\S+)\\s+((<)?([-]+([lrdu]|left|right|up|down)[-]+|[-]+)(>)?)"
+                           "\\s+(\\S+)\\s*(:(.*))?$" };
+    if (!regex_match(line, match, rx)) {
         return false;
     }
 
