@@ -1,0 +1,21 @@
+@startuml
+
+actor Alice
+actor Bob
+entity Log
+
+ref over Alice, Bob, Log
+Инициализация
+end ref
+
+Alice -> Bob: Authentication Request
+Bob -> Alice: Authentication Failure
+
+alt Моя основная метка
+    Alice -> Log : Log attack start
+    loop 1000 times
+        Alice -> Bob: DNS Attack
+    end
+    Alice -> Log : Log attack end
+end
+@enduml

@@ -27,8 +27,12 @@ SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqOpd> root) {
     this->type = tp;
 }
 
+// TEST!
 size_t SeqFrag::opd_pos(std::shared_ptr<SeqOpd> opd) const {
-    // TODO:
+    if (!opd) throw runtime_error{ "opd is nullptr" };
+    const auto it = find(begin(opds), end(opds), opd);
+    if (it != end(opds)) return distance(begin(opds), it);
+    throw runtime_error{ "operand not found" };
 }
 
 SeqOpd::SeqOpd(std::string id, std::string condition) {
@@ -394,8 +398,13 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     throw GraphError(ch->line_number, "fragment is not closed");
 }
 
-bool SequenceGraph::try_ref_over(const std::string&, std::istream&) {
+bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
+    smatch match;
+    static const regex rx{ "^\\s*ref\\s+over\\s+(.*)" };
+    if (!regex_match(line, match, rx)) {
+        return false;
+    }
 
-    // TODO:
+
     return false;
 }

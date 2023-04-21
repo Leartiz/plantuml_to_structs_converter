@@ -5,6 +5,7 @@ SUBDIRS += \
 #    getline \
 #    init_fields \
 #    inner_struct \
+    compare_sp \
     json
 #    putback \
 #    std_string \
