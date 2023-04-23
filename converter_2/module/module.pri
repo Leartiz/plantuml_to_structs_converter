@@ -11,7 +11,7 @@ SOURCES += \
     $$PWD/usecasegraph.cpp
 
 HEADERS += \
-    $$PWD/../../dependency/nlohmann/json.hpp \
+    $$PWD/../../dependency/nlohmann/json/json.hpp \
     $$PWD/classgraph.h \
     $$PWD/constructhelper.h \
     $$PWD/graph.h \

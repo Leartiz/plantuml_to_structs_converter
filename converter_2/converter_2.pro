@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    app \
+    console_app \
     gui_app \
     test

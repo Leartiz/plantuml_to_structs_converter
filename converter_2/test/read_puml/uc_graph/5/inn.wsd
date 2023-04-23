@@ -1,0 +1,6 @@
+@startuml
+
+:User: as UserId
+(DoSome) as DoSomeId
+
+@enduml

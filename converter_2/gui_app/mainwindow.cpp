@@ -17,58 +17,74 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , m_ui(new Ui::MainWindow)
     , m_model(new JsonModel(this))
 {
-    ui->setupUi(this);
-    ui->treeViewJson->setModel(m_model);
+    m_ui->setupUi(this);
+    m_ui->treeViewJson->setModel(m_model);
+
+    // ui
+    {
+        connect(m_ui->pushBtnConvert, &QPushButton::clicked,
+                this, &MainWindow::onClicked_pushBtnConvert);
+    }
+
+    // geometry
+    {
+
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete m_ui;
+    delete m_model;
 }
 
 // -----------------------------------------------------------------------
 
-void MainWindow::on_pushBtnConvert_clicked()
+void MainWindow::onClicked_pushBtnConvert()
 {
-    ui->textEditJson->clear();
+    m_ui->textEditLog->clear();
+
+    m_ui->textEditJson->clear();
     m_model->setJson(QJsonObject{});
 
-    std::istringstream sin{ ui->textEditWsd->toPlainText().toStdString() };
+    std::istringstream sin{ m_ui->codeEditor->toPlainText().toStdString() };
     std::ostringstream sout;
 
     try {
-        if (ui->radioButtonUc->isChecked()) {
+        if (m_ui->radioButtonUc->isChecked()) {
             UseCaseGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
-        else if (ui->radioButtonRob->isChecked()) {
+        else if (m_ui->radioButtonRob->isChecked()) {
             RobustnessGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
-        else if (ui->radioButtonSeq->isChecked()) {
+        else if (m_ui->radioButtonSeq->isChecked()) {
             SequenceGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
-        else if (ui->radioButtonClass->isChecked()) {
+        else if (m_ui->radioButtonClass->isChecked()) {
             ClassGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
 
-        ui->textEditJson->setText(QString::fromStdString(sout.str()));
+        m_ui->textEditJson->setText(QString::fromStdString(sout.str()));
         QJsonDocument jsonDoc = QJsonDocument::fromJson(QString::fromStdString(sout.str()).toUtf8());
         m_model->setJson(jsonDoc.object());
     }
     catch (const GraphError& err) {
-        ui->textEditJson->setText(QString::fromStdString(err.complete_message()));
+        m_ui->textEditLog->setText(QString::fromStdString(err.complete_message()));
         return;
     }
     catch (const std::runtime_error& err) {
-        ui->textEditJson->setText(QString::fromStdString(err.what()));
+        m_ui->textEditLog->setText(QString::fromStdString(err.what()));
         return;
     }
+
+    m_ui->textEditLog->setText("puml2stts - [OK]");
 }
 
 

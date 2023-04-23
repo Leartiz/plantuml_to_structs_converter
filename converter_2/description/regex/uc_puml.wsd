@@ -1,45 +1,24 @@
-    @startuml   
-
-     left    to right direction 
-
-  top to bottom   direction    
-
-         skinparam actorStyle awesome   
-
-rectangle das{   
-}
-
-rectangle  das {
-}
-
-rectangle{
-  usecase "Есть" as UC1
-  usecase "Платить" as UC2
-  usecase "Пить" as UC3
-  usecase "Составлять отзыв" as UC4
-   }   
-
-
-package Ресторан{
-  usecase "Есть" as UC1
-  usecase "Платить" as UC2
-  usecase "Пить" as UC3
-  usecase "Составлять отзыв" as UC4
-   }   
-
+@startuml   
    
+:OneUser: as OneUserId
+
+(ShortUc) as ShortUcId
+
 usecase (Последний прецедент) as UC1 
-    usecase "Последний прецедент" as UC2
-usecase  "Последний прецедент"  as  UC3
-    usecase  (Последний прецедент)  as  UC4
+usecase "Последний прецедент" as UC2
+usecase "Последний прецедент"  as  UC3
+usecase (Последний прецедент)  as  UC4
 
 actor :Последний прецедент: as A1
 actor "Последний прецедент" as AC
- actor  "Последний прецедент"  as  A3
-  actor  :Последний прецедент:  as  A4
-UC <|-> A1   
-UC -d-> A1   
-UC ..> A1 : <<include>>     
-UC ..> A1   
+actor "Последний прецедент"  as  A3
+actor :Последний прецедент:  as  A4
+
+UC1 <-- A1   
+UC2 <-d- A1   
+UC3 <.. A3 : <<include>>     
+UC4 <.. A4   
+
+OneUserId --> ShortUcId
 
 @enduml

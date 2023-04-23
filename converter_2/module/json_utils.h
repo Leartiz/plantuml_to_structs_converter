@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "graph.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json/json.hpp"
 
 namespace json_utils {
 

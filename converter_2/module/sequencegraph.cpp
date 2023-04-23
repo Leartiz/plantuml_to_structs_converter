@@ -9,7 +9,6 @@
 
 #include "str_utils.h"
 #include "json_utils.h"
-#include "nlohmann/json.hpp"
 
 using namespace std;
 using namespace nlohmann;
@@ -27,7 +26,6 @@ SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqOpd> root) {
     this->type = tp;
 }
 
-// TEST!
 size_t SeqFrag::opd_pos(std::shared_ptr<SeqOpd> opd) const {
     if (!opd) throw runtime_error{ "opd is nullptr" };
     const auto it = find(begin(opds), end(opds), opd);

@@ -12,7 +12,6 @@
 
 #include "str_utils.h"
 #include "json_utils.h"
-#include "nlohmann/json.hpp"
 
 using namespace std;
 using namespace nlohmann;
@@ -253,7 +252,6 @@ bool try_interface_member_func(std::shared_ptr<ClassNode> node, const std::strin
     return true;
 }
 
-// TODO: разбить на две функции (data и func)
 bool try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*([+#-])?(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))\\s*$" };
@@ -263,14 +261,19 @@ bool try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) 
 
     const auto mem_name{ match[2].str() };
     const auto mem_type{ match[7].str() }; // <empty> == void
-    Member member{ str_to_mark(match[1].str()), mem_name, mem_type };
 
-    if (!match[3].matched) {
-        node->datas.push_back(std::move(member));
+    try {
+        Member member{ str_to_mark(match[1].str()), mem_name, mem_type };
+        if (!match[3].matched) {
+            node->datas.push_back(std::move(member));
+        }
+        else {
+            member.param_types = str_to_param_types(str_utils::trim(match[3].str(), "()"));
+            node->funcs.push_back(std::move(member));
+        }
     }
-    else {
-        member.param_types = str_to_param_types(str_utils::trim(match[3].str(), "()"));
-        node->funcs.push_back(std::move(member));
+    catch (const runtime_error& err) {
+        throw GraphError{ ch->line_number, err.what() };
     }
     return true;
 }
@@ -338,6 +341,7 @@ bool ClassGraph::try_any(const std::string& line, std::istream& in) {
     return Graph::try_any(line, in) || try_hide_empty_members(line);
 }
 
+// TODO: обработать runtime исключения!
 bool ClassGraph::try_node(const std::string& line, std::istream& in) {
     using ClassNode = ClassGraph::ClassNode;
     using Type = ClassGraph::ClassNode::Type;

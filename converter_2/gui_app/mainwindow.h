@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QMainWindow>
+#include <QCodeEditor>
 
 #include "jsonmodel.h"
 
@@ -20,13 +21,13 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushBtnConvert_clicked();
+    void onClicked_pushBtnConvert();
 
 private:
 
 
 private:
-    Ui::MainWindow *ui;
-    JsonModel *m_model = nullptr;
+    Ui::MainWindow *m_ui;
+    JsonModel *m_model{ nullptr };
 };
 #endif // MAINWINDOW_H

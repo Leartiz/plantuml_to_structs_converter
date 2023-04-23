@@ -21,6 +21,15 @@
       "type": "usecase"
     },
     {
+      "id": "Student",
+      "inn_edges": [],
+      "name": "Student",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
       "id": "User",
       "inn_edges": [],
       "name": "User",

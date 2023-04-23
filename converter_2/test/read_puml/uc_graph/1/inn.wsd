@@ -1,6 +1,8 @@
 @startuml
 
 actor "User" as User
+actor "Student" as Student
+
 usecase "Registration" as Reg
 usecase "Authorization" as Auth
 

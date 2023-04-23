@@ -12,7 +12,6 @@
 #include "grapherror.h"
 
 #include "json_utils.h"
-#include "nlohmann/json.hpp"
 
 using namespace std;
 using namespace nlohmann;
@@ -41,8 +40,8 @@ namespace {
 ConstructHelper* ch{ nullptr };
 
 UcEdge::Type edge_type_from_arrow_part(const string& head,
-                                        const string& body,
-                                        const string& note) {
+                                       const string& body,
+                                       const string& note) {
     const auto it{ find(begin(body), end(body), '.') };
     const auto detected_dot{ it != end(body) ? true : false };
 
@@ -112,7 +111,7 @@ json node_to_json(UcNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_actor_node(const std::string& line) {
+bool try_whole_actor_node(const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -127,7 +126,21 @@ bool try_actor_node(const std::string& line) {
     return true;
 }
 
-bool try_usecase_node(const std::string& line) {
+bool try_short_actor_node(const std::string& line) {
+    smatch match;
+    static const regex rx{ "^\\s*:(.+):\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
+        return false;
+    }
+
+    const auto node = make_shared<UcNode>(match[2].str(), match[1].str(), UcNode::Actor);
+    ch->id_node[node->id] = node;
+    return true;
+}
+
+// -----------------------------------------------------------------------
+
+bool try_whole_usecase_node(const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -142,11 +155,22 @@ bool try_usecase_node(const std::string& line) {
     return true;
 }
 
+bool try_short_usecase_node(const std::string& line) {
+    smatch match;
+    static const regex rx{ "^\\s*\\((.+)\\)\\s+as\\s+(\\S+)\\s*$" };
+    if (!regex_match(line, match, rx)) {
+        return false;
+    }
+
+    const auto node = make_shared<UcNode>(match[2].str(), match[1].str(), UcNode::Actor);
+    ch->id_node[node->id] = node;
+    return true;
+}
+
 } // <anonymous>
 
 // -----------------------------------------------------------------------
 
-// TODO: создать базовое определение
 void UseCaseGraph::read_puml(istream& in) {
     ch = m_ch.get();
     Graph::read_puml(in);
@@ -183,7 +207,8 @@ void UseCaseGraph::write_json(ostream& out) {
 // -----------------------------------------------------------------------
 
 bool UseCaseGraph::try_node(const std::string& line, std::istream&) {
-    return try_actor_node(line) || try_usecase_node(line);
+    return try_whole_actor_node(line) || try_whole_usecase_node(line) ||
+            try_short_actor_node(line) || try_short_usecase_node(line);
 }
 
 bool UseCaseGraph::try_connection(const string& line, std::istream&) {
