@@ -1,0 +1,152 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "1",
+      "name": "Authentication Request",
+      "opd": null,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "2",
+      "name": "Authentication Failure",
+      "opd": null,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Log"
+      },
+      "id": "3",
+      "name": "Log attack start",
+      "opd": "1",
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "4",
+      "name": "DNS Attack",
+      "opd": "2",
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Log"
+      },
+      "id": "5",
+      "name": "Log attack end",
+      "opd": "1",
+      "type": "sync"
+    }
+  ],
+  "frags": [
+    {
+      "id": "1",
+      "opds": [
+        {
+          "condition": "Моя основная метка",
+          "frag": "1",
+          "id": "1"
+        }
+      ],
+      "root_opd": null,
+      "type": "alt"
+    },
+    {
+      "id": "2",
+      "opds": [
+        {
+          "condition": "1000 times",
+          "frag": "2",
+          "id": "2"
+        }
+      ],
+      "root_opd": "1",
+      "type": "loop"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "3"
+        },
+        {
+          "id": "4"
+        },
+        {
+          "id": "5"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Bob",
+      "inn_edges": [
+        {
+          "id": "1"
+        },
+        {
+          "id": "4"
+        }
+      ],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [
+        {
+          "id": "2"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Log",
+      "inn_edges": [
+        {
+          "id": "3"
+        },
+        {
+          "id": "5"
+        }
+      ],
+      "is_error": false,
+      "name": "Log",
+      "out_edges": [],
+      "type": "entity"
+    }
+  ]
+}
