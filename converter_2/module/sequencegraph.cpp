@@ -20,7 +20,8 @@ using SeqOpd = SequenceGraph::SeqOpd;
 
 // -----------------------------------------------------------------------
 
-SeqFrag::SeqFrag(string id, Type tp, std::shared_ptr<SeqOpd> root) {
+SeqFrag::SeqFrag(string id, Type tp,
+                 std::shared_ptr<SeqOpd> root) {
     this->id = std::move(id);
     this->root_opd = root;
     this->type = tp;
@@ -66,6 +67,23 @@ SeqEdge::Type edge_type_from_arrow_part(const string& body) {
     return SeqEdge::Reply;
 }
 
+vector<string> str_to_node_names(const string& str) {
+    vector<string> result;
+    istringstream sin{ str };
+    while (!sin.eof()) {
+        string node_mame;
+        getline(sin, node_mame, ',');
+
+        str_utils::trim_space_by_ref(node_mame);
+        if (!node_mame.empty()) {
+            result.push_back(std::move(node_mame));
+            continue;
+        }
+
+        throw GraphError{ ch->line_number, "invalid node name" };
+    }
+    return result;
+}
 
 // *** json and not only
 
@@ -238,6 +256,11 @@ bool try_operand_end(const std::string& line) {
     return regex_match(line, rx);
 }
 
+bool try_end_ref(const std::string& line) {
+    static const regex rx{ "^\\s*end\\s+ref\\s*$" };
+    return regex_match(line, rx);
+}
+
 } // <anonymous>
 
 // -----------------------------------------------------------------------
@@ -403,6 +426,22 @@ bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
         return false;
     }
 
+    const auto node_names{ str_to_node_names(match[1].str()) };
+    for (const auto& one : node_names) {
+        if (!ch->id_node.count(one)) {
+            throw GraphError(ch->line_number, "unknown node name");
+        }
+    }
 
+    const auto frag_id = to_string(frags.size() + 1);
+    auto frag = make_shared<SeqFrag>(frag_id, SeqFrag::Ref, ch->current_opd());
+    frags.push_back(frag);
+
+    while (!in.eof()) {
+        const auto line{ read_line(in) };
+        if (try_end_ref(line)) {
+            return true;
+        }
+    }
     return false;
 }

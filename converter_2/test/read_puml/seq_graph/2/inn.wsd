@@ -4,9 +4,9 @@ actor Alice
 actor Bob
 entity Log
 
-' ref over Alice, Bob, Log
-' Инициализация
-' end ref
+ref over Alice, Bob, Log
+Инициализация
+end ref
 
 Alice -> Bob: Authentication Request
 Bob -> Alice: Authentication Failure

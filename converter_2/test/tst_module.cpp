@@ -11,7 +11,7 @@
 #include "grapherror.h"
 
 #include "str_utils.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json/json.hpp"
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 4, 0)
     Q_DECLARE_METATYPE(std::string);

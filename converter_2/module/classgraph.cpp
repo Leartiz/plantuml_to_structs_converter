@@ -122,14 +122,15 @@ string mark_to_str(Member::Mark mark) {
 vector<string> str_to_param_types(const string& str) {
     vector<string> result;
     istringstream sin{ str };
-    while (sin) {
+    while (!sin.eof()) {
         string param_type;
         getline(sin, param_type, ',');
+
         str_utils::trim_space_by_ref(param_type);
         if (param_type.empty()) continue;
 
         if (str_utils::is_trgle_bracket_balance(param_type)) {
-            result.push_back(param_type);
+            result.push_back(std::move(param_type));
             continue;
         }
 

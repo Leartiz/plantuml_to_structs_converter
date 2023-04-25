@@ -7,13 +7,25 @@
 #include "usecasegraph.h"
 
 struct SequenceGraph final : Graph {
+
+    struct SeqEdge;
+    struct SeqNode;
+
+    struct SetGroup {
+
+    };
+
     struct SeqOpd;
     struct SeqFrag {
+        // TODO: сделать наследование, отделить Ref
+        // TODO: хранить информацию о раннем и позднем объекте (часто стрелка)
+
         enum Type : uint32_t {
             Ref, Loop, Alt, Opt
         };
 
-        SeqFrag(std::string id, Type, std::shared_ptr<SeqOpd> = {});
+        SeqFrag(std::string id, Type,
+                std::shared_ptr<SeqOpd> = {});
         size_t opd_pos(std::shared_ptr<SeqOpd>) const;
 
         std::string id;
