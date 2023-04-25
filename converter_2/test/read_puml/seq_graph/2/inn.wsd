@@ -1,5 +1,7 @@
 @startuml
 
+skinparam dpi 200
+
 actor Alice
 actor Bob
 entity Log
