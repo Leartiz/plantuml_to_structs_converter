@@ -1,0 +1,55 @@
+/* Try it: https://bnfplayground.pauliankline.com/ */
+
+/* элементарные (или встроенные) конструкции */
+
+<whs> ::= " "
+<nln> ::= "\n"
+<any_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+
+/* --- */
+
+<optwhs> ::= <whs>*
+<reqwhs> ::= <whs>+
+
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+<string> ::= <any_char>+
+<node_id> ::= <ids_char>+
+<end_curly_brace> ::= "}"
+
+/* составные конструкции (не используются напрямую) */
+
+<part_whole_node> ::=   "\"" <string> "\"" <reqwhs> "as" <reqwhs> <node_id>
+
+/* составные конструкции (то из чего состоит диаграмма) */
+
+<enduml> ::= "@enduml"
+<startuml> ::= "@startuml"
+<directive> ::= <startuml> | <enduml>
+
+/* --- */
+
+<actor_short_node> ::= ":" <string> ":" <reqwhs> "as" <reqwhs> <node_id>
+<actor_whole_node> ::= "actor" <reqwhs> (<actor_short_node> | <part_whole_node>)
+<actor_node> ::= (<actor_short_node> | <actor_whole_node>)
+
+<usecase_short_node> ::= "(" <string> ")" <reqwhs> "as" <reqwhs> <node_id>
+<usecase_whole_node> ::= "usecase" <reqwhs> (<usecase_short_node> | <part_whole_node>)
+<usecase_node> ::= (<usecase_short_node> | <usecase_whole_node>)
+
+/* --- */
+
+<left_arrow_head> ::= "<" | "<|"
+<rght_arrow_head> ::= ">" | "|>"
+<arrow_direction> ::= ("l" | "r" | "d" | "u") | ("left" | "right" | "down" | "up")
+<arrow_body> ::= ("." | "-")+ <arrow_direction> ("." | "-")+
+<arrow> ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+<connection> ::= <node_id> <reqwhs> <arrow> <reqwhs> <node_id>
+
+/* --- */
+
+<beg_grouping> ::= ("rectangle" | "package") <reqwhs> "{"
+<grouping> ::= <beg_grouping> <nln> ((<actor_node> | <usecase_node>) <nln>)* <nln> <end_curly_brace>
+
+/* --- */
+
+<diagram> ::= <startuml> <nln> ((<actor_node> | <usecase_node> | <grouping> | <connection>) <nln>)* <enduml> 
