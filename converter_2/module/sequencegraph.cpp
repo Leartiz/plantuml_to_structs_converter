@@ -414,6 +414,7 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
             continue;
         }
 
+        // TODO: добавить возможность объявления новых узлов
         if (!try_whitespaces(line) && !try_three_dots(line) && !try_grouping(line, in)) {
             throw GraphError(ch->line_number, "unknown line");
         }

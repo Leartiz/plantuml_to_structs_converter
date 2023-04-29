@@ -20,7 +20,7 @@
 <node_id> ::= <ids_char>+
 <end_curly_brace> ::= "}"
 
-/* -------------------------- только для Rob -------------------------- */
+/* -------------------------- только для Seq -------------------------- */
 
 /* стрелка */
 <left_arrow_head> ::= "<" 
@@ -55,16 +55,17 @@
 <beg_fragment> ::= ("alt" | "opt" | "loop" ) <reqwhs> <any_char>+
 <else_opd> ::= "else" <reqwhs> <any_char>+
 <end_opd> ::= "end"
-<fragment_body> ::= (<connection> <nln>)+ <else_opd>?
-<fragment> ::= <beg_fragment> <nln> <fragment_body> <nln> <end_opd>
+<fragment_body> ::= (<connection> <nln>)+ (<else_opd> <nln>)?
+<fragment> ::= <beg_fragment> <nln> <fragment_body> <end_opd>
 
 /* перечисление узлов */
 <beg_ref_over> ::= "ref" <reqwhs> "over" <reqwhs> <any_char>+
 <end_ref> ::= <end_opd> <reqwhs> "ref"
-<ref_over> ::= <beg_ref_over> <nln> <string> <nln> <end_ref>
+<ref_over_body> ::= (<string> <nln>)+
+<ref_over> ::= <beg_ref_over> <nln> <ref_over_body> <end_ref>
 
-<grouping> ::= <fragment> | <ref_over>
+<grouping> ::= (<fragment> | <ref_over>)
 
 /* --- */
 
-<diagram> ::= <startuml> <nln> ((<whole_node> | <short_node> | <connection> | <fragment> | <ref_over>) <nln>)* <enduml> 
+<diagram> ::= <startuml> <nln> ((<whole_node> | <short_node> | <connection> | <grouping>) <nln>)* <enduml> 
