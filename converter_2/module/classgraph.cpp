@@ -55,12 +55,14 @@ ClassEdge::Type edge_type_from_arrow_part(const string& head,
     else if ((head == "<" || head == ">") && !detected_dot) {
         return Type::Association;
     }
+
     else if (head == "o" && !detected_dot) {
         return Type::Aggregation;
     }
     else if (head == "*" && !detected_dot) {
         return Type::Composition;
     }
+
     else if ((head == "<|" || head == "|>") && detected_dot) {
         return Type::Implementation;
     }
@@ -68,7 +70,7 @@ ClassEdge::Type edge_type_from_arrow_part(const string& head,
         return Type::Generalization;
     }
 
-    throw GraphError(ch->line_number, "unknown edge type");
+    throw GraphError{ ch->line_number, "unknown edge type" };
 }
 
 shared_ptr<ClassNode> create_node_if_need(const string& str) {
@@ -342,7 +344,6 @@ bool ClassGraph::try_any(const std::string& line, std::istream& in) {
     return Graph::try_any(line, in) || try_hide_empty_members(line);
 }
 
-// TODO: обработать runtime исключения!
 bool ClassGraph::try_node(const std::string& line, std::istream& in) {
     using ClassNode = ClassGraph::ClassNode;
     using Type = ClassGraph::ClassNode::Type;
@@ -354,7 +355,7 @@ bool ClassGraph::try_node(const std::string& line, std::istream& in) {
     }
 
     const auto node_nmid = match[2].str();
-    const auto node_type = str_to_node_type(match[1].str());
+    const auto node_type = str_to_node_type(match[1].str()); // regex level check.
 
     if (!ch->id_node.count(node_nmid)) {
         auto res_node{ make_shared<ClassNode>(node_nmid, node_nmid, node_type) };
@@ -434,7 +435,7 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
 void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
     if (node->type != ClassNode::Interface) {
-        throw GraphError(ch->line_number, "node has no interface type");
+        throw GraphError{ ch->line_number, "node has no interface type" };
     }
 
     while (in) {
@@ -450,13 +451,13 @@ void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
         }
     }
 
-    throw GraphError(ch->line_number, "interface body is not closed");
+    throw GraphError{ ch->line_number, "interface body is not closed" };
 }
 
 void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
     if (node->type != ClassNode::Class) {
-        throw GraphError(ch->line_number, "node has no class type");
+        throw GraphError{ ch->line_number, "node has no class type" };
     }
 
     while (in) {
@@ -472,13 +473,13 @@ void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
         }
     }
 
-    throw GraphError(ch->line_number, "class body is not closed");
+    throw GraphError{ ch->line_number, "class body is not closed" };
 }
 
 void ClassGraph::try_enum_body(const std::string& nmid, std::istream& in) {
     auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
     if (node->type != ClassNode::Enum) {
-        throw GraphError(ch->line_number, "node has no enum type");
+        throw GraphError{ ch->line_number, "node has no enum type" };
     }
 
     while (in) {
@@ -494,5 +495,5 @@ void ClassGraph::try_enum_body(const std::string& nmid, std::istream& in) {
         }
     }
 
-    throw GraphError(ch->line_number, "enum body is not closed");
+    throw GraphError{ ch->line_number, "enum body is not closed" };
 }

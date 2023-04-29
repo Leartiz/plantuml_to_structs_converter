@@ -9,7 +9,7 @@
       "out_edges": [],
       "rob_dia": null,
       "seq_dia": null,
-      "type": "actor"
+      "type": "usecase"
     },
     {
       "id": "UserId",

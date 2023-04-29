@@ -34,6 +34,7 @@ public:
     std::vector<std::shared_ptr<Node>> nodes; // &
     std::vector<std::shared_ptr<Edge>> edges;
 
+    // TODO: часть методов можно спрятать в cpp?
 protected:
     bool try_directive(const std::string&) const;
     bool try_skinparam(const std::string&) const;

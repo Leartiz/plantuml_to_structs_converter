@@ -12,6 +12,7 @@
 #include "grapherror.h"
 
 #include "json_utils.h"
+#include "str_utils.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -54,13 +55,25 @@ UcEdge::Type edge_type_from_arrow_part(const string& head,
         return UcEdge::Extend;
     if ((head == "<" || head == ">") && detected_dot && note == "include")
         return UcEdge::Include;
+
     throw GraphError(ch->line_number, "unknown edge type");
 }
 
-shared_ptr<UcNode> create_node_if_need(const string& str) {
+shared_ptr<UcNode> create_node_if_need(string str) {
+    auto node_type = UcNode::Actor;
+    if (str.front() == '(' && str.back() == ')') {
+        str_utils::trim_by_ref(str, "()");
+        node_type = UcNode::Usecase;
+    }
+    else {
+        str_utils::trim_by_ref(str, ":");
+    }
+
+    // *** create
+
     shared_ptr<UcNode> res_node;
     if (!ch->id_node.count(str)) {
-        res_node = make_shared<UcNode>(str, str, UcNode::Actor);
+        res_node = make_shared<UcNode>(str, str, node_type);
         ch->id_node[str] = res_node;
     }
     else {
@@ -162,7 +175,7 @@ bool try_short_usecase_node(const std::string& line) {
         return false;
     }
 
-    const auto node = make_shared<UcNode>(match[2].str(), match[1].str(), UcNode::Actor);
+    const auto node = make_shared<UcNode>(match[2].str(), match[1].str(), UcNode::Usecase);
     ch->id_node[node->id] = node;
     return true;
 }
@@ -213,8 +226,9 @@ bool UseCaseGraph::try_node(const std::string& line, std::istream&) {
 
 bool UseCaseGraph::try_connection(const string& line, std::istream&) {
     smatch match;
-    static const regex rx{ "^\\s*(\\S+)\\s+((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)"
-                           "\\s+(\\S+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$" };
+    static const regex rx{ "^\\s*(:.+:|\\(.+\\)|[^\\s\\:\\(\\)]+)\\s+"
+                           "((<|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>)?)\\s+"
+                           "(:.+:|\\(.+\\)|[^\\s\\:\\(\\)]+)\\s*(:\\s*(<<(include|extend)>>))?\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }

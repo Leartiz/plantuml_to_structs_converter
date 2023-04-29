@@ -1,0 +1,53 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "LX"
+      },
+      "end": {
+        "id": "y64"
+      },
+      "id": "1",
+      "name": "<<include>>",
+      "type": "include"
+    }
+  ],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "LX",
+      "inn_edges": [],
+      "name": "LX",
+      "out_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "P_",
+      "inn_edges": [],
+      "name": "_",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "y64",
+      "inn_edges": [
+        {
+          "id": "1"
+        }
+      ],
+      "name": "y64",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    }
+  ]
+}

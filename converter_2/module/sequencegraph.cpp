@@ -132,6 +132,7 @@ string frag_type_to_str(const SeqFrag::Type tp) {
 SeqFrag::Type str_to_frag_type(const string& str) {
     using Type = SeqFrag::Type;
     if (frag_type_to_str(Type::Ref) == str) return Type::Ref;
+
     if (frag_type_to_str(Type::Loop) == str) return Type::Loop;
     if (frag_type_to_str(Type::Alt) == str) return Type::Alt;
     if (frag_type_to_str(Type::Opt) == str) return Type::Opt;
@@ -325,21 +326,22 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
         return false;
     }
 
+    // *** node
     const auto left_node_name = match[1].str();
     const auto rght_node_name = match[6].str();
-    if (!ch->id_node.count(left_node_name) || !ch->id_node.count(rght_node_name)) {
-        throw runtime_error{ "node not defined" };
-    }
+    if (!ch->id_node.count(left_node_name)) throw GraphError{ ch->line_number, "left node not defined" };
+    if (!ch->id_node.count(rght_node_name)) throw GraphError{ ch->line_number, "right node not defined" };
 
     const auto left_node{ static_pointer_cast<SeqNode>(ch->id_node[left_node_name]) };
     const auto rght_node{ static_pointer_cast<SeqNode>(ch->id_node[rght_node_name]) };
 
+    // *** edge
     const auto left_head_arrow{ match[3].str() };
     const auto rght_head_arrow{ match[5].str() };
     if (
             (!left_head_arrow.empty() && !rght_head_arrow.empty()) ||
             (left_head_arrow.empty() && rght_head_arrow.empty())) {
-        throw GraphError(ch->line_number, "double-sided arrow");
+        throw GraphError{ ch->line_number, "double-sided arrow" };
     }
 
     const auto edge_type = edge_type_from_arrow_part(match[4].str());
@@ -381,7 +383,7 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     }
 
     const auto frag_id = to_string(frags.size() + 1);
-    const auto frag_type = str_to_frag_type(match[1].str());
+    const auto frag_type = str_to_frag_type(match[1].str()); // regex level check.
     const auto opd_cond = str_utils::trim_space(match[2].str());
 
     auto frag = make_shared<SeqFrag>(frag_id, frag_type, ch->current_opd());

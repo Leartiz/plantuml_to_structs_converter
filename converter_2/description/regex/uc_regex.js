@@ -8,4 +8,4 @@ var actor_whole_node = /^\s*actor\s+(:(.+):|\"(.+)\")\s+as\s+(\S+)\s*$/gm
 var usecase_short_node = /^\s*\((.+)\)\s+as\s+(\S+)\s*$/gm
 var actor_short_node = /^\s*:(.+):\s+as\s+(\S+)\s*$/gm
 
-var connection = /^\s*(\S+)\s+((<|<\|)?([-\.]+([lrdu]|left|right|up|down)[-\.]+|[-\.]+)(\|>|>)?)\s+(\S+)\s*(:\s*(<<(include|extend)>>))?\s*$/gm
+var connection = /^\s*(:.+:|\(.+\))\s+((<|<\|)?([-\.]+([lrdu]|left|right|up|down)[-\.]+|[-\.]+)(\|>|>)?)\s+(\S+)\s*(:\s*(<<(include|extend)>>))?\s*$/gm

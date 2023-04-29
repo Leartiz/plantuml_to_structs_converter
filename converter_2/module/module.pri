@@ -4,6 +4,7 @@ SOURCES += \
     $$PWD/graph.cpp \
     $$PWD/grapherror.cpp \
     $$PWD/json_utils.cpp \
+    $$PWD/layoutflowgraph.cpp \
     $$PWD/project.cpp \
     $$PWD/robustnessgraph.cpp \
     $$PWD/sequencegraph.cpp \
@@ -17,6 +18,7 @@ HEADERS += \
     $$PWD/graph.h \
     $$PWD/grapherror.h \
     $$PWD/json_utils.h \
+    $$PWD/layoutflowgraph.h \
     $$PWD/project.h \
     $$PWD/robustnessgraph.h \
     $$PWD/sequencegraph.h \

@@ -78,7 +78,7 @@ bool try_whole_node(const std::string& line) {
 
     const auto node_id = match[3].str();
     const auto node_name = match[2].str();
-    const auto node_type = str_to_node_type(match[1].str());
+    const auto node_type = str_to_node_type(match[1].str()); // regex level check.
     const auto node{ make_shared<RobNode>(node_id, node_name, node_type) };
 
     if (match[4].matched) {

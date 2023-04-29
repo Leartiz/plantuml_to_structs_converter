@@ -1,0 +1,10 @@
+@startuml
+
+package {
+
+}
+
+(_) as P_
+(y64) <.up.  (LX) : <<include>>
+
+@enduml
