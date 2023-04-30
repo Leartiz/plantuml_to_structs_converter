@@ -20,4 +20,5 @@ alt Моя основная метка
     end
     Alice -> Log : Log attack end
 end
+
 @enduml
