@@ -373,8 +373,9 @@ bool ClassGraph::try_node(const std::string& line, std::istream& in) {
 
 bool ClassGraph::try_connection(const std::string& line, std::istream&) {
     smatch match;
-    static const regex rx{ "^\\s*(\\S+)\\s+((<|o|\\*|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>|o|\\*)?)"
-                           "\\s+(\\S+)\\s*(:(.+))?$" };
+    static const regex rx{ "^\\s*(\\S+)\\s+"
+                           "((<|o|\\*|<\\|)?([-\\.]+([lrdu]|left|right|up|down)[-\\.]+|[-\\.]+)(\\|>|>|o|\\*)?)\\s+"
+                           "(\\S+)\\s*(:(.+))?$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
