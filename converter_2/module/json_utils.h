@@ -9,8 +9,12 @@
 
 namespace json_utils {
 
-nlohmann::json edge_to_json(Graph::Edge& edge);
-nlohmann::json node_to_json(Graph::Node& node);
+nlohmann::json node_to_short_json(Graph::Node& node);
+nlohmann::json edge_to_short_json(Graph::Edge& edge);
+
+nlohmann::json node_to_whole_json(Graph::Node& node);
+nlohmann::json edge_to_whole_json(Graph::Edge& edge);
+
 nlohmann::json edges_to_short_json(std::vector<std::weak_ptr<Graph::Edge>> edges);
 
 };

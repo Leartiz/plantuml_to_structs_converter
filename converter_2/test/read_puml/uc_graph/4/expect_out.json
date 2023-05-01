@@ -7,7 +7,7 @@
       "end": {
         "id": "Auth"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "",
       "type": "association"
     },
@@ -18,7 +18,7 @@
       "end": {
         "id": "Buy"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "",
       "type": "association"
     },
@@ -29,7 +29,7 @@
       "end": {
         "id": "Show"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "",
       "type": "association"
     }
@@ -40,7 +40,7 @@
       "id": "Auth",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "Авторизация",
@@ -53,7 +53,7 @@
       "id": "Buy",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "name": "Покупка",
@@ -66,7 +66,7 @@
       "id": "Show",
       "inn_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "name": "Смотреть товары",
@@ -81,13 +81,13 @@
       "name": "Пользователь",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "2"
+          "id": "edge_2"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "rob_dia": null,

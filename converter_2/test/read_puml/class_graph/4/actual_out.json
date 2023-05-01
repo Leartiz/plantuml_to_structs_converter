@@ -7,7 +7,7 @@
       "end": {
         "id": "Class_node"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "",
       "type": "aggregation"
     },
@@ -18,7 +18,7 @@
       "end": {
         "id": "Class_edge_type"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "",
       "type": "association"
     },
@@ -29,7 +29,7 @@
       "end": {
         "id": "Class_node"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "",
       "type": "aggregation"
     },
@@ -40,7 +40,7 @@
       "end": {
         "id": "Class_edge"
       },
-      "id": "4",
+      "id": "edge_4",
       "name": "",
       "type": "aggregation"
     }
@@ -74,7 +74,7 @@
       "name": "Class_dia",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "type": "class"
@@ -106,16 +106,16 @@
       "id": "Class_edge",
       "inn_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "name": "Class_edge",
       "out_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "type": "class"
@@ -132,7 +132,7 @@
       "id": "Class_edge_type",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "name": "Class_edge_type",
@@ -156,16 +156,16 @@
       "id": "Class_node",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "name": "Class_node",
       "out_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "type": "class"

@@ -7,7 +7,7 @@
       "end": {
         "id": "UC1"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "",
       "type": "association"
     },
@@ -18,7 +18,7 @@
       "end": {
         "id": "A2"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "",
       "type": "association"
     },
@@ -29,7 +29,7 @@
       "end": {
         "id": "A3"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "<<include>>",
       "type": "include"
     },
@@ -40,7 +40,7 @@
       "end": {
         "id": "A4"
       },
-      "id": "4",
+      "id": "edge_4",
       "name": "<<extend>>",
       "type": "extend"
     },
@@ -51,7 +51,7 @@
       "end": {
         "id": "A5"
       },
-      "id": "5",
+      "id": "edge_5",
       "name": "",
       "type": "generalization"
     }
@@ -61,13 +61,13 @@
     {
       "id": "A1",
       "inn_edges": [],
-      "name": "Последний прецедент 1",
+      "name": "A1",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "rob_dia": null,
@@ -78,7 +78,7 @@
       "id": "A2",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "name": "Последний прецедент 2",
@@ -91,7 +91,7 @@
       "id": "A3",
       "inn_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "name": "Последний прецедент 3",
@@ -104,7 +104,7 @@
       "id": "A4",
       "inn_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "name": "Последний прецедент 4",
@@ -117,7 +117,7 @@
       "id": "A5",
       "inn_edges": [
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "name": "A5",
@@ -130,7 +130,7 @@
       "id": "UC1",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "Последний прецедент 1",
@@ -145,7 +145,7 @@
       "name": "Последний прецедент 2",
       "out_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "rob_dia": null,
@@ -158,7 +158,7 @@
       "name": "Последний прецедент 3",
       "out_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "rob_dia": null,
@@ -171,12 +171,21 @@
       "name": "Последний прецедент 4",
       "out_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "rob_dia": null,
       "seq_dia": null,
       "type": "usecase"
+    },
+    {
+      "id": "node_0",
+      "inn_edges": [],
+      "name": "Последний прецедент 1",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
     }
   ]
 }

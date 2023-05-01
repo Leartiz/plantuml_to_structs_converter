@@ -6,23 +6,33 @@ void ConstructHelper::reset() {
     nested_opds = {};
     id_node.clear();
     id_edge.clear();
+
     line_number = 0;
-    opd_number = 0;
+    operand_number = 0;
+    order_number = 0;
 }
 
-string ConstructHelper::next_edge_id() {
-    return to_string(id_edge.size() + 1);
+// -----------------------------------------------------------------------
+
+string ConstructHelper::next_edge_id() const {
+    return "edge_" + to_string(id_edge.size() + 1);
 }
 
-string ConstructHelper::last_edge_id() {
-    return to_string(id_edge.size());
+string ConstructHelper::last_edge_id() const {
+    return "edge_" + to_string(id_edge.size() + 0);
 }
 
 string ConstructHelper::next_opd_id() {
-    return to_string((opd_number++) + 1);
+    return "opd_" + to_string(operand_number++ + 1);
 }
 
-std::shared_ptr<SequenceGraph::SeqOpd> ConstructHelper::current_opd() {
+size_t ConstructHelper::next_order_number() {
+    return order_number++ + 1;
+}
+
+// -----------------------------------------------------------------------
+
+std::shared_ptr<SequenceGraph::SeqOpd> ConstructHelper::current_opd() const {
     if (nested_opds.empty())
         return nullptr;
     return nested_opds.top();

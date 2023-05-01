@@ -7,9 +7,10 @@
       "end": {
         "id": "Bob"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "Authentication Request",
       "opd": null,
+      "order_number": 1,
       "type": "sync"
     },
     {
@@ -19,9 +20,10 @@
       "end": {
         "id": "Alice"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "Authentication Failure",
       "opd": null,
+      "order_number": 2,
       "type": "sync"
     },
     {
@@ -31,9 +33,10 @@
       "end": {
         "id": "Log"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "Log attack start",
-      "opd": "1",
+      "opd": "opd_1",
+      "order_number": 5,
       "type": "sync"
     },
     {
@@ -43,9 +46,10 @@
       "end": {
         "id": "Bob"
       },
-      "id": "4",
+      "id": "edge_4",
       "name": "DNS Attack",
-      "opd": "2",
+      "opd": "opd_2",
+      "order_number": 8,
       "type": "sync"
     },
     {
@@ -55,35 +59,40 @@
       "end": {
         "id": "Log"
       },
-      "id": "5",
+      "id": "edge_5",
       "name": "Log attack end",
-      "opd": "1",
+      "opd": "opd_1",
+      "order_number": 9,
       "type": "sync"
     }
   ],
   "frags": [
     {
-      "id": "1",
+      "id": "frag_1",
       "opds": [
         {
           "condition": "Моя основная метка",
-          "frag": "1",
-          "id": "1"
+          "frag": "frag_1",
+          "id": "opd_1",
+          "order_number": 4
         }
       ],
+      "order_number": 3,
       "root_opd": null,
       "type": "alt"
     },
     {
-      "id": "2",
+      "id": "frag_2",
       "opds": [
         {
           "condition": "1000 times",
-          "frag": "2",
-          "id": "2"
+          "frag": "frag_2",
+          "id": "opd_2",
+          "order_number": 7
         }
       ],
-      "root_opd": "1",
+      "order_number": 6,
+      "root_opd": "opd_1",
       "type": "loop"
     }
   ],
@@ -93,23 +102,23 @@
       "id": "Alice",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "is_error": false,
       "name": "Alice",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         },
         {
-          "id": "4"
+          "id": "edge_4"
         },
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "type": "actor"
@@ -118,17 +127,17 @@
       "id": "Bob",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "is_error": false,
       "name": "Bob",
       "out_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "type": "actor"
@@ -137,16 +146,55 @@
       "id": "Log",
       "inn_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         },
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "is_error": false,
       "name": "Log",
       "out_edges": [],
       "type": "entity"
+    }
+  ],
+  "refs": [],
+  "stamps": [
+    {
+      "id": "edge_1",
+      "order_number": 1
+    },
+    {
+      "id": "edge_2",
+      "order_number": 2
+    },
+    {
+      "id": "frag_1",
+      "order_number": 3
+    },
+    {
+      "id": "opd_1",
+      "order_number": 4
+    },
+    {
+      "id": "edge_3",
+      "order_number": 5
+    },
+    {
+      "id": "frag_2",
+      "order_number": 6
+    },
+    {
+      "id": "opd_2",
+      "order_number": 7
+    },
+    {
+      "id": "edge_4",
+      "order_number": 8
+    },
+    {
+      "id": "edge_5",
+      "order_number": 9
     }
   ]
 }

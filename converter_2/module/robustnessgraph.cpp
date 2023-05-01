@@ -56,12 +56,12 @@ RobNode::Type str_to_node_type(const string& str) {
 }
 
 json edge_to_json(RobustnessGraph::RobEdge& edge) {
-    json result = json_utils::edge_to_json(edge);
+    json result = json_utils::edge_to_whole_json(edge);
     return result;
 }
 
 json node_to_json(RobustnessGraph::RobNode& node) {
-    json result = json_utils::node_to_json(node);
+    json result = json_utils::node_to_whole_json(node);
     result["is_error"] = node.is_error;
     result["type"] = node_type_to_str(node.type);
     return result;

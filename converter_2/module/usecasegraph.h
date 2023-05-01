@@ -11,7 +11,7 @@ struct RobustnessGraph;
 // TODO: изменить имя на Use_case_dia?
 struct UseCaseGraph final : Graph {
 
-    struct UcNode : public Node {
+    struct UcNode : Node {
         enum Type : uint32_t {
             Actor, Usecase, // Usecase - тип узла.
         };
@@ -24,7 +24,7 @@ struct UseCaseGraph final : Graph {
         std::shared_ptr<RobustnessGraph> rob_graph;
     };
 
-    struct UcEdge : public Edge {
+    struct UcEdge : Edge {
         enum Type : uint32_t {
             Association,
             Generalization,

@@ -10,40 +10,53 @@ struct SequenceGraph final : Graph {
 
     struct SeqEdge;
     struct SeqNode;
+    struct SeqOpd;
 
-    struct SetGroup {
-
+    /* on the timeline */
+    struct Stamp {
+        uint32_t order_number{ 0 };
+        virtual ~Stamp() = default;
     };
 
-    struct SeqOpd;
-    struct SeqFrag {
-        // TODO: сделать наследование, отделить Ref
-        // TODO: хранить информацию о раннем и позднем объекте (часто стрелка)
-
-        enum Type : uint32_t {
-            Ref, Loop, Alt, Opt
-        };
-
-        SeqFrag(std::string id, Type,
-                std::shared_ptr<SeqOpd> = {});
-        size_t opd_pos(std::shared_ptr<SeqOpd>) const;
+public:
+    struct SeqGroup : Stamp {
+        SeqGroup(uint32_t onum, std::string id,
+                 std::shared_ptr<SeqOpd> = {});
 
         std::string id;
-        Type type{ Type::Ref };
-
         std::weak_ptr<SeqOpd> root_opd;
+        virtual ~SeqGroup() = default;
+    };
+
+    struct SeqRef : SeqGroup {
+        SeqRef(uint32_t onum, std::string id, std::string text,
+               std::shared_ptr<SeqOpd> = {});
+
+        std::string text;
+        std::vector<std::weak_ptr<SeqNode>> nodes;
+    };
+
+    struct SeqFrag : SeqGroup {
+        enum Type : uint32_t {
+            Opt, Alt, Loop
+        };
+
+        SeqFrag(uint32_t onum, std::string id, Type,
+                std::shared_ptr<SeqOpd> = {});
+
+        Type type{ Type::Opt };
         std::vector<std::shared_ptr<SeqOpd>> opds;
     };
 
-    struct SeqOpd {
-        SeqOpd(std::string id, std::string condition);
+    struct SeqOpd : Stamp {
+        SeqOpd(uint32_t onum, std::string id, std::string condition);
 
         std::string id, condition;
         std::weak_ptr<SeqFrag> frag;
     };
 
 public:
-    struct SeqNode : public Node {
+    struct SeqNode : Node {
         enum Type : uint32_t {
             Actor, Boundary, Control, Entity,
         };
@@ -55,20 +68,23 @@ public:
         Type type{ Actor };
     };
 
-    struct SeqEdge : public Edge {
+    struct SeqEdge : Edge, Stamp {
         enum Type : uint32_t {
             Sync, Reply,
         };
 
         SeqEdge() = default;
-        SeqEdge(std::string id, std::string name, Type);
+        SeqEdge(uint32_t onum, std::string id, std::string name, Type);
 
-        Type type;
+        Type type{ Sync };
         std::weak_ptr<SeqOpd> opd;
     };
 
+public:
     std::weak_ptr<UseCaseGraph::UcNode> uc_node;
     std::vector<std::shared_ptr<SeqFrag>> frags;
+    std::vector<std::shared_ptr<SeqRef>> refs;
+    std::vector<std::shared_ptr<Stamp>> stamps;
 
 public:
     void read_puml(std::istream&) override;

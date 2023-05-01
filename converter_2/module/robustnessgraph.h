@@ -8,7 +8,7 @@
 
 struct RobustnessGraph final : Graph {
 
-    struct RobNode : public Node {
+    struct RobNode : Node {
         enum Type : uint32_t {
             Actor, Boundary, Control, Entity,
         };
@@ -20,7 +20,7 @@ struct RobustnessGraph final : Graph {
         Type type{ Actor };
     };
 
-    struct RobEdge : public Edge {
+    struct RobEdge : Edge {
         RobEdge() = default;
         RobEdge(std::string id, std::string name);
     };

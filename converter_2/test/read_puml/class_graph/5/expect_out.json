@@ -7,7 +7,7 @@
       "end": {
         "id": "IA"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "",
       "type": "implementation"
     },
@@ -18,7 +18,7 @@
       "end": {
         "id": "A"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "",
       "type": "generalization"
     },
@@ -29,7 +29,7 @@
       "end": {
         "id": "A"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "",
       "type": "composition"
     },
@@ -40,7 +40,7 @@
       "end": {
         "id": "B"
       },
-      "id": "4",
+      "id": "edge_4",
       "name": "",
       "type": "aggregation"
     }
@@ -53,16 +53,16 @@
       "id": "A",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         }
       ],
       "name": "A",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "type": "class"
@@ -79,13 +79,13 @@
       "id": "B",
       "inn_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "name": "B",
       "out_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "type": "class"
@@ -98,10 +98,10 @@
       "name": "C",
       "out_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         },
         {
-          "id": "4"
+          "id": "edge_4"
         }
       ],
       "type": "class"
@@ -111,7 +111,7 @@
       "id": "IA",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "IA",

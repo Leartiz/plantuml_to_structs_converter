@@ -7,7 +7,7 @@
 
 struct ClassGraph final : Graph {
 
-    struct ClassNode : public Node {
+    struct ClassNode : Node {
         // TODO: separate data and funcs?
         struct Member final {
             enum Mark : uint32_t {
@@ -33,7 +33,7 @@ struct ClassGraph final : Graph {
         std::vector<std::string> enum_values;
     };
 
-    struct ClassEdge : public Edge {
+    struct ClassEdge : Edge {
         enum Type : uint32_t {
             Dependency, Association,
             Aggregation, Composition,

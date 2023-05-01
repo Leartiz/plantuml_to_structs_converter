@@ -2,6 +2,7 @@
 #define TST_MODULE_H
 
 #include <QtTest>
+#include <QString>
 
 // add necessary includes here
 
@@ -57,6 +58,10 @@ private slots:
     void test_str_utils_is_bracket_balance_data();
     void test_str_utils_is_bracket_balance();
 
+    // common read_puml ...
+private slots:
+    void test_common_read_puml_data(const QString&);
+
     // UseCaseGraph
 private slots:
     void test_UseCaseGraph_read_okk();
@@ -85,7 +90,6 @@ private slots:
 private slots:
     void test_SequenceGraph_read_okk();
     void test_SequenceGraph_read_okk1();
-
 
     void test_SequenceGraph_read_err();
     void test_SequenceGraph_read_err1();

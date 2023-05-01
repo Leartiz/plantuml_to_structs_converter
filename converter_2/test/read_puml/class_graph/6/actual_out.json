@@ -7,7 +7,7 @@
       "end": {
         "id": "UC_node"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "",
       "type": "aggregation"
     },
@@ -18,7 +18,7 @@
       "end": {
         "id": "Seq_opd"
       },
-      "id": "10",
+      "id": "edge_10",
       "name": "",
       "type": "aggregation"
     },
@@ -29,7 +29,7 @@
       "end": {
         "id": "Seq_frag"
       },
-      "id": "11",
+      "id": "edge_11",
       "name": "",
       "type": "aggregation"
     },
@@ -40,7 +40,7 @@
       "end": {
         "id": "Seq_opd"
       },
-      "id": "12",
+      "id": "edge_12",
       "name": "",
       "type": "aggregation"
     },
@@ -51,7 +51,7 @@
       "end": {
         "id": "Sequence_dia"
       },
-      "id": "2",
+      "id": "edge_2",
       "name": "",
       "type": "aggregation"
     },
@@ -62,7 +62,7 @@
       "end": {
         "id": "Seq_edge"
       },
-      "id": "3",
+      "id": "edge_3",
       "name": "edges",
       "type": "aggregation"
     },
@@ -73,7 +73,7 @@
       "end": {
         "id": "Seq_node"
       },
-      "id": "4",
+      "id": "edge_4",
       "name": "nodes",
       "type": "aggregation"
     },
@@ -84,7 +84,7 @@
       "end": {
         "id": "Seq_frag"
       },
-      "id": "5",
+      "id": "edge_5",
       "name": "",
       "type": "aggregation"
     },
@@ -95,7 +95,7 @@
       "end": {
         "id": "Seq_node_type"
       },
-      "id": "6",
+      "id": "edge_6",
       "name": "",
       "type": "association"
     },
@@ -106,7 +106,7 @@
       "end": {
         "id": "Seq_edge_type"
       },
-      "id": "7",
+      "id": "edge_7",
       "name": "",
       "type": "association"
     },
@@ -117,7 +117,7 @@
       "end": {
         "id": "Seq_node"
       },
-      "id": "8",
+      "id": "edge_8",
       "name": "",
       "type": "aggregation"
     },
@@ -128,7 +128,7 @@
       "end": {
         "id": "Seq_edge"
       },
-      "id": "9",
+      "id": "edge_9",
       "name": "",
       "type": "aggregation"
     }
@@ -185,22 +185,22 @@
       "id": "Seq_edge",
       "inn_edges": [
         {
-          "id": "3"
+          "id": "edge_3"
         },
         {
-          "id": "9"
+          "id": "edge_9"
         }
       ],
       "name": "Seq_edge",
       "out_edges": [
         {
-          "id": "10"
+          "id": "edge_10"
         },
         {
-          "id": "7"
+          "id": "edge_7"
         },
         {
-          "id": "8"
+          "id": "edge_8"
         }
       ],
       "type": "class"
@@ -213,7 +213,7 @@
       "id": "Seq_edge_type",
       "inn_edges": [
         {
-          "id": "7"
+          "id": "edge_7"
         }
       ],
       "name": "Seq_edge_type",
@@ -237,16 +237,16 @@
       "id": "Seq_frag",
       "inn_edges": [
         {
-          "id": "11"
+          "id": "edge_11"
         },
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "name": "Seq_frag",
       "out_edges": [
         {
-          "id": "12"
+          "id": "edge_12"
         }
       ],
       "type": "class"
@@ -283,19 +283,19 @@
       "id": "Seq_node",
       "inn_edges": [
         {
-          "id": "4"
+          "id": "edge_4"
         },
         {
-          "id": "8"
+          "id": "edge_8"
         }
       ],
       "name": "Seq_node",
       "out_edges": [
         {
-          "id": "6"
+          "id": "edge_6"
         },
         {
-          "id": "9"
+          "id": "edge_9"
         }
       ],
       "type": "class"
@@ -310,7 +310,7 @@
       "id": "Seq_node_type",
       "inn_edges": [
         {
-          "id": "6"
+          "id": "edge_6"
         }
       ],
       "name": "Seq_node_type",
@@ -334,16 +334,16 @@
       "id": "Seq_opd",
       "inn_edges": [
         {
-          "id": "10"
+          "id": "edge_10"
         },
         {
-          "id": "12"
+          "id": "edge_12"
         }
       ],
       "name": "Seq_opd",
       "out_edges": [
         {
-          "id": "11"
+          "id": "edge_11"
         }
       ],
       "type": "class"
@@ -375,22 +375,22 @@
       "id": "Sequence_dia",
       "inn_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "name": "Sequence_dia",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         },
         {
-          "id": "3"
+          "id": "edge_3"
         },
         {
-          "id": "4"
+          "id": "edge_4"
         },
         {
-          "id": "5"
+          "id": "edge_5"
         }
       ],
       "type": "class"
@@ -401,13 +401,13 @@
       "id": "UC_node",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "UC_node",
       "out_edges": [
         {
-          "id": "2"
+          "id": "edge_2"
         }
       ],
       "type": "class"

@@ -7,7 +7,7 @@
       "end": {
         "id": "y64"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "<<include>>",
       "type": "include"
     }
@@ -20,7 +20,7 @@
       "name": "LX",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "rob_dia": null,
@@ -40,7 +40,7 @@
       "id": "y64",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "y64",

@@ -215,13 +215,13 @@ json::array_t enum_values_to_json(const vector<string>& enum_values) {
 }
 
 json edge_to_json(ClassEdge& edge) {
-    json result = json_utils::edge_to_json(edge);
+    json result = json_utils::edge_to_whole_json(edge);
     result["type"] = edge_type_to_str(edge.type);
     return result;
 }
 
 json node_to_json(ClassNode& node) {
-    json result = json_utils::node_to_json(node);
+    json result = json_utils::node_to_whole_json(node);
     result["type"] = node_type_to_str(node.type);
 
     if (node.type == ClassNode::Class) {

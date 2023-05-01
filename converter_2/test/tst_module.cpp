@@ -582,6 +582,50 @@ void Module::test_str_utils_is_bracket_balance()
     QCOMPARE_EQ(got, result);
 }
 
+// common read_puml ...
+// -----------------------------------------------------------------------
+
+void Module::test_common_read_puml_data(const QString& basic_path)
+{
+    QTest::addColumn<string>("inn_fpath");
+    QTest::addColumn<string>("expect_out_fpath");
+    QTest::addColumn<string>("actual_out_fpath");
+
+    // ***
+
+    auto cur_dir{ QDir::current() };
+    QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cdUp(), true);
+    QCOMPARE_EQ(cur_dir.cd(basic_path), true);
+
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false); // no tests - this is a error!
+    QCOMPARE_EQ(test_catalogs.contains(".."), false);
+    QCOMPARE_EQ(test_catalogs.contains("."), false);
+
+    // ***
+
+    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
+        QCOMPARE_EQ(cur_test_catalog.exists(), true);
+
+        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
+        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
+        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
+
+        QCOMPARE_EQ(QFile::exists(dia_source), true);
+        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
+        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
+
+        const std::string inn_fpath{ dia_source.toStdString() };
+        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
+        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
+
+        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
+    }
+}
+
 // UseCaseGraph
 // -----------------------------------------------------------------------
 
@@ -678,7 +722,7 @@ void Module::test_UseCaseGraph_read_okk2()
         auto detected_edge = ucg.edges[0];
         auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
         QCOMPARE_EQ(uc_edge->name, string(""));
         QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Association);
         QCOMPARE_EQ(uc_edge->beg.lock()->id, string("A1"));
@@ -735,7 +779,7 @@ void Module::test_UseCaseGraph_read_okk3()
         auto detected_edge = ucg.edges[0];
         auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
         QCOMPARE_EQ(uc_edge->name, string("<<include>>"));
         QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Include);
         QCOMPARE_EQ(uc_edge->beg.lock()->id, string("UC1"));
@@ -794,7 +838,7 @@ void Module::test_UseCaseGraph_read_okk4()
         auto detected_edge = ucg.edges[0];
         auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
         QCOMPARE_EQ(uc_edge->name, string(""));
         QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Association);
         QCOMPARE_EQ(uc_edge->end.lock()->id, string("UC1"));
@@ -849,42 +893,7 @@ void Module::test_UseCaseGraph_read_err1()
 
 void Module::test_UseCaseGraph_read_puml_data()
 {
-    QTest::addColumn<string>("inn_fpath");
-    QTest::addColumn<string>("expect_out_fpath");
-    QTest::addColumn<string>("actual_out_fpath");
-
-    // ***
-
-    auto cur_dir{ QDir::current() };
-    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
-    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/uc_graph"), true);
-
-    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
-    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
-    QCOMPARE_EQ(test_catalogs.contains(".."), false);
-    QCOMPARE_EQ(test_catalogs.contains("."), false);
-
-    // ***
-
-    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
-        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
-        QCOMPARE_EQ(cur_test_catalog.exists(), true);
-
-        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
-        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
-        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
-
-        QCOMPARE_EQ(QFile::exists(dia_source), true);
-        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
-        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
-
-        const std::string inn_fpath{ dia_source.toStdString() };
-        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
-        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
-
-        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
-        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
-    }
+    test_common_read_puml_data("converter_2/test/read_puml/uc_graph");
 }
 
 void Module::test_UseCaseGraph_read_puml()
@@ -955,6 +964,8 @@ void Module::test_RobustnessGraph_read_okk()
     QCOMPARE_EQ(robG.nodes.size(), size_t(5));
     QCOMPARE_EQ(robG.edges.size(), size_t(4)); // important!
     QCOMPARE_EQ(robG.uc_node.expired(), true);
+
+    // ...
 }
 
 void Module::test_RobustnessGraph_read_okk1()
@@ -1013,7 +1024,7 @@ void Module::test_RobustnessGraph_read_okk1()
         auto detected_edge = robG.edges[0];
         auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
         QCOMPARE_EQ(uc_edge->name, string("one line..."));
         QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
         QCOMPARE_EQ(uc_edge->beg.lock()->id, string("User"));
@@ -1076,11 +1087,11 @@ void Module::test_RobustnessGraph_read_okk3()
         auto detected_edge = robG.edges.begin();
         QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
                                                             [](const shared_ptr<Graph::Edge> edge) {
-            return edge->id == "1";
+            return edge->id == "edge_1";
         }));
         auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("1"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
         QCOMPARE_EQ(uc_edge->name, string("edge text"));
         QCOMPARE_EQ(uc_edge->beg.lock()->id, string("display_add_student_screen"));
         QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
@@ -1090,11 +1101,11 @@ void Module::test_RobustnessGraph_read_okk3()
         auto detected_edge = robG.edges.begin();
         QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
                                                             [](const shared_ptr<Graph::Edge> edge) {
-            return edge->id == "2";
+            return edge->id == "edge_2";
         }));
         auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
 
-        QCOMPARE_EQ(uc_edge->id, string("2"));
+        QCOMPARE_EQ(uc_edge->id, string("edge_2"));
         QCOMPARE_EQ(uc_edge->name, string("edge text"));
         QCOMPARE_EQ(uc_edge->end.lock()->id, string("display_add_student_screen"));
         QCOMPARE_EQ(uc_edge->beg.lock()->id, string("MainWin"));
@@ -1105,42 +1116,7 @@ void Module::test_RobustnessGraph_read_okk3()
 
 void Module::test_RobustnessGraph_read_puml_data()
 {
-    QTest::addColumn<string>("inn_fpath");
-    QTest::addColumn<string>("expect_out_fpath");
-    QTest::addColumn<string>("actual_out_fpath");
-
-    // ***
-
-    auto cur_dir{ QDir::current() };
-    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
-    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/rob_graph"), true);
-
-    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
-    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
-    QCOMPARE_EQ(test_catalogs.contains(".."), false);
-    QCOMPARE_EQ(test_catalogs.contains("."), false);
-
-    // ***
-
-    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
-        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
-        QCOMPARE_EQ(cur_test_catalog.exists(), true);
-
-        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
-        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
-        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
-
-        QCOMPARE_EQ(QFile::exists(dia_source), true);
-        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
-        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
-
-        const std::string inn_fpath{ dia_source.toStdString() };
-        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
-        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
-
-        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
-        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
-    }
+    test_common_read_puml_data("converter_2/test/read_puml/rob_graph");
 }
 
 void Module::test_RobustnessGraph_read_puml()
@@ -1210,8 +1186,10 @@ void Module::test_SequenceGraph_read_okk()
     QVERIFY_THROWS_NO_EXCEPTION(seqG.read_puml(sin));
     QCOMPARE_EQ(seqG.nodes.size(), size_t(2));
     QCOMPARE_EQ(seqG.edges.size(), size_t(2));
-    QCOMPARE_EQ(seqG.frags.size(), size_t(0));
+
     QCOMPARE_EQ(seqG.uc_node.expired(), true);
+    QCOMPARE_EQ(seqG.frags.size(), size_t(0));
+    QCOMPARE_EQ(seqG.refs.size(), size_t(0));
 
     // ***
 
@@ -1251,7 +1229,7 @@ void Module::test_SequenceGraph_read_okk()
     // ***
     {
         auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[0]);
-        QCOMPARE_EQ(seq_edge->id, string("1"));
+        QCOMPARE_EQ(seq_edge->id, string("edge_1"));
         QCOMPARE_EQ(seq_edge->name, string("on_clicked_menu()"));
         QCOMPARE_EQ(seq_edge->type, SeqEdge::Sync);
         QCOMPARE_EQ(seq_edge->beg.lock()->id, string("Bob"));
@@ -1261,7 +1239,7 @@ void Module::test_SequenceGraph_read_okk()
     // ***
     {
         auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[1]);
-        QCOMPARE_EQ(seq_edge->id, string("2"));
+        QCOMPARE_EQ(seq_edge->id, string("edge_2"));
         QCOMPARE_EQ(seq_edge->name, string(""));
         QCOMPARE_EQ(seq_edge->type, SeqEdge::Reply);
         QCOMPARE_EQ(seq_edge->beg.lock()->id, string("MainWin"));
@@ -1335,42 +1313,7 @@ void Module::test_SequenceGraph_read_err2()
 
 void Module::test_SequenceGraph_read_puml_data()
 {
-    QTest::addColumn<string>("inn_fpath");
-    QTest::addColumn<string>("expect_out_fpath");
-    QTest::addColumn<string>("actual_out_fpath");
-
-    // ***
-
-    auto cur_dir{ QDir::current() };
-    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
-    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/seq_graph"), true);
-
-    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
-    QCOMPARE_EQ(test_catalogs.isEmpty(), false); // tests should be!
-    QCOMPARE_EQ(test_catalogs.contains(".."), false);
-    QCOMPARE_EQ(test_catalogs.contains("."), false);
-
-    // ***
-
-    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
-        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
-        QCOMPARE_EQ(cur_test_catalog.exists(), true);
-
-        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
-        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
-        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
-
-        QCOMPARE_EQ(QFile::exists(dia_source), true);
-        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
-        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
-
-        const std::string inn_fpath{ dia_source.toStdString() };
-        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
-        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
-
-        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
-        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
-    }
+    test_common_read_puml_data("converter_2/test/read_puml/seq_graph");
 }
 
 void Module::test_SequenceGraph_read_puml()
@@ -1649,42 +1592,7 @@ void Module::test_ClassGraph_read_okk4()
 
 void Module::test_ClassGraph_read_puml_data()
 {
-    QTest::addColumn<string>("inn_fpath");
-    QTest::addColumn<string>("expect_out_fpath");
-    QTest::addColumn<string>("actual_out_fpath");
-
-    // ***
-
-    auto cur_dir{ QDir::current() };
-    QCOMPARE_EQ(cur_dir.cdUp(), true); QCOMPARE_EQ(cur_dir.cdUp(), true);
-    QCOMPARE_EQ(cur_dir.cd("converter_2/test/read_puml/class_graph"), true);
-
-    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
-    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
-    QCOMPARE_EQ(test_catalogs.contains(".."), false);
-    QCOMPARE_EQ(test_catalogs.contains("."), false);
-
-    // ***
-
-    for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
-        const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
-        QCOMPARE_EQ(cur_test_catalog.exists(), true);
-
-        const auto dia_source{ cur_test_catalog.absoluteFilePath("inn.wsd") }; // required PlantUML OK!
-        const auto dia_expect_destin{ cur_test_catalog.absoluteFilePath("expect_out.json") }; // at least empty!
-        const auto dia_actual_destin{ cur_test_catalog.absoluteFilePath("actual_out.json") }; // may not exist!
-
-        QCOMPARE_EQ(QFile::exists(dia_source), true);
-        QCOMPARE_EQ(QFile::exists(dia_expect_destin), true);
-        //QCOMPARE_EQ(QFile::exists(dia_actual_destin), true);
-
-        const std::string inn_fpath{ dia_source.toStdString() };
-        const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
-        const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
-
-        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
-        QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
-    }
+    test_common_read_puml_data("converter_2/test/read_puml/class_graph");
 }
 
 void Module::test_ClassGraph_read_puml()

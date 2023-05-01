@@ -7,7 +7,7 @@
       "end": {
         "id": "Foo"
       },
-      "id": "1",
+      "id": "edge_1",
       "name": "dsad",
       "type": "generalization"
     }
@@ -22,7 +22,7 @@
       "name": "Bar",
       "out_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "type": "class"
@@ -47,7 +47,7 @@
       "id": "Foo",
       "inn_edges": [
         {
-          "id": "1"
+          "id": "edge_1"
         }
       ],
       "name": "Foo",

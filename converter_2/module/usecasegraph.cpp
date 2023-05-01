@@ -106,13 +106,13 @@ string edge_type_to_str(const UcEdge::Type tp) {
 }
 
 json edge_to_json(UcEdge& edge) {
-    json result = json_utils::edge_to_json(edge);
+    json result = json_utils::edge_to_whole_json(edge);
     result["type"] = edge_type_to_str(edge.type);
     return result;
 }
 
 json node_to_json(UcNode& node) {
-    json result = json_utils::node_to_json(node);
+    json result = json_utils::node_to_whole_json(node);
     result["type"] = node_type_to_str(node.type);
 
     result["rob_dia"] = node.id;
