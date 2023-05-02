@@ -1,0 +1,12 @@
+@startuml
+
+actor "Alice" as Alice
+entity "Auth System" as authSys 
+boundary "Wrapped request" as wrappedRequest
+
+Alice -- authSys: Authentication Request
+
+authSys -> wrappedRequest: new request()
+Alice <-- authSys: response
+
+@enduml

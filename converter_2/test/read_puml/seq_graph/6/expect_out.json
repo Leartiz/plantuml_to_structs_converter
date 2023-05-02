@@ -1,0 +1,109 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_1",
+      "name": "hello",
+      "opd": null,
+      "order_number": 1,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_2",
+      "name": "ok",
+      "opd": null,
+      "order_number": 2,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "DbFacade"
+      },
+      "id": "edge_3",
+      "name": "",
+      "opd": null,
+      "order_number": 3,
+      "type": "sync"
+    }
+  ],
+  "frags": [],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_3"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Bob",
+      "inn_edges": [
+        {
+          "id": "edge_2"
+        }
+      ],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "DbFacade",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "is_error": false,
+      "name": "DD BB",
+      "out_edges": [],
+      "type": "entity"
+    }
+  ],
+  "refs": [],
+  "stamps": [
+    {
+      "id": "edge_1",
+      "order_number": 1
+    },
+    {
+      "id": "edge_2",
+      "order_number": 2
+    },
+    {
+      "id": "edge_3",
+      "order_number": 3
+    }
+  ]
+}

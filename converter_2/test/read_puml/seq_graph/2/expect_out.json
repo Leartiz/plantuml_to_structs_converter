@@ -161,7 +161,17 @@
   "refs": [
     {
       "id": "ref_1",
-      "nodes": [],
+      "nodes": [
+        {
+          "id": "Alice"
+        },
+        {
+          "id": "Bob"
+        },
+        {
+          "id": "Log"
+        }
+      ],
       "order_number": 1,
       "root_opd": null,
       "text": "Инициализация"

@@ -1,0 +1,13 @@
+@startuml
+
+skinparam style strictuml
+
+actor Bob
+actor Alice
+entity "DD BB" as DbFacade
+
+Bob -> Alice : hello
+Alice -> Bob : ok
+Alice -> DbFacade
+
+@enduml

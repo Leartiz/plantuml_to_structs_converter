@@ -1031,7 +1031,7 @@ void Module::test_RobustnessGraph_read_okk1()
     }
 }
 
-void Module::test_RobustnessGraph_read_okk3()
+void Module::test_RobustnessGraph_read_okk2()
 {
     RobustnessGraph robG;
     istringstream sin{
@@ -1188,6 +1188,7 @@ void Module::test_SequenceGraph_read_okk()
     QCOMPARE_EQ(seqG.edges.size(), size_t(2));
 
     QCOMPARE_EQ(seqG.uc_node.expired(), true);
+    QCOMPARE_EQ(seqG.stamps.size(), size_t(2));
     QCOMPARE_EQ(seqG.frags.size(), size_t(0));
     QCOMPARE_EQ(seqG.refs.size(), size_t(0));
 
@@ -1250,7 +1251,12 @@ void Module::test_SequenceGraph_read_okk()
 
 void Module::test_SequenceGraph_read_okk1()
 {
+    // TODO:
+}
 
+void Module::test_SequenceGraph_read_okk2()
+{
+    // TODO:
 }
 
 // -----------------------------------------------------------------------
@@ -1302,6 +1308,27 @@ void Module::test_SequenceGraph_read_err2()
         "\n"
         "Bob -- MainWin : on_clicked_menu()\n"
         "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err3()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "skinparam dpi 200\n"
+        "\n"
+        "actor Alice \n"
+        "actor Bob   \n"
+        "\n"
+        "ref over Alice, Bob, Log\n"
+        "Инициализация\n"
+        "end ref\n"
         "\n"
         "@enduml\n"
     };
@@ -1561,8 +1588,8 @@ void Module::test_ClassGraph_read_okk2()
 
 void Module::test_ClassGraph_read_okk3()
 {
-    using Member = ClassGraph::ClassNode::Member;
-    using ClassNode = ClassGraph::ClassNode;
+    //using Member = ClassGraph::ClassNode::Member;
+    //using ClassNode = ClassGraph::ClassNode;
 
     ClassGraph classG;
     istringstream sin{

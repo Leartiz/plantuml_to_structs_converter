@@ -1,0 +1,132 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Alicрe"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_1",
+      "name": "Authentication Request",
+      "opd": null,
+      "order_number": 1,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_2",
+      "name": "Authentication Response",
+      "opd": null,
+      "order_number": 2,
+      "type": "reply"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_3",
+      "name": "Another authentication Request",
+      "opd": null,
+      "order_number": 3,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_4",
+      "name": "Another authentication Response",
+      "opd": null,
+      "order_number": 4,
+      "type": "reply"
+    }
+  ],
+  "frags": [],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Alicрe",
+      "inn_edges": [],
+      "is_error": false,
+      "name": "Alicрe",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Bob",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_3"
+        }
+      ],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "type": "actor"
+    }
+  ],
+  "refs": [],
+  "stamps": [
+    {
+      "id": "edge_1",
+      "order_number": 1
+    },
+    {
+      "id": "edge_2",
+      "order_number": 2
+    },
+    {
+      "id": "edge_3",
+      "order_number": 3
+    },
+    {
+      "id": "edge_4",
+      "order_number": 4
+    }
+  ]
+}

@@ -81,7 +81,7 @@ private slots:
 private slots:
     void test_RobustnessGraph_read_okk();
     void test_RobustnessGraph_read_okk1();
-    void test_RobustnessGraph_read_okk3();
+    void test_RobustnessGraph_read_okk2();
 
     void test_RobustnessGraph_read_puml_data();
     void test_RobustnessGraph_read_puml();
@@ -90,10 +90,12 @@ private slots:
 private slots:
     void test_SequenceGraph_read_okk();
     void test_SequenceGraph_read_okk1();
+    void test_SequenceGraph_read_okk2();
 
     void test_SequenceGraph_read_err();
     void test_SequenceGraph_read_err1();
     void test_SequenceGraph_read_err2();
+    void test_SequenceGraph_read_err3();
 
     void test_SequenceGraph_read_puml_data();
     void test_SequenceGraph_read_puml();

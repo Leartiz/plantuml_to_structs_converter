@@ -1,0 +1,100 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "authSys"
+      },
+      "id": "edge_1",
+      "name": "Authentication Request"
+    },
+    {
+      "beg": {
+        "id": "authSys"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_2",
+      "name": "Authentication Request"
+    },
+    {
+      "beg": {
+        "id": "authSys"
+      },
+      "end": {
+        "id": "wrappedRequest"
+      },
+      "id": "edge_3",
+      "name": "new request()"
+    },
+    {
+      "beg": {
+        "id": "authSys"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_4",
+      "name": "response"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "authSys",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "is_error": false,
+      "name": "Auth System",
+      "out_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "type": "entity"
+    },
+    {
+      "id": "wrappedRequest",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "is_error": false,
+      "name": "Wrapped request",
+      "out_edges": [],
+      "type": "boundary"
+    }
+  ]
+}

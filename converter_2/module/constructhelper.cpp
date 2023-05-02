@@ -7,6 +7,8 @@ void ConstructHelper::reset() {
     id_node.clear();
     id_edge.clear();
 
+    // ***
+
     line_number = 0;
     operand_number = 0;
     order_number = 0;
@@ -28,6 +30,10 @@ string ConstructHelper::next_opd_id() {
 
 size_t ConstructHelper::next_order_number() {
     return order_number++ + 1;
+}
+
+size_t ConstructHelper::next_onum() {
+    return next_order_number();
 }
 
 // -----------------------------------------------------------------------

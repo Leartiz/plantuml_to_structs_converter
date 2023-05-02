@@ -76,6 +76,7 @@ SeqEdge::Type edge_type_from_arrow_part(const string& body) {
     return SeqEdge::Reply;
 }
 
+// TODO: не самое точное решение, может привести к проблемам
 vector<string> str_to_node_names(const string& str) {
     vector<string> result;
     istringstream sin{ str };
@@ -177,7 +178,7 @@ json ref_to_json(SeqRef& rf) {
 
     json::array_t json_nodes;
     std::for_each(begin(rf.nodes), end(rf.nodes),
-                  [&json_nodes](const weak_ptr<SeqNode>& node_wp) -> void {
+                  [&json_nodes](const weak_ptr<Graph::Node>& node_wp) -> void {
         if (!node_wp.expired()) {
             const auto node_sp = node_wp.lock();
             json_nodes.push_back(json_utils::node_to_short_json(*node_sp));
@@ -216,7 +217,7 @@ json frag_to_json(SeqFrag& frag) {
 
 // ***
 
-json stamp_to_json(Stamp& stamp) {
+json only_stamp_to_json(Stamp& stamp) {
     json result;
     string stamp_id;
     if (const auto edge = dynamic_cast<SeqEdge*>(&stamp); edge) stamp_id = edge->id;
@@ -342,24 +343,26 @@ void SequenceGraph::write_json(std::ostream& out) {
         json_graph["id"] = uc_node_sp->id;
     }
 
-    /* edges */
+    /* units */
     {
-        json::array_t json_edges;
-        for (const auto& edge : edges) {
-            auto uc_edge = static_pointer_cast<SeqEdge>(edge);
-            json_edges.push_back(edge_to_json(*uc_edge));
+        /* edges */
+        {
+            json::array_t json_edges;
+            for (const auto& edge : edges) {
+                auto uc_edge = static_pointer_cast<SeqEdge>(edge);
+                json_edges.push_back(edge_to_json(*uc_edge));
+            }
+            json_graph["edges"] = json_edges;
         }
-        json_graph["edges"] = json_edges;
-    }
-
-    /* nodes */
-    {
-        json::array_t json_nodes;
-        for (const auto& node : nodes) {
-            auto uc_node = static_pointer_cast<SeqNode>(node);
-            json_nodes.push_back(node_to_json(*uc_node));
+        /* nodes */
+        {
+            json::array_t json_nodes;
+            for (const auto& node : nodes) {
+                auto uc_node = static_pointer_cast<SeqNode>(node);
+                json_nodes.push_back(node_to_json(*uc_node));
+            }
+            json_graph["nodes"] = json_nodes;
         }
-        json_graph["nodes"] = json_nodes;
     }
 
     /* groups */
@@ -385,7 +388,7 @@ void SequenceGraph::write_json(std::ostream& out) {
         {
             json::array_t json_stamps;
             for (const auto& stamp : stamps)
-                json_stamps.push_back(stamp_to_json(*stamp));
+                json_stamps.push_back(only_stamp_to_json(*stamp));
             json_graph["stamps"] = json_stamps;
         }
     }
@@ -446,7 +449,7 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
         rght_node->outs.push_back(edge);
     }
     ch->id_edge[edge->id] = edge;
-    stamps.push_back(edge);
+    add_stamp(edge);
     return true;
 }
 
@@ -469,13 +472,12 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
 
     auto frag = make_shared<SeqFrag>(ch->next_order_number(), frag_id, frag_type, ch->current_opd());
     auto opd = make_shared<SeqOpd>(ch->next_order_number(), ch->next_opd_id(), opd_cond);
-    frags.push_back(frag);
-    stamps.push_back(frag);
+    add_frag(frag);
 
     ch->nested_opds.push(opd);
     frag->opds.push_back(opd);
-    stamps.push_back(opd);
     opd->frag = frag; // enable_shared_from_this!
+    add_stamp(opd);
 
     while (in) {
         const auto line{ read_line(in) };
@@ -487,7 +489,7 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
         if (try_operand_else(line, frag)) {
             opd = frag->opds.back();
             ch->nested_opds.top() = opd;
-            stamps.push_back(opd);
+            add_stamp(opd); /* rare case */
             continue;
         }
 
@@ -508,31 +510,52 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
 
 bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
     smatch match;
-    static const regex rx{ "^\\s*ref\\s+over\\s+(.*)" };
+    static const regex rx{ "^\\s*ref\\s+over\\s+(.*)$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
 
+    vector<weak_ptr<Node>> nodes_above;
     const auto node_names{ str_to_node_names(match[1].str()) };
     for (const auto& one : node_names) {
-        if (!ch->id_node.count(one)) {
-            throw GraphError(ch->line_number, "unknown node name");
+        if (ch->id_node.count(one)) {
+            nodes_above.push_back(ch->id_node[one]);
+            continue;
         }
+        throw GraphError{ ch->line_number, "unknown node name" };
     }
 
     string text;
     while (!in.eof()) {
         const auto line{ read_line(in) };
         if (try_end_ref(line)) {
-            const auto ref_id = "ref_" + to_string(refs.size() + 1);
-            auto ref = make_shared<SeqRef>(ch->next_order_number(), ref_id, text, ch->current_opd());
-            stamps.push_back(ref);
-            refs.push_back(ref);
+            const string ref_id = "ref_" + to_string(refs.size() + 1);
+            const auto ref = make_shared<SeqRef>(ch->next_onum(), ref_id, text, ch->current_opd());
+            ref->nodes = std::move(nodes_above);
+            add_ref(ref);
             return true;
         }
         else {
-            text.append(line);
+            if (!text.empty())
+                text.push_back('\n');
+            text.append(str_utils::trim_space(line));
         }
     }
-    throw GraphError(ch->line_number, "ref over is not closed");
+    throw GraphError{ ch->line_number, "ref over is not closed" };
+}
+
+// -----------------------------------------------------------------------
+
+void SequenceGraph::add_stamp(std::shared_ptr<Stamp> stamp) {
+    stamps.push_back(stamp);
+}
+
+void SequenceGraph::add_ref(std::shared_ptr<SeqRef> ref) {
+    stamps.push_back(ref);
+    refs.push_back(ref);
+}
+
+void SequenceGraph::add_frag(std::shared_ptr<SeqFrag> frag) {
+    stamps.push_back(frag);
+    frags.push_back(frag);
 }

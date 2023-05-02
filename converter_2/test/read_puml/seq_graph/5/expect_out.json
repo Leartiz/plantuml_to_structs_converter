@@ -1,0 +1,44 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_1",
+      "name": "Это сигнал к самому себе.\\nТакже это является демонстрацией\\nмногострочного \\nтекста.",
+      "opd": null,
+      "order_number": 1,
+      "type": "sync"
+    }
+  ],
+  "frags": [],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "type": "actor"
+    }
+  ],
+  "refs": [],
+  "stamps": [
+    {
+      "id": "edge_1",
+      "order_number": 1
+    }
+  ]
+}

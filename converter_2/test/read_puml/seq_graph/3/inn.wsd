@@ -1,0 +1,14 @@
+@startuml
+
+skinparam dpi 200
+
+actor Alice
+actor Bob
+
+ref over Alice, Bob
+    Инициализация
+    Вторая строка   
+    Третья строка
+end ref
+
+@enduml

@@ -1,0 +1,197 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_1",
+      "name": "Valid Authentication Request"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_10",
+      "name": "Authentication Response (DENIED)"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_2",
+      "name": "Valid Authentication Request"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "RH"
+      },
+      "id": "edge_3",
+      "name": "formatted Authenticated Request (VALID)"
+    },
+    {
+      "beg": {
+        "id": "RH"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_4",
+      "name": "Request Authenticated Response (OK)"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "Alice"
+      },
+      "id": "edge_5",
+      "name": "Authentication Response (OK)"
+    },
+    {
+      "beg": {
+        "id": "Alice"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_6",
+      "name": "Invalid Authentication Request"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "RH"
+      },
+      "id": "edge_7",
+      "name": "formatted Authenticated Request (INVALID)"
+    },
+    {
+      "beg": {
+        "id": "RH"
+      },
+      "end": {
+        "id": "Bob"
+      },
+      "id": "edge_8",
+      "name": "Request Authenticated Response (DENIED)"
+    },
+    {
+      "beg": {
+        "id": "Bob"
+      },
+      "end": {
+        "id": "RH"
+      },
+      "id": "edge_9",
+      "name": "Request Authenticated Response (DENIED)"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [
+        {
+          "id": "edge_10"
+        },
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_6"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "Bob",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_6"
+        },
+        {
+          "id": "edge_8"
+        }
+      ],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [
+        {
+          "id": "edge_10"
+        },
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_5"
+        },
+        {
+          "id": "edge_7"
+        },
+        {
+          "id": "edge_9"
+        }
+      ],
+      "type": "actor"
+    },
+    {
+      "id": "RH",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_7"
+        },
+        {
+          "id": "edge_9"
+        }
+      ],
+      "is_error": false,
+      "name": "Request Handler",
+      "out_edges": [
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_8"
+        }
+      ],
+      "type": "entity"
+    }
+  ]
+}

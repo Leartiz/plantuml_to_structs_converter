@@ -1,0 +1,38 @@
+@startuml
+
+skinparam ActorBorderThickness 1.5
+skinparam ActorBackgroundColor #FEFECE
+skinparam ActorBorderColor #B20842
+
+skinparam BoundaryBorderThickness 1.5
+skinparam BoundaryBackgroundColor #FEFECE
+skinparam BoundaryBorderColor #B20842
+
+skinparam EntityBorderThickness 1.5
+skinparam EntityBackgroundColor #FEFECE
+skinparam EntityBorderColor #B20842
+
+skinparam ControlBorderThickness 1.5
+skinparam ControlBackgroundColor #FEFECE
+skinparam ControlBorderColor #B20842
+
+skinparam Shadowing true
+
+entity "Request Handler" as RH 
+
+actor Alice
+actor Bob
+
+' ***
+
+Alice -- Bob: Valid Authentication Request
+Bob -> RH: formatted Authenticated Request (VALID)
+RH --> Bob: Request Authenticated Response (OK)
+Bob --> Alice: Authentication Response (OK)
+
+Alice -> Bob: Invalid Authentication Request
+Bob --> RH: formatted Authenticated Request (INVALID)
+RH -- Bob: Request Authenticated Response (DENIED)
+Alice <-- Bob: Authentication Response (DENIED)
+
+@enduml

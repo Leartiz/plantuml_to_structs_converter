@@ -33,7 +33,7 @@ public:
                std::shared_ptr<SeqOpd> = {});
 
         std::string text;
-        std::vector<std::weak_ptr<SeqNode>> nodes;
+        std::vector<std::weak_ptr<Node>> nodes;
     };
 
     struct SeqFrag : SeqGroup {
@@ -98,6 +98,11 @@ protected:
 private:
     bool try_fragment(const std::string&, std::istream&);
     bool try_ref_over(const std::string&, std::istream&);
+
+private:
+    void add_stamp(std::shared_ptr<Stamp> stamp);
+    void add_frag(std::shared_ptr<SeqFrag> frag);
+    void add_ref(std::shared_ptr<SeqRef> ref);
 };
 
 #endif // SEQUENCEGRAPH_H

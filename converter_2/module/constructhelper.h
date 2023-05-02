@@ -19,6 +19,7 @@ public:
 
     std::string next_opd_id();
     size_t next_order_number(); // to stamp!
+    size_t next_onum();
 
 public:
     std::shared_ptr<SequenceGraph::SeqOpd> current_opd() const;

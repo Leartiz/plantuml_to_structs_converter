@@ -1,0 +1,45 @@
+{
+  "edges": [],
+  "frags": [],
+  "id": null,
+  "nodes": [
+    {
+      "id": "Alice",
+      "inn_edges": [],
+      "is_error": false,
+      "name": "Alice",
+      "out_edges": [],
+      "type": "actor"
+    },
+    {
+      "id": "Bob",
+      "inn_edges": [],
+      "is_error": false,
+      "name": "Bob",
+      "out_edges": [],
+      "type": "actor"
+    }
+  ],
+  "refs": [
+    {
+      "id": "ref_1",
+      "nodes": [
+        {
+          "id": "Alice"
+        },
+        {
+          "id": "Bob"
+        }
+      ],
+      "order_number": 1,
+      "root_opd": null,
+      "text": "Инициализация\nВторая строка\nТретья строка"
+    }
+  ],
+  "stamps": [
+    {
+      "id": "ref_1",
+      "order_number": 1
+    }
+  ]
+}

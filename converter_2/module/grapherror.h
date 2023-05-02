@@ -7,7 +7,7 @@
 class GraphError : public std::runtime_error
 {
 public:
-    GraphError(size_t line_num, std::string txt);
+    GraphError(size_t line_num, const std::string& txt);
     std::string complete_message() const;
 
 private:
