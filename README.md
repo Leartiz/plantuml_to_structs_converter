@@ -1,9 +1,5 @@
 # Модуль перевода документов PlantUML в структуры #
 
-
- TODO: Исправить описание, сделать какой-то формат!
- TODO: привести в порядок библиотеки
-
 ## Доступный PlantUML для диаграмм ##
 ### Любая ###
 - [x] использование директив `@startuml`/`@enduml`;
@@ -11,10 +7,10 @@
   * `left to right direction`
   * `top to bottom direction`
 - [x] использование однострочных `skinparam`:
-  * `skinparam actorStyle Hollow`
+  * `skinparam <key> <value>`
 - [x] однострочные заметки с ключевым словом `note`:
-  * `note right of User : This is actor`
-  * `note bottom of Database : This is entity`
+  * `note right of <id> : <string>`
+  * `note bottom of <id> : <string>`
 - [x] пустые строки;
 ---
 
@@ -37,22 +33,28 @@
 ---
 
 ### Диаграмма робастности ###
-- [x] обязательное определение узлов;
+- [x] **обязательное** определение узлов;
 - [x] определение узлов:
-  *  `actor User`
-  *  `entity Database`
-  *  `control "Обработать что-то" as process_something`
-  *  `boundary "Главное окно" as main_screen`
+  *  `actor    <nmid>` \
+     `boundary <nmid>` \
+     `control  <nmid>` \
+     `entity   <nmid>` 
+  *  `actor    "<name>" as <id>` \
+     `boundary "<name>" as <id>` \
+     `control  "<name>" as <id>` \
+     `entity   "<name>" as <id>` 
 - [x] отношения между элементами:
-  * `User -- MainWin`
-  * `AnyActor --> AnyBoundary`
-  * `start_game <-- main_game_screen : нажата кнопка "старт"`
+  * `<id> -[-]... <id>` \
+    `<id> --> <id>`     \
+    `<id> <-- <id>`
+  * `<id> -[-]... <id> : <string>` \
+    `<id> --> <id> : <string>`     \
+    `<id> --> <id> : <string>`
 - [x] альтернативные последовательности цветом `#red`:
-  *  `boundary ErrB #red`
-  *  `control ErrC #red`
-  *  `boundary "Окно с ошибкой" as error_screen #red`
+  *  `<type> <nmid> #red`           \
+     `<type> "<name>" as <id> #red`
 
-> Если на диаграмме используются двусторонние стрелки вида `--` или `<-->`, то в этом случае в памяти будут созданы два объекта дуги.
+> Если на диаграмме используются двусторонние стрелки вида `--` или `<-->`, то в таком случае, в памяти будут созданы два объекта дуги.
 ---
 
 ### Диаграмма последовательности ###
@@ -71,10 +73,17 @@
   * `enum E { ... }`
 - [x] функции и данные в узле `class`:
   - [ ] [+|-|#]<Name> : Number
+
+В нотации РБНФ [тут](converter/description/ebnf/class.ebnf).
+
+Примеры [тут]().
+
 ---
 
 ### Диаграмма потока экранов (состояний) ###
 - [ ] ...
 
 
-### Зависимости ###
+## Сериализация ##
+
+## Зависимости ##

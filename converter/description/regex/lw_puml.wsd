@@ -1,0 +1,35 @@
+@startuml
+
+' https://plantuml-documentation.readthedocs.io/en/latest/formatting/html.html
+
+state TransportWindow1
+state " " as TransportWindow2
+state "Auth\nWindow\n<img:layouts/3.png>" as AuthWindow
+state "MainWindow\n<img:layouts/0.png>" as MainWindow  
+state "ReferenceWindow\n<img:layouts/2.png>" as ReferenceWindow  
+state "<img:layouts/1.png>" as TransportWindow
+
+[*] --> AuthWindow
+AuthWindow --> [*] : закрыли\nокно
+AuthWindow : Пользователь может
+AuthWindow : - ввести правильный пароль
+AuthWindow : - ввести неправильный пароль
+AuthWindow : - Закрыть окно
+
+AuthWindow -> MainWindow : Выполнен вход в систему 
+MainWindow : Пользователь может
+MainWindow : - ....
+MainWindow : - Перейти на вкладку "Справочники"
+MainWindow : - ....
+MainWindow : - Закрыть окно
+
+MainWindow --> [*]
+MainWindow --> ReferenceWindow : Переход на\nвкладку "Справочники"
+ReferenceWindow : Пользователь может
+ReferenceWindow : - выбрать "Название справочника"  
+
+ReferenceWindow --> TransportWindow : Выбран справочник\n"Виды транспорта" 
+TransportWindow : Пользователь может
+TransportWindow : ...
+
+@enduml

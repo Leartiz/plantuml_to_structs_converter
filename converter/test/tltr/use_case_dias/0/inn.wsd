@@ -1,6 +1,0 @@
-@startuml     use_case_dia    
-
-actor "Student" as Student
-usecase "Registration" as Registration
-
-@enduml

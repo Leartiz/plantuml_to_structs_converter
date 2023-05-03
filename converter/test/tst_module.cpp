@@ -1,42 +1,21 @@
 #include <sstream>
 #include <fstream>
-#include <iostream>
-
-#include <QtTest>
-#include <QDebug>
-
-#include <QDir>
-#include <QFile>
+#include <algorithm>
 
 #include "tst_module.h"
 
-#include "nlohmann/json.hpp"
+#include "usecasegraph.h"
+#include "robustnessgraph.h"
+#include "sequencegraph.h"
+#include "classgraph.h"
+#include "grapherror.h"
 
-#include "use_case/uc_ptrs.h"
-#include "use_case/uc_node.h"
-#include "use_case/uc_edge.h"
-#include "use_case/use_case_dia.h"
-
-#include "errors/bldr/null_node.h"
-#include "errors/bldr/null_edge.h"
-#include "errors/bldr/invalid_edge.h"
-#include "errors/bldr/unsuitable_edge.h"
-#include "errors/bldr/repeating_edge.h"
-#include "errors/bldr/unknown_edge_type.h"
-#include "errors/bldr/unknown_node_type.h"
-
-#include "utils/str_utils.h"
-#include "utils/wsd_utils.h"
-
-#include "translator/lex_analyzer.h"
-#include "errors/tltr/lexer_error.h"
-
-#include "translator/use_case/uc_dia_direct_converter.h"
-#include "translator/direct_translator.h"
-
-// -----------------------------------------------------------------------
+#include "str_utils.h"
+#include "nlohmann/json/json.hpp"
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 4, 0)
+    Q_DECLARE_METATYPE(std::string);
+
     #define QCOMPARE_EQ(lhs, rhs) QCOMPARE(lhs == rhs, true);
     #define QCOMPARE_NE(lhs, rhs) QCOMPARE(lhs == rhs, false);
 
@@ -44,928 +23,12 @@
     #define QVERIFY_THROWS_NO_EXCEPTION(expression) static_cast<void>(expression);
 #endif
 
+using namespace std;
+using namespace nlohmann;
+
+// str_utils
 // -----------------------------------------------------------------------
-
-Module::Module() {}
-Module::~Module() {}
-
-// -----------------------------------------------------------------------
-
-void Module::initTestCase() {}
-void Module::cleanupTestCase() {}
-
-// UC_edge
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_Builder_beg_err()
-{
-    using namespace lenv;
-    try {
-        UC_edge::Builder b("");
-        b.type(UC_edge::ASSOCIATION)
-                .beg(nullptr);
-    }
-    catch(const Null_node& ne) {
-        QCOMPARE_EQ(true, true); // OK!
-    }
-    catch(...) {
-        qWarning() << "Expected exception: Null_node";
-        QCOMPARE_EQ(true, false);
-    }
-}
-
-void Module::test_UC_edge_Builder_beg_err1()
-{
-    using namespace lenv;
-    UC_edge::Builder b(""); b.type(UC_edge::ASSOCIATION);
-
-    QVERIFY_THROWS_EXCEPTION(Null_node, b.beg(nullptr));
-}
-
-void Module::test_UC_edge_Builder_beg_okk()
-{
-    using namespace lenv;
-    UC_node::Builder beg_node_b("Actor");
-    const auto beg_node{ beg_node_b.name("Actor")
-                .type(UC_node::ACTOR)
-                .build_ptr() }; // next will be a test!
-
-    UC_edge::Builder b(""); b.type(UC_edge::ASSOCIATION);
-    QVERIFY_THROWS_NO_EXCEPTION(b.beg(beg_node));
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_Builder_end_err()
-{
-    using namespace lenv;
-    UC_edge::Builder b(""); b.type(UC_edge::GENERALIZATION);
-    QVERIFY_THROWS_EXCEPTION(Null_node, b.end(nullptr));
-}
-
-void Module::test_UC_edge_Builder_end_okk()
-{
-    using namespace lenv;
-    UC_node::Builder end_node_b("UseCase");
-    const auto end_node{ end_node_b.name("UseCase")
-                .type(UC_node::USE_CASE)
-                .build_ptr() };
-
-    UC_edge::Builder b(""); b.type(UC_edge::GENERALIZATION);
-    QVERIFY_THROWS_NO_EXCEPTION(b.end(end_node));
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_Builder_build_ptr_err()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-    QVERIFY_THROWS_EXCEPTION(Invalid_edge, edge_b.build_ptr());
-}
-
-void Module::test_UC_edge_Builder_build_ptr_okk()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    UC_node::Builder beg_node_b("Actor");
-    /* depends on the lifetime of this object! */
-    const auto beg_node{ beg_node_b.name("Actor")
-                .type(UC_node::ACTOR).build_ptr() };
-
-    UC_node::Builder end_node_b("UseCase");
-    const auto end_node{ end_node_b.name("UseCase")
-                .type(UC_node::USE_CASE).build_ptr() };
-
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node));
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.end(end_node));
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.build_ptr());
-}
-
-void Module::test_UC_edge_Builder_complex()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    QVERIFY_THROWS_EXCEPTION(Null_node, edge_b.beg(nullptr));
-    QVERIFY_THROWS_EXCEPTION(Null_node, edge_b.end(nullptr));
-    QVERIFY_THROWS_EXCEPTION(Invalid_edge, edge_b.build_ptr());
-
-    UC_node::Builder beg_node_b("Actor");
-    const auto beg_node{ beg_node_b.name("Actor")
-                .type(UC_node::ACTOR).build_ptr() };
-
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node));
-    QVERIFY_THROWS_EXCEPTION(Invalid_edge, edge_b.build_ptr());
-
-    UC_node::Builder end_node_b("UseCase");
-    const auto end_node{ end_node_b.name("UseCase")
-                .type(UC_node::USE_CASE).build_ptr() };
-
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.end(end_node));
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.build_ptr());
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_type_to_str_complex()
-{
-    using namespace lenv;
-    {
-        std::string str;
-        const UC_edge::Type type{ static_cast<UC_edge::Type>(0) };
-        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_edge::type_to_str(type));
-        QCOMPARE_EQ(str, "ASSOCIATION");
-    }
-    {
-        std::string str;
-        const UC_edge::Type type{ static_cast<UC_edge::Type>(1) };
-        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_edge::type_to_str(type));
-        QCOMPARE_EQ(str, "GENERALIZATION");
-    }
-    {
-        std::string str;
-        const UC_edge::Type type{ static_cast<UC_edge::Type>(4) };
-        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, str = lenv::UC_edge::type_to_str(type));
-    }
-    {
-        std::string str;
-        const UC_edge::Type type{ static_cast<UC_edge::Type>(9) };
-        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, str = lenv::UC_edge::type_to_str(type));
-    }
-    // ...
-}
-
-void Module::test_UC_edge_str_to_type_complex()
-{
-    using namespace lenv;
-    {
-        UC_edge::Type type{};
-        const std::string str{ "AssOCIAtiOn" };
-        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_edge::str_to_type(str));
-        QCOMPARE_EQ(type, UC_edge::Type::ASSOCIATION);
-    }
-    {
-        UC_edge::Type type{};
-        const std::string str{ "ExtEND" };
-        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_edge::str_to_type(str));
-        QCOMPARE_EQ(type, UC_edge::Type::EXTEND);
-    }
-    {
-        UC_edge::Type type{};
-        const std::string str{ "Ext123" };
-        QVERIFY_THROWS_EXCEPTION(Unknown_edge_type, type = lenv::UC_edge::str_to_type(str));
-        static_cast<void>(type);
-    }
-    // ...
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_to_whole_json_err()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    UC_edge_sp edge_sp; /* take out of space! */
-    {
-        UC_node::Builder beg_node_b("Actor");
-        const auto beg_node{ beg_node_b.type(UC_node::ACTOR).build_ptr() };
-        UC_node::Builder end_node_b("UseCase");
-        const auto end_node{ end_node_b.type(UC_node::USE_CASE).build_ptr() };
-
-        // ***
-
-        QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node).end(end_node));
-        QVERIFY_THROWS_NO_EXCEPTION(edge_sp = edge_b.build_ptr());
-        QCOMPARE_EQ(edge_sp->is_valid(), true);
-    }
-
-    QCOMPARE_EQ(edge_sp->is_valid(), false);
-    QVERIFY_THROWS_EXCEPTION(Null_node, edge_sp->to_whole_json());
-}
-
-void Module::test_UC_edge_to_whole_json_okk()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    UC_node::Builder beg_node_b("Actor");
-    const auto beg_node{ beg_node_b.type(UC_node::ACTOR).build_ptr() };
-    UC_node::Builder end_node_b("UseCase");
-    const auto end_node{ end_node_b.type(UC_node::USE_CASE).build_ptr() };
-
-    // ***
-
-    UC_edge_sp edge_sp;
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node).end(end_node));
-    QVERIFY_THROWS_NO_EXCEPTION(edge_sp = edge_b.build_ptr());
-    QCOMPARE_EQ(edge_sp->is_valid(), true);
-
-    // ***
-
-    const nlohmann::json actual = edge_sp->to_whole_json();
-    const nlohmann::json expected = {
-        { UC_edge::Field::type, UC_edge::ASSOCIATION }, // static_cast<uint32_t>?
-        { UC_edge::Field::id, "Association" },
-        { UC_edge::Field::beg, { { UC_node::Field::id, "Actor" } } },
-        { UC_edge::Field::end, { { UC_node::Field::id, "UseCase" } } },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_to_short_json_okk()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    UC_edge_sp edge_sp; /* take out of scope! */
-    {
-        UC_node::Builder beg_node_b("Actor");
-        const auto beg_node{ beg_node_b.type(UC_node::ACTOR).build_ptr() };
-        UC_node::Builder end_node_b("UseCase");
-        const auto end_node{ end_node_b.type(UC_node::USE_CASE).build_ptr() };
-
-        // ***
-
-        QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node).end(end_node));
-        QVERIFY_THROWS_NO_EXCEPTION(edge_sp = edge_b.build_ptr());
-        QCOMPARE_EQ(edge_sp->is_valid(), true);
-    }
-    /* but short JSON can be obtained! */
-    QCOMPARE_EQ(edge_sp->is_valid(), false);
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = edge_sp->to_short_json());
-    const nlohmann::json expected = { { UC_edge::Field::id, "Association" }, };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_UC_edge_to_short_json_okk1()
-{
-    using namespace lenv;
-    UC_edge::Builder edge_b("Association");
-    edge_b.type(UC_edge::ASSOCIATION);
-
-    UC_node::Builder beg_node_b("Actor");
-    const auto beg_node{ beg_node_b.type(UC_node::ACTOR).build_ptr() };
-    UC_node::Builder end_node_b("UseCase");
-    const auto end_node{ end_node_b.type(UC_node::USE_CASE).build_ptr() };
-
-    // ***
-
-    UC_edge_sp edge_sp;
-    QVERIFY_THROWS_NO_EXCEPTION(edge_b.beg(beg_node).end(end_node));
-    QVERIFY_THROWS_NO_EXCEPTION(edge_sp = edge_b.build_ptr());
-    QCOMPARE_EQ(edge_sp->is_valid(), true);
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = edge_sp->to_short_json());
-    const nlohmann::json expected = { { UC_edge::Field::id, "Association" }, };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_edge_is_valid_err()
-{
-    // TODO:
-}
-
-void Module::test_UC_edge_is_valid_okk()
-{
-    // TODO:
-}
-
-// UC_node
-// -----------------------------------------------------------------------
-
-void Module::test_UC_node_Builder_Builder_err()
-{
-    using namespace lenv;
-    UC_node_sp node{ nullptr };
-    QVERIFY_THROWS_EXCEPTION(
-                Null_node,
-                UC_node::Builder node_b(nullptr, "Actor")
-                );
-}
-
-void Module::test_UC_node_Builder_Builder_okk()
-{
-    using namespace lenv;
-    UC_node::Builder node_b("Actor");
-    node_b.name("Actor")
-            .type(UC_node::ACTOR)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp node{ nullptr };
-    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr()); // always OK!
-}
-
-void Module::test_UC_node_Builder_Builder_okk1()
-{
-    using namespace lenv;
-    UC_node::Builder node_b("UseCase");
-    node_b.name("UseCase")
-            .type(UC_node::USE_CASE)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp node{ nullptr };
-    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
-}
-
-void Module::test_UC_node_Builder_Builder_okk2()
-{
-    using namespace lenv;
-    UC_node::Builder node_b("Actor");
-    node_b.name("Actor")
-            .type(UC_node::ACTOR)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp node{ nullptr };
-    QVERIFY_THROWS_NO_EXCEPTION(
-                node = node_b.build_ptr()
-            );
-
-    UC_node::Builder node_b_for_clone(node, "Actor2");
-    node_b_for_clone.name("Actor2")
-            .type(UC_node::ACTOR)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp cloned_node{ nullptr };
-    QVERIFY_THROWS_NO_EXCEPTION(
-                cloned_node = node_b_for_clone.build_ptr()
-            );
-
-    QCOMPARE_NE(node->id(), cloned_node->id());
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_node_type_to_str_complex()
-{
-    using namespace lenv;
-    {
-        std::string str;
-        const UC_node::Type type{ static_cast<UC_node::Type>(0) };
-        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_node::type_to_str(type));
-        QCOMPARE_EQ(str, "ACTOR");
-    }
-    {
-        std::string str;
-        const UC_node::Type type{ static_cast<UC_node::Type>(1) };
-        QVERIFY_THROWS_NO_EXCEPTION(str = lenv::UC_node::type_to_str(type));
-        QCOMPARE_EQ(str, "USE_CASE");
-    }
-    {
-        std::string str;
-        const UC_node::Type type{ static_cast<UC_node::Type>(2) };
-        QVERIFY_THROWS_EXCEPTION(Unknown_node_type, str = lenv::UC_node::type_to_str(type));
-    }
-    // ...
-}
-
-void Module::test_UC_node_str_to_type_complex()
-{
-    using namespace lenv;
-    {
-        UC_node::Type type{};
-        const std::string str{ "Actor" };
-        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_node::str_to_type(str));
-        QCOMPARE_EQ(type, UC_node::Type::ACTOR);
-    }
-    {
-        UC_node::Type type{};
-        const std::string str{ "use_CASE" };
-        QVERIFY_THROWS_NO_EXCEPTION(type = lenv::UC_node::str_to_type(str));
-        QCOMPARE_EQ(type, UC_node::Type::USE_CASE);
-    }
-    {
-        UC_node::Type type{};
-        const std::string str{ "Ext123" };
-        QVERIFY_THROWS_EXCEPTION(Unknown_node_type, type = lenv::UC_node::str_to_type(str));
-        static_cast<void>(type);
-    }
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_node_Adder_add_inn_edge_err()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("UC1");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_node::Adder beg_uc_node_a{ beg_uc_node };
-    QVERIFY_THROWS_EXCEPTION(Null_edge, beg_uc_node_a.add_out_edge(nullptr));
-    QVERIFY_THROWS_EXCEPTION(Null_edge, beg_uc_node_a.add_inn_edge(nullptr));
-}
-
-void Module::test_UC_node_Adder_add_inn_edge_err1()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Registration");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(beg_uc_node)
-            .end(end_uc_node)
-            .build_ptr();
-
-    beg_uc_node.reset(); // clear node - will result in an error.
-
-    // ***
-
-    UC_node::Adder beg_uc_node_a{ end_uc_node };
-    QVERIFY_THROWS_EXCEPTION(Null_node, beg_uc_node_a.add_inn_edge(uc_edge));
-}
-
-void Module::test_UC_node_Adder_add_inn_edge_err2()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Registration");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(beg_uc_node)
-            .end(end_uc_node)
-            .build_ptr();
-
-    // ***
-
-    UC_node::Builder uc_node_b("User");
-    auto uc_node{ uc_node_b.name("User")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // ***
-
-    {
-        UC_node::Adder uc_node_a{ uc_node };
-        QVERIFY_THROWS_EXCEPTION(Unsuitable_edge, uc_node_a.add_inn_edge(uc_edge));
-        QVERIFY_THROWS_EXCEPTION(Unsuitable_edge, uc_node_a.add_out_edge(uc_edge));
-    }
-}
-
-void Module::test_UC_node_Adder_add_inn_edge_err3()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Reg");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(beg_uc_node)
-            .end(end_uc_node)
-            .build_ptr();
-
-    // ***
-
-    UC_node::Adder end_uc_node_a{ end_uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
-    QVERIFY_THROWS_EXCEPTION(Repeating_edge, end_uc_node_a.add_inn_edge(uc_edge));
-}
-
-void Module::test_UC_node_Adder_add_inn_edge_okk()
-{
-    using namespace lenv;
-    UC_node::Builder uc_node_b("Student");
-    auto uc_node{ uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(uc_node)
-            .end(uc_node)
-            .build_ptr(); // a loop!
-
-    // ***
-
-    UC_node::Adder uc_node_a{ uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_inn_edge(uc_edge));
-    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_out_edge(uc_edge));
-}
-
-void Module::test_UC_node_Adder_add_out_edge_err()
-{
-    // TODO:
-}
-
-void Module::test_UC_node_Adder_add_out_edge_okk()
-{
-    // TODO:
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_node_to_whole_json_err()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Registration");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // scope for edge!
-    {
-        UC_edge::Builder uc_edge_b("1");
-        auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-                .beg(beg_uc_node)
-                .end(end_uc_node)
-                .build_ptr();
-
-        UC_node::Adder beg_uc_node_a{ beg_uc_node };
-        QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
-    }
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_EXCEPTION(
-                Null_edge,
-                actual = beg_uc_node->to_whole_json()
-            );
-}
-
-void Module::test_UC_node_to_whole_json_okk()
-{
-    using namespace lenv;
-    UC_node::Builder node_b("Actor_Id");
-    node_b.name("Actor_name")
-            .type(UC_node::ACTOR)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp node;
-    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = node->to_whole_json());
-
-    const nlohmann::json expected = {
-        { UC_node::Field::id, "Actor_Id" },
-        { UC_node::Field::name, "Actor_name" },
-        { UC_node::Field::type, static_cast<uint32_t>(UC_node::ACTOR) },
-        { UC_node::Field::inn_edges, nlohmann::json::array() },
-        { UC_node::Field::out_edges, nlohmann::json::array() },
-        { UC_node::Field::rob_dia, nullptr },
-        { UC_node::Field::seq_dia, nullptr },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_UC_node_to_whole_json_okk1()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Registration");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(beg_uc_node)
-            .end(end_uc_node)
-            .build_ptr();
-
-    // ***
-
-    UC_node::Adder beg_uc_node_a{ beg_uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
-
-    UC_node::Adder end_uc_node_a{ end_uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = beg_uc_node->to_whole_json());
-
-    const nlohmann::json expected = {
-        { UC_node::Field::id, "Student" },
-        { UC_node::Field::name, "Student" },
-        { UC_node::Field::type, UC_node::ACTOR },
-        { UC_node::Field::inn_edges, nlohmann::json::array() },
-        { UC_node::Field::out_edges, { { { UC_edge::Field::id, "1" } } } },
-        { UC_node::Field::rob_dia, nullptr },
-        { UC_node::Field::seq_dia, nullptr },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_UC_node_to_whole_json_okk2()
-{
-    using namespace lenv;
-    UC_node::Builder beg_uc_node_b("Student");
-    auto beg_uc_node{ beg_uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    // only for building edge!
-    UC_node::Builder end_uc_node_b("Reg");
-    auto end_uc_node{ end_uc_node_b.name("Registration")
-                .type(UC_node::USE_CASE)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(beg_uc_node)
-            .end(end_uc_node)
-            .build_ptr();
-
-    // ***
-
-    UC_node::Adder end_uc_node_a{ end_uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(end_uc_node_a.add_inn_edge(uc_edge));
-
-    UC_node::Adder beg_uc_node_a{ beg_uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(beg_uc_node_a.add_out_edge(uc_edge));
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = end_uc_node->to_whole_json());
-
-    const nlohmann::json expected = {
-        { UC_node::Field::id, "Reg" },
-        { UC_node::Field::name, "Registration" },
-        { UC_node::Field::type, UC_node::USE_CASE },
-        { UC_node::Field::inn_edges, { { { UC_edge::Field::id, "1" } } } },
-        { UC_node::Field::out_edges, nlohmann::json::array() },
-        { UC_node::Field::rob_dia, nullptr },
-        { UC_node::Field::seq_dia, nullptr },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_UC_node_to_whole_json_okk3()
-{
-    using namespace lenv;
-    UC_node::Builder uc_node_b("Student");
-    auto uc_node{ uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(uc_node)
-            .end(uc_node)
-            .build_ptr(); // a loop!
-
-    // ***
-
-    UC_node::Adder uc_node_a{ uc_node };
-    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_inn_edge(uc_edge));
-    QVERIFY_THROWS_NO_EXCEPTION(uc_node_a.add_out_edge(uc_edge));
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_node->to_whole_json());
-
-    const nlohmann::json expected = {
-        { UC_node::Field::id, "Student" },
-        { UC_node::Field::name, "Student" },
-        { UC_node::Field::type, UC_node::ACTOR },
-        { UC_node::Field::inn_edges, { { { UC_edge::Field::id, "1" } } } },
-        { UC_node::Field::out_edges, { { { UC_edge::Field::id, "1" } } } },
-        { UC_node::Field::rob_dia, nullptr },
-        { UC_node::Field::seq_dia, nullptr },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_UC_node_to_short_json_okk()
-{
-    using namespace lenv;
-    UC_node::Builder node_b("Actor_Id");
-    node_b.name("Actor_name")
-            .type(UC_node::ACTOR)
-            .rob_dia(nullptr)
-            .seq_dia(nullptr);
-
-    UC_node_sp node;
-    QVERIFY_THROWS_NO_EXCEPTION(node = node_b.build_ptr());
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = node->to_short_json());
-
-    const nlohmann::json expected = { { UC_node::Field::id, "Actor_Id" }, };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_UC_node_is_valid_err()
-{
-    // TODO:
-}
-
-void Module::test_UC_node_is_valid_okk()
-{
-    // TODO:
-}
-
-// Use_Case_dia
-// -----------------------------------------------------------------------
-
-void Module::test_Use_Case_dia_to_whole_json_err()
-{
-
-}
-
-void Module::test_Use_Case_dia_to_whole_json_okk()
-{
-    using namespace lenv;
-    const Use_Case_dia::Builder uc_dia_b;
-    auto uc_dia = uc_dia_b.build_ptr();
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia->to_whole_json());
-
-    const nlohmann::json expected = {
-        { Use_Case_dia::Field::id, Use_Case_dia::id },
-        { Use_Case_dia::Field::nodes, nlohmann::json::array() },
-        { Use_Case_dia::Field::edges, nlohmann::json::array() },
-    };
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_Use_Case_dia_to_whole_json_okk1()
-{
-    using namespace lenv;
-    const Use_Case_dia::Builder uc_dia_b;
-    auto uc_dia = uc_dia_b.build_ptr();
-
-    // ***
-
-    UC_node::Builder uc_node_b("Student");
-    auto uc_node{ uc_node_b.name("Student")
-                .type(UC_node::ACTOR)
-                .rob_dia(nullptr)
-                .seq_dia(nullptr)
-                .build_ptr() };
-
-    UC_edge::Builder uc_edge_b("1");
-    auto uc_edge = uc_edge_b.type(UC_edge::ASSOCIATION)
-            .beg(uc_node)
-            .end(uc_node)
-            .build_ptr(); // a loop!
-
-    // ***
-
-    QVERIFY_THROWS_NO_EXCEPTION(uc_dia->add_node_bfore_adder(uc_node));
-    QVERIFY_THROWS_NO_EXCEPTION(uc_dia->add_edge(uc_edge, "Student", "Student"));
-
-    // ***
-
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia->to_whole_json());
-
-    const nlohmann::json expected = {
-        { Use_Case_dia::Field::id, Use_Case_dia::id },
-        { Use_Case_dia::Field::nodes, { uc_node->to_whole_json() } },
-        { Use_Case_dia::Field::edges, { uc_edge->to_whole_json() } },
-    };
-
-    QCOMPARE_EQ(actual[Use_Case_dia::Field::nodes].is_array(), true);
-    QCOMPARE_EQ(actual[Use_Case_dia::Field::edges].is_array(), true);
-
-    QCOMPARE_EQ(actual.is_object(), true);
-    QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
-}
-
-void Module::test_Use_Case_dia_to_whole_json_okk2()
-{
-    // TODO:
-}
-
-// String_utils
-// -----------------------------------------------------------------------
-
-void Module::test_String_utils_to_upper_data()
+void Module::test_str_utils_to_upper_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("res");
@@ -998,16 +61,16 @@ void Module::test_String_utils_to_upper_data()
     // ...
 }
 
-void Module::test_String_utils_to_upper()
+void Module::test_str_utils_to_upper()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::to_upper(str) };
+    auto got{ str_utils::to_upper(str) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_utils_to_lower_data()
+void Module::test_str_utils_to_lower_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("res");
@@ -1040,18 +103,18 @@ void Module::test_String_utils_to_lower_data()
     // ...
 }
 
-void Module::test_String_utils_to_lower()
+void Module::test_str_utils_to_lower()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::to_lower(str) };
+    auto got{ str_utils::to_lower(str) };
     QCOMPARE_EQ(got, res);
 }
 
 // -----------------------------------------------------------------------
 
-void Module::test_String_utils_start_with_data()
+void Module::test_str_utils_start_with_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("start");
@@ -1089,18 +152,18 @@ void Module::test_String_utils_start_with_data()
     // ...
 }
 
-void Module::test_String_utils_start_with()
+void Module::test_str_utils_start_with()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, start);
     QFETCH(bool, sensitive);
     QFETCH(bool, res);
 
-    auto got{ lenv::str_utils::start_with(str, start, sensitive) };
+    auto got{ str_utils::start_with(str, start, sensitive) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_utils_stop_with_data()
+void Module::test_str_utils_stop_with_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("stop");
@@ -1138,20 +201,20 @@ void Module::test_String_utils_stop_with_data()
     // ...
 }
 
-void Module::test_String_utils_stop_with()
+void Module::test_str_utils_stop_with()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, stop);
     QFETCH(bool, sensitive);
     QFETCH(bool, res);
 
-    auto got{ lenv::str_utils::stop_with(str, stop, sensitive) };
+    auto got{ str_utils::stop_with(str, stop, sensitive) };
     QCOMPARE_EQ(got, res);
 }
 
 // -----------------------------------------------------------------------
 
-void Module::test_String_utils_eq_data()
+void Module::test_str_utils_eq_data()
 {
     QTest::addColumn<std::string>("lhs");
     QTest::addColumn<std::string>("rhs");
@@ -1182,18 +245,18 @@ void Module::test_String_utils_eq_data()
     // ...
 }
 
-void Module::test_String_utils_eq()
+void Module::test_str_utils_eq()
 {
     QFETCH(std::string, lhs);
     QFETCH(std::string, rhs);
     QFETCH(bool, sensitive);
     QFETCH(bool, res);
 
-    auto got{ lenv::str_utils::eq(lhs, rhs, sensitive) };
+    auto got{ str_utils::eq(lhs, rhs, sensitive) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_utils_eq_ref_data()
+void Module::test_str_utils_eq_ref_data()
 {
     QTest::addColumn<std::string>("lhs");
     QTest::addColumn<std::string>("rhs");
@@ -1231,20 +294,20 @@ void Module::test_String_utils_eq_ref_data()
     // ...
 }
 
-void Module::test_String_utils_eq_ref()
+void Module::test_str_utils_eq_ref()
 {
     QFETCH(std::string, lhs);
     QFETCH(std::string, rhs);
     QFETCH(bool, sensitive);
     QFETCH(bool, res);
 
-    auto got{ lenv::str_utils::eq_ref(lhs, rhs, sensitive) };
+    auto got{ str_utils::eq_ref(lhs, rhs, sensitive) };
     QCOMPARE_EQ(got, res);
 }
 
 // -----------------------------------------------------------------------
 
-void Module::test_String_trim_left_data()
+void Module::test_str_utils_trim_left_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("chs");
@@ -1271,17 +334,17 @@ void Module::test_String_trim_left_data()
     // ...
 }
 
-void Module::test_String_trim_left()
+void Module::test_str_utils_trim_left()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, chs);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim_left(str, chs) };
+    auto got{ str_utils::trim_left(str, chs) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_trim_rght_data()
+void Module::test_str_utils_trim_rght_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("chs");
@@ -1308,17 +371,17 @@ void Module::test_String_trim_rght_data()
     // ...
 }
 
-void Module::test_String_trim_rght()
+void Module::test_str_utils_trim_rght()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, chs);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim_rght(str, chs) };
+    auto got{ str_utils::trim_rght(str, chs) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_trim_data()
+void Module::test_str_utils_trim_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("chs");
@@ -1345,19 +408,19 @@ void Module::test_String_trim_data()
     // ...
 }
 
-void Module::test_String_trim()
+void Module::test_str_utils_trim()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, chs);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim(str, chs) };
+    auto got{ str_utils::trim(str, chs) };
     QCOMPARE_EQ(got, res);
 }
 
 // -----------------------------------------------------------------------
 
-void Module::test_String_trim_left_space_data()
+void Module::test_str_utils_trim_left_space_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("res");
@@ -1375,16 +438,16 @@ void Module::test_String_trim_left_space_data()
     // ...
 }
 
-void Module::test_String_trim_left_space()
+void Module::test_str_utils_trim_left_space()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim_left_space(str) };
+    auto got{ str_utils::trim_left_space(str) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_trim_rght_space_data()
+void Module::test_str_utils_trim_rght_space_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("res");
@@ -1402,16 +465,16 @@ void Module::test_String_trim_rght_space_data()
     // ...
 }
 
-void Module::test_String_trim_rght_space()
+void Module::test_str_utils_trim_rght_space()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim_rght_space(str) };
+    auto got{ str_utils::trim_rght_space(str) };
     QCOMPARE_EQ(got, res);
 }
 
-void Module::test_String_trim_space_data()
+void Module::test_str_utils_trim_space_data()
 {
     QTest::addColumn<std::string>("str");
     QTest::addColumn<std::string>("res");
@@ -1429,1296 +492,114 @@ void Module::test_String_trim_space_data()
     // ...
 }
 
-void Module::test_String_trim_space()
+void Module::test_str_utils_trim_space()
 {
     QFETCH(std::string, str);
     QFETCH(std::string, res);
 
-    auto got{ lenv::str_utils::trim_space(str) };
+    auto got{ str_utils::trim_space(str) };
     QCOMPARE_EQ(got, res);
 }
 
-// Puml_utils
 // -----------------------------------------------------------------------
 
-void Module::test_Puml_utils_read_startuml_directive_data()
+void Module::test_str_utils_is_bracket_balance_err()
 {
-    QTest::addColumn<std::string>("line");
-    QTest::addColumn<std::string>("exd_out_name");
-    QTest::addColumn<bool>("exd_status");
-
-    {
-        const std::string line{ "@Startuml" };
-        const std::string exd_out_name{ "" };
-        const bool exd_status{ true };
-        QTest::newRow("@Startuml") << line << exd_out_name << exd_status;
-    }
-    {
-        const std::string line{ "@Startuml inner" };
-        const std::string exd_out_name{ "inner" };
-        const bool exd_status{ true };
-        QTest::newRow("@Startuml inner") << line << exd_out_name << exd_status;
-    }
-    {
-        const std::string line{ "@Sta" };
-        const std::string exd_out_name{ "" };
-        const bool exd_status{ false };
-        QTest::newRow("@Sta") << line << exd_out_name << exd_status;
-    }
-    {
-        const std::string line{ "     @STARTUML      my   dia  " };
-        const std::string exd_out_name{ "my   dia" };
-        const bool exd_status{ true };
-        QTest::newRow("     @STARTUML      my   dia  ")
-                << line << exd_out_name << exd_status;
-    }
-    {
-        const std::string line{ "     @STARTUML         " };
-        const std::string exd_out_name{ "" };
-        const bool exd_status{ true };
-        QTest::newRow("     @STARTUML         ")
-                << line << exd_out_name << exd_status;
-    }
-    {
-        const std::string line{ "@enduml" };
-        const std::string exd_out_name{ "" };
-        const bool exd_status{ false };
-        QTest::newRow("@enduml")
-                << line << exd_out_name << exd_status;
-    }
+    QVERIFY_THROWS_EXCEPTION(std::runtime_error, str_utils::is_bracket_balance("(123(123))", 'A'));
     // ...
 }
 
-void Module::test_Puml_utils_read_startuml_directive()
+void Module::test_str_utils_is_bracket_balance_data()
 {
-    using namespace lenv;
-    QFETCH(std::string, line);
-    QFETCH(std::string, exd_out_name);
-    QFETCH(bool, exd_status);
+    QTest::addColumn<std::string>("str");
+    QTest::addColumn<char>("open_br");
+    QTest::addColumn<bool>("result");
 
-    std::string got_out_name{};
-    QCOMPARE_EQ(wsd_utils::read_startuml_directive(line, got_out_name), exd_status);
-    if (exd_status) QCOMPARE_EQ(got_out_name, exd_out_name);
+    // *** (
+    {
+        const std::string str{ "(123(123))" };
+        QTest::newRow("(123(123))") << str << '(' << true;
+    }
+    {
+        const std::string str{ "(123(123))(" };
+        QTest::newRow("(123(123))(") << str << '(' << false;
+    }
+    {
+        const std::string str{ "))(())" };
+        QTest::newRow("))(())") << str << '(' << false;
+    }
+    {
+        const std::string str{ "((()()))" };
+        QTest::newRow("((()()))") << str << '(' << true;
+    }
+
+    // *** [
+    {
+        const std::string str{ "[[[x[]][][][]]]" };
+        QTest::newRow("[[[x[]][][][]]]") << str << '[' << true;
+    }
+    {
+        const std::string str{ "[][[]" };
+        QTest::newRow("[][[]") << str << '[' << false;
+    }
+
+    // *** {
+    {
+        const std::string str{ "{}{}{{{}}}{{}}" };
+        QTest::newRow("{}{}{{{}}}{{}}") << str << '{' << true;
+    }
+    {
+        const std::string str{ "List{int}{}" };
+        QTest::newRow("List{int}{}") << str << '{' << true;
+    }
+    {
+        const std::string str{ "L{{}}{{" };
+        QTest::newRow("L{{}}{{") << str << '{' << false;
+    }
+
+    // *** <
+    {
+        const std::string str{ "List<Number>" };
+        QTest::newRow("List<Number>") << str << '<' << true;
+    }
+    {
+        const std::string str{ "List<Pair<int;double>>" };
+        QTest::newRow("List<Pair<int;double>>") << str << '<' << true;
+    }
+    {
+        const std::string str{ "List<Pair>>" };
+        QTest::newRow("List<Pair>>") << str << '<' << false;
+    }
 }
 
-void Module::test_Puml_utils_read_enduml_directive_data()
+void Module::test_str_utils_is_bracket_balance()
 {
-    QTest::addColumn<std::string>("line");
-    QTest::addColumn<bool>("exd_status");
+    QFETCH(std::string, str);
+    QFETCH(char, open_br);
+    QFETCH(bool, result);
 
-    {
-        const std::string line{ "@Startuml" };
-        const bool exd_status{ false };
-        QTest::newRow("@Startuml") << line << exd_status;
-    }
-    {
-        const std::string line{ "@enduml         " };
-        const bool exd_status{ true };
-        QTest::newRow("@enduml         ") << line << exd_status;
-    }
-    {
-        const std::string line{ "@en du ml" };
-        const bool exd_status{ false };
-        QTest::newRow("@en du ml") << line << exd_status;
-    }
-    {
-        const std::string line{ "     @enduml    " };
-        const bool exd_status{ true };
-        QTest::newRow("     @enduml    ") << line << exd_status;
-    }
-    {
-        const std::string line{ "kdasaswe" };
-        const bool exd_status{ false };
-        QTest::newRow("kdasaswe") << line << exd_status;
-    }
-    // ...
+    auto got{ str_utils::is_bracket_balance(str, open_br) };
+    QCOMPARE_EQ(got, result);
 }
 
-void Module::test_Puml_utils_read_enduml_directive()
-{
-    using namespace lenv;
-    QFETCH(std::string, line);
-    QFETCH(bool, exd_status);
-
-    const bool got_status{ wsd_utils::read_enduml_directive(line) };
-    QCOMPARE_EQ(got_status, exd_status);
-}
-
+// common read_puml ...
 // -----------------------------------------------------------------------
 
-void Module::test_Puml_utils_UC_dia_read_use_case_creation_data()
+void Module::test_common_read_puml_data(const QString& basic_path)
 {
-    using namespace lenv;
-    QTest::addColumn<std::string>("line");
-    QTest::addColumn<std::string>("exd_name");
-    QTest::addColumn<std::string>("exd_id");
-    QTest::addColumn<UC_node::Type>("exd_type");
-    QTest::addColumn<bool>("exd_status");
-
-    /* true */
-    {
-        const std::string line{ "usecase Reg" };
-        const std::string exd_name{ "Reg" };
-        const std::string exd_id{ "Reg" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase Reg")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Reg\"" };
-        const std::string exd_name{ "Reg" };
-        const std::string exd_id{ "Reg" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"Reg\"")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Registr\" as Reg" };
-        const std::string exd_name{ "Registr" };
-        const std::string exd_id{ "Reg" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"Registr\" as Reg")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Reg reg\" as Reg" };
-        const std::string exd_name{ "Reg reg" };
-        const std::string exd_id{ "Reg" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"Reg reg\" as Reg")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase :Reg ds:" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reg ds" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("usecase :Reg ds:")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    // *** 5
-    {
-        const std::string line{ "usecase :Reg ds: as \"Reggg  d\"" };
-        const std::string exd_name{ "Reggg  d" };
-        const std::string exd_id{ "Reg ds" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("usecase :Reg ds: as \"Reggg  d\"")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase :Reg ds: as (Reggg  d)" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reggg  d" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase :Reg ds: as (Reggg  d)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase :Reg ds: as :Reggg  d:" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reggg  d" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("usecase :Reg ds: as :Reggg  d:")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase (Reg ds) as :Reggg  d:" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reggg  d" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase (Reg ds) as :Reggg  d:")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Reg ds\" as :Reggg  d:" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reggg  d" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"Reg ds\" as :Reggg  d:")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    // *** 10
-    {
-        const std::string line{ "usecase (Reg ds)" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reg ds" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase (Reg ds)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase (Reg ds)" };
-        const std::string exd_name{ "Reg ds" };
-        const std::string exd_id{ "Reg ds" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase (Reg ds)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"dasd asd\"" };
-        const std::string exd_name{ "dasd asd" };
-        const std::string exd_id{ "dasd asd" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"dasd asd\"")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"dasd asd\" AS REG" };
-        const std::string exd_name{ "dasd asd" };
-        const std::string exd_id{ "REG" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"dasd asd\" AS REG")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "USECASE   (dasd asd)    AS    (REG)" };
-        const std::string exd_name{ "dasd asd" };
-        const std::string exd_id{ "REG" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("USECASE   (dasd asd)    AS    (REG)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    // *** 15
-    {
-        const std::string line{ "usecase \"Reg reg\" as as" };
-        const std::string exd_name{ "Reg reg" };
-        const std::string exd_id{ "as" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase \"Reg reg\" as as")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase Reg as \"Обычная регистрация\nпользователя\nбез.\"" };
-        const std::string exd_name{ "Обычная регистрация\nпользователя\nбез." };
-        const std::string exd_id{ "Reg" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("usecase Reg as \"Обычная регистрация\\nпользователя\\nбез.\"")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-
-    /* false */
-    {
-        const std::string line{ "usecase Reg bs" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("usecase Reg bs")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "uscase Reg bs" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("uscase Reg bs")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Reg reg\" as as as" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("usecase \"Reg reg\" as as as")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase \"Reg reg" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("usecase \"Reg reg")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "usecase :Reg reg: as :sss" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("usecase \"Reg reg")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    // *** 5
-    {
-        const std::string line{ "usecase (RegReg as d" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ false };
-        QTest::newRow("usecase (RegReg as d")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_read_use_case_creation()
-{
-    using namespace lenv;
-    QFETCH(std::string, line);
-    QFETCH(std::string, exd_name);
-    QFETCH(std::string, exd_id);
-    QFETCH(UC_node::Type, exd_type);
-    QFETCH(bool, exd_status);
-
-    // ***
-
-    std::string got_name, got_id;
-    UC_node::Type got_type{ UC_node::ACTOR };
-    QCOMPARE_EQ(wsd_utils::UC_dia::read_use_case_creation(line,
-                    got_name, got_id, got_type), exd_status);
-
-    if (exd_status) {
-        QCOMPARE_EQ(exd_id, got_id);
-        QCOMPARE_EQ(exd_name, got_name);
-        QCOMPARE_EQ(exd_type, got_type);
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_read_actor_creation_data()
-{
-    using namespace lenv;
-    QTest::addColumn<std::string>("line");
-    QTest::addColumn<std::string>("exd_name");
-    QTest::addColumn<std::string>("exd_id");
-    QTest::addColumn<UC_node::Type>("exd_type");
-    QTest::addColumn<bool>("exd_status");
-
-    /* true */
-    {
-        const std::string line{ "actor User" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "User" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("actor User")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor (User) as \"dsa\"" };
-        const std::string exd_name{ "dsa" };
-        const std::string exd_id{ "User" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("actor (User) as \"dsa\"")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor (User) as (dsa)" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "dsa" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("actor (User) as (dsa)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor (User) as :dsa:" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "dsa" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("actor (User) as :dsa:")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor :User: as (dsa)" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "dsa" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("actor :User: as (dsa)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    // *** 5
-    {
-        const std::string line{ "actor User as dsa" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "dsa" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ true };
-        QTest::newRow("actor User as dsa")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor (User)" };
-        const std::string exd_name{ "User" };
-        const std::string exd_id{ "User" };
-        const UC_node::Type exd_type{ UC_node::USE_CASE };
-        const bool exd_status{ true };
-        QTest::newRow("actor (User)")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-
-    /* false */
-    {
-        const std::string line{ "actor ds ds ds" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ false };
-        QTest::newRow("actor ds ds ds")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor (())ds" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ false };
-        QTest::newRow("actor (())ds")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-    {
-        const std::string line{ "actor User as ds dffs w" };
-        const std::string exd_name{ "" };
-        const std::string exd_id{ "" };
-        const UC_node::Type exd_type{ UC_node::ACTOR };
-        const bool exd_status{ false };
-        QTest::newRow("actor User as ds dffs w")
-                << line << exd_name << exd_id << exd_type << exd_status;
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_read_actor_creation()
-{
-    using namespace lenv;
-    QFETCH(std::string, line);
-    QFETCH(std::string, exd_name);
-    QFETCH(std::string, exd_id);
-    QFETCH(UC_node::Type, exd_type);
-    QFETCH(bool, exd_status);
-
-    // ***
-
-    std::string got_name, got_id;
-    UC_node::Type got_type{ UC_node::ACTOR };
-    QCOMPARE_EQ(wsd_utils::UC_dia::read_actor_creation(line,
-                    got_name, got_id, got_type), exd_status);
-
-    if (exd_status) {
-        QCOMPARE_EQ(exd_id, got_id);
-        QCOMPARE_EQ(exd_name, got_name);
-        QCOMPARE_EQ(exd_type, got_type);
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_read_connection_creation_data()
-{
-    using namespace lenv;
-    QTest::addColumn<std::string>("line");
-    QTest::addColumn<std::string>("exd_lstr");
-    QTest::addColumn<std::string>("exd_rstr");
-    QTest::addColumn<UC_edge::Type>("exd_edge_type");
-    QTest::addColumn<bool>("exd_status");
-
-    /* true */
-    {
-        const std::string line{ ":das: --> (dasda)" };
-        const std::string exd_lstr{ ":das:" };
-        const std::string exd_rstr{ "(dasda)" };
-        const UC_edge::Type exd_type{ UC_edge::ASSOCIATION };
-        const bool exd_status{ true };
-        QTest::newRow(":das: --> (dasda)")
-                << line << exd_lstr << exd_rstr << exd_type << exd_status;
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_read_connection_creation()
-{
-    using namespace lenv;
-    QFETCH(std::string, line);
-    QFETCH(std::string, exd_lstr);
-    QFETCH(std::string, exd_rstr);
-    QFETCH(UC_edge::Type, exd_edge_type);
-    QFETCH(bool, exd_status);
-
-    // ***
-
-//    std::string got_lstr, got_rstr;
-//    UC_edge::Type got_edge_type{ UC_edge::ASSOCIATION };
-//    QCOMPARE_EQ(Puml_utils::UC_dia::read_connection_creation(line,
-//                    got_lstr, got_rstr, got_edge_type), exd_status);
-
-//    if (exd_status) {
-//        QCOMPARE_EQ(exd_lstr, got_lstr);
-//        QCOMPARE_EQ(exd_rstr, got_rstr);
-//        QCOMPARE_EQ(exd_edge_type, got_edge_type);
-//    }
-}
-
-void Module::test_Puml_utils_UC_dia_arrow_to_type_data()
-{
-    using namespace lenv;
-    QTest::addColumn<std::string>("arrow");
-    QTest::addColumn<UC_edge::Type>("exd_edge_type");
-    QTest::addColumn<bool>("exd_status");
-
-    /* true */
-    {
-        const std::string arrow{ "-->" };
-        const UC_edge::Type exd_edge_type{ UC_edge::ASSOCIATION };
-        const bool exd_status{ true };
-        QTest::newRow("-->") << arrow << exd_edge_type << exd_status;
-    }
-}
-
-void Module::test_Puml_utils_UC_dia_arrow_to_type()
-{
-
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_Lex_analyzer_tokenize_okk()
-{
-    /* PlantUML OK! */
-    std::istringstream sin{
-        "@startuml\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk1()
-{
-    using namespace lenv;
-    std::istringstream sin{
-        "\n"
-    };
-    const std::vector<Token> expect{
-        Token{ "\n", Token::LINE_END },
-    };
-
-    std::vector<Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk2()
-{
-    std::istringstream sin{
-        "@startuml\n"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk3()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "@enduml "
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk4()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "@endumldasdadas"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-        lenv::Token{ "dasdadas", lenv::Token::DIRECTIVE_VALUE },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk5()
-{
-    std::istringstream sin{
-        "@startuml  \t    dia_name     \n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "  \t    ", lenv::Token::WHITESPACE },
-        lenv::Token{ "dia_name", lenv::Token::DIRECTIVE_VALUE },
-        lenv::Token{ "     ", lenv::Token::WHITESPACE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk6()
-{
-    std::istringstream sin{""};
-    std::vector<lenv::Token> expect{};
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk7()
-{
-    std::istringstream sin{
-        "@startumlasdasd       "
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "asdasd", lenv::Token::DIRECTIVE_VALUE },
-        lenv::Token{ "       ", lenv::Token::WHITESPACE },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk8()
-{
-    std::istringstream sin{
-        "    \t\t\n"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "    \t\t", lenv::Token::WHITESPACE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk9()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        ":   dsad ds sd sd:\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "   dsad ds sd sd", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk10()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        ":Первый Actor:\n"
-        ":Второй\\nactor: as Участник2\n"
-        "actor Участник3\n"
-        "actor :Последний actor: as     Участник4\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "Первый Actor", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "Второй\\nactor", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Участник2", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Участник3", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Последний actor", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ "     ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Участник4", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk11()
-{
-    std::istringstream sin{
-        "actor"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk12()
-{
-    using namespace lenv;
-    std::istringstream sin{
-        "@startuml uc_expts  \n"
-        "\n"
-        "(Один прецедент)\n"
-        "(Другой прецедент) as (UC2)\n"
-        "usecase Прецедент3   \n"
-        "usecase (Последний\\nпрецедент) as UC4\n"
-        "\n"
-        "@enduml"
-    };
-    const std::vector<Token> expect{
-        Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "uc_expts", lenv::Token::DIRECTIVE_VALUE },
-        Token{ "  ", lenv::Token::WHITESPACE },
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "Один прецедент", lenv::Token::USECASE_FAST_USE },
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "Другой прецедент", lenv::Token::USECASE_FAST_USE },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "as", lenv::Token::KW_AS },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "UC2", lenv::Token::USECASE_FAST_USE },
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "usecase", lenv::Token::KW_USECASE },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "Прецедент3", lenv::Token::IDENTIFIER },
-        Token{ "   ", lenv::Token::WHITESPACE },
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "usecase", lenv::Token::KW_USECASE },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "Последний\\nпрецедент", lenv::Token::USECASE_FAST_USE },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "as", lenv::Token::KW_AS },
-        Token{ " ", lenv::Token::WHITESPACE },
-        Token{ "UC4", lenv::Token::IDENTIFIER },
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "\n", lenv::Token::LINE_END },
-
-        Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = tokenize(sin));
-    QCOMPARE_EQ(expect.size(), actual.size());
-    QCOMPARE_EQ(expect, actual);
-
-    /*
-    for (size_t i = 0; i < expect.size(); ++i) {
-        QCOMPARE_EQ(expect[i], actual[i]);
-    }
-    */
-}
-
-void Module::test_Lex_analyzer_tokenize_okk13()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        ":User: --> (Reg)\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "User", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::USECASE_FAST_USE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk14()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase Registration AS Reg\n"
-        "actor User as User\n"
-        "\n"
-        "User --> Reg\n"
-        "User<--Reg\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "AS", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ "<--", lenv::Token::ARROW },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk15()
-{
-    std::istringstream sin{
-        "Registration asd a sd"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "asd", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "a", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "sd", lenv::Token::IDENTIFIER },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk16()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase Registration as Reg\n"
-        "actor User\n"
-        "User --> Reg: <<include>>\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "User", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ ":", lenv::Token::COLON },
-        lenv::Token{ "<<include>>", lenv::Token::ONE_LINE_NOTE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk17() // ?
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase Registration as Reg\n"
-        "Reg --> Reg --> Reg\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk18()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase Registration as Reg\n"
-        "Reg --> Reg:da: dasd : dsd:\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Registration", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ ":", lenv::Token::COLON },
-        lenv::Token{ "da: dasd : dsd:", lenv::Token::ONE_LINE_NOTE },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk19()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase actor as as as\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk20()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "left to right direction\n"
-        "actor :Ресторанный критик: as fc\n"
-        "rectangle Ресторан{\n"
-        "\t  usecase (Есть) as UC1\n"
-        "    }\n"
-        "fc --> UC1\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "left", lenv::Token::KW_LEFT },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "to", lenv::Token::KW_TO },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "right", lenv::Token::KW_RIGHT },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "direction", lenv::Token::KW_DIRECTION },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "actor", lenv::Token::KW_ACTOR },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Ресторанный критик", lenv::Token::ACTOR_FAST_USE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "fc", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "rectangle", lenv::Token::KW_RECTANGLE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Ресторан", lenv::Token::IDENTIFIER },
-        lenv::Token{ "{", lenv::Token::OPN_CURLY_BR },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "\t  ", lenv::Token::WHITESPACE },
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Есть", lenv::Token::USECASE_FAST_USE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "UC1", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "    ", lenv::Token::WHITESPACE },
-        lenv::Token{ "}", lenv::Token::CLS_CURLY_BR },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "fc", lenv::Token::IDENTIFIER },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "-->", lenv::Token::ARROW },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "UC1", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML },
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-
-    /*
-    for (size_t i = 0; i < actual.size(); ++i) {
-        std::cout << "\"" << actual[i].value() << "\" ;" << actual[i].tag() << std::endl;
-        std::cout << "\"" << expect[i].value() << "\" ;" << expect[i].tag() << std::endl;
-        QCOMPARE_EQ(actual[i], expect[i]);
-    }
-    */
-
-    QCOMPARE_EQ(expect.size(), actual.size());
-    QCOMPARE_EQ(expect, actual);
-}
-
-void Module::test_Lex_analyzer_tokenize_okk21()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "usecase \"Reg\" as Reg\n"
-        "Reg->Reg\n"
-        "@enduml"
-    };
-    const std::vector<lenv::Token> expect{
-        lenv::Token{ "@startuml", lenv::Token::DIRECTIVE_STARTUML},
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "usecase", lenv::Token::KW_USECASE },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::ONE_STRING },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "as", lenv::Token::KW_AS },
-        lenv::Token{ " ", lenv::Token::WHITESPACE },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "->", lenv::Token::ARROW },
-        lenv::Token{ "Reg", lenv::Token::IDENTIFIER },
-        lenv::Token{ "\n", lenv::Token::LINE_END },
-
-        lenv::Token{ "@enduml", lenv::Token::DIRECTIVE_ENDUML},
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(expect, actual);
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_Lex_analyzer_tokenize_err()
-{
-    std::istringstream sin{
-        "@"
-    };
-    std::vector<lenv::Token> expect{};
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_EXCEPTION(lenv::Lexer_error, actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(actual.empty(), true);
-}
-
-void Module::test_Lex_analyzer_tokenize_err1()
-{
-    std::istringstream sin{
-        "@sta"
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_EXCEPTION(lenv::Lexer_error, actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(actual.empty(), true);
-}
-
-void Module::test_Lex_analyzer_tokenize_err2()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        "@endu"
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_EXCEPTION(lenv::Lexer_error, actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(actual.empty(), true);
-}
-
-void Module::test_Lex_analyzer_tokenize_err3()
-{
-    std::istringstream sin{
-        "@startuml\n"
-        ":   dsad ds\n sd sd:\n"
-        "@enduml"
-    };
-
-    std::vector<lenv::Token> actual;
-    QVERIFY_THROWS_EXCEPTION(lenv::Lexer_error, actual = lenv::tokenize(sin));
-    QCOMPARE_EQ(actual.empty(), true);
-}
-
-// -----------------------------------------------------------------------
-
-void Module::test_Lex_analyzer_tokenize_okks()
-{
-
-}
-
-void Module::test_Lex_analyzer_tokenize_errs()
-{
-
-}
-
-// Direct_translator
-// -----------------------------------------------------------------------
-
-void Module::test_Direct_translator_convert_uc_dia_data()
-{
-    QTest::addColumn<std::string>("inn_fpath");
-    QTest::addColumn<std::string>("expect_out_fpath");
-    QTest::addColumn<std::string>("actual_out_fpath");
+    QTest::addColumn<string>("inn_fpath");
+    QTest::addColumn<string>("expect_out_fpath");
+    QTest::addColumn<string>("actual_out_fpath");
 
     // ***
 
     auto cur_dir{ QDir::current() };
     QCOMPARE_EQ(cur_dir.cdUp(), true);
     QCOMPARE_EQ(cur_dir.cdUp(), true);
-    QCOMPARE_EQ(cur_dir.cd("converter/test/tltr/use_case_dias"), true); // always like this?
+    QCOMPARE_EQ(cur_dir.cd(basic_path), true);
 
-    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot|QDir::Dirs) };
-    QCOMPARE_EQ(test_catalogs.isEmpty(), false);
+    const auto test_catalogs{ cur_dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs) };
+    QCOMPARE_EQ(test_catalogs.isEmpty(), false); // no tests - this is a error!
     QCOMPARE_EQ(test_catalogs.contains(".."), false);
     QCOMPARE_EQ(test_catalogs.contains("."), false);
 
@@ -2745,44 +626,1043 @@ void Module::test_Direct_translator_convert_uc_dia_data()
     }
 }
 
-void Module::test_Direct_translator_convert_uc_dia()
+// UseCaseGraph
+// -----------------------------------------------------------------------
+
+void Module::test_UseCaseGraph_read_okk()
 {
-    QFETCH(std::string, inn_fpath);
-    QFETCH(std::string, expect_out_fpath);
-    QFETCH(std::string, actual_out_fpath);
+    UseCaseGraph ucg;
+    istringstream sin{
+        "@startuml\n"
+        "usecase (Last\\nprecedent) as UC4\n"
+        "actor :Last\\nprecedent: as A1\n"
+        "A1 --> UC4\n"
+        "@enduml"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(2));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(1));
+}
 
-    // *** open all files now! ***
+void Module::test_UseCaseGraph_read_okk1()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "   @startuml   \n"
+        "  skinparam actorStyle awesome  \n"
+        "   \n"
+        "  usecase (Последний прецедент)   as UC1  \n"
+        "  usecase \"Последний прецедент\" as UC2  \n"
+        "  usecase \"Последний прецедент\" as UC3  \n"
+        "  usecase (Последний прецедент)   as UC4  \n"
+        "   \n"
+        "  actor :Последний прецедент:   as A1  \n"
+        "  actor \"Последний прецедент\" as A2  \n"
+        "  actor \"Последний прецедент\" as A3  \n"
+        "  actor :Последний прецедент:   as A4  \n"
+        "  \n"
+        "  UC1 <--  A1  \n"
+        "  UC2 ..>  A2 : <<extend>>  \n"
+        "  UC3 ..>  A3 : <<include>> \n"
+        "  UC4 --|> A4  \n"
+        "  UC5 --> A5   \n"
+        "  \n"
+        "   @enduml   \n"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(10));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(5));
+}
 
-    std::ifstream fin_inn{ inn_fpath };
+void Module::test_UseCaseGraph_read_okk2()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  UC1 <--  A1  \n"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(2));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(1));
+
+    // ***
+
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "UC1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("UC1"));
+        QCOMPARE_EQ(uc_node->name, string("UC1"));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
+    }
+    // ***
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "A1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("A1"));
+        QCOMPARE_EQ(uc_node->name, string("A1"));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
+    }
+    // ***
+    {
+        auto detected_edge = ucg.edges[0];
+        auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
+        QCOMPARE_EQ(uc_edge->name, string(""));
+        QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Association);
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("A1"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("UC1"));
+    }
+}
+
+void Module::test_UseCaseGraph_read_okk3()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "usecase   (Последний прецедент)   as   UC1   \n"
+        "   UC1 .u.>   A1   :   <<include>>   \n"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(2));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(1));
+
+    // ***
+
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "UC1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("UC1"));
+        QCOMPARE_EQ(uc_node->name, string("Последний прецедент"));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Usecase);
+    }
+    // ***
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "A1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("A1"));
+        QCOMPARE_EQ(uc_node->name, string("A1"));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
+    }
+    // ***
+    {
+        auto detected_edge = ucg.edges[0];
+        auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
+        QCOMPARE_EQ(uc_edge->name, string("<<include>>"));
+        QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Include);
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("UC1"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("A1"));
+    }
+}
+
+void Module::test_UseCaseGraph_read_okk4()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  top to bottom   direction     \n"
+        "  usecase   (Last precedent)   as   UC1  \n"
+        "  actor :Last actor: as A1   \n"
+        "  UC1 <---down--- A1   \n"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(2));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(1));
+
+    // ***
+
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "UC1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("UC1"));
+        QCOMPARE_EQ(uc_node->name, string("Last precedent"));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Usecase);
+    }
+    // ***
+    {
+        auto detected_node = ucg.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(ucg.nodes), end(ucg.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "A1";
+        }));
+        QCOMPARE_EQ((detected_node == ucg.nodes.end()), false);
+
+        auto uc_node = static_pointer_cast<UseCaseGraph::UcNode>(*detected_node);
+        QCOMPARE_EQ(uc_node->id, string("A1"));
+        QCOMPARE_EQ(uc_node->name, string("Last actor"));
+        QCOMPARE_EQ(uc_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(uc_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(uc_node->type, UseCaseGraph::UcNode::Actor);
+    }
+    // ***
+    {
+        auto detected_edge = ucg.edges[0];
+        auto uc_edge = static_pointer_cast<UseCaseGraph::UcEdge>(detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
+        QCOMPARE_EQ(uc_edge->name, string(""));
+        QCOMPARE_EQ(uc_edge->type, UseCaseGraph::UcEdge::Association);
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("UC1"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("A1"));
+    }
+}
+
+void Module::test_UseCaseGraph_read_okk5()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  @startuml \n"
+        "  top to bottom   direction     \n"
+        "  package Ресторан {     \n"
+        "   }   "
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(0));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(0));
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UseCaseGraph_read_err()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  @startuml \n"
+        "  top to bottom   direction     \n"
+        "  package Ресторан {     \n"
+    };
+    QVERIFY_THROWS_EXCEPTION(GraphError, ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(0));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(0));
+}
+
+void Module::test_UseCaseGraph_read_err1()
+{
+    UseCaseGraph ucg;
+    istringstream sin{
+        "  @startuml \n"
+        "  top to bottom   direction     \n"
+        "  boundary MainWin as MainWin \n"
+        "   UC1 .u.>   A1   :   <<include>>   \n"
+    };
+    QVERIFY_THROWS_EXCEPTION(GraphError, ucg.read_puml(sin));
+    QCOMPARE_EQ(ucg.nodes.size(), size_t(0));
+    QCOMPARE_EQ(ucg.edges.size(), size_t(0));
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_UseCaseGraph_read_puml_data()
+{
+    test_common_read_puml_data("converter/test/read_puml/uc_graph");
+}
+
+void Module::test_UseCaseGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
     QCOMPARE_EQ(fin_inn.is_open(), true);
 
-    std::ifstream fin_expect{ expect_out_fpath };
+    ifstream fin_expect{ expect_out_fpath };
     QCOMPARE_EQ(fin_inn.is_open(), true);
 
-    std::ofstream fout_actual{ actual_out_fpath };
+    ofstream fout_actual{ actual_out_fpath };
     QCOMPARE_EQ(fout_actual.is_open(), true);
 
-    // *** check the file with PlantUML ***
+    stringstream siout_actual;
 
-    // TODO:
+    // ***
 
-    // *** write what happened ***
+    // TODO: проверка синтаксиса инструментом PlantUML
 
-    auto tr = lenv::Direct_translator{};
-    auto uc_dia_sp = tr.convert_uc_dia(fin_inn);
+    // ***
 
-    nlohmann::json actual;
-    QVERIFY_THROWS_NO_EXCEPTION(actual = uc_dia_sp->to_whole_json());
-    fout_actual << std::setw(2) << actual; // not sticky manipulator!
+    UseCaseGraph uc_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(uc_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(uc_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(uc_graph.write_json(siout_actual));
 
-    // *** compare adjusted expectation ***
+    // ***
 
-    nlohmann::json expected;
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
     QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
 
     QCOMPARE_EQ(actual.is_object(), true);
     QCOMPARE_EQ(expected.is_object(), true);
-    QCOMPARE_EQ(actual == expected, true);
+    QCOMPARE_EQ((actual == expected), true);
+}
+
+// RobustnessGraph
+// -----------------------------------------------------------------------
+
+void Module::test_RobustnessGraph_read_okk()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor \"Пользователь\" as User \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "boundary \"Окно ошибки\" as ErrWin #red \n"
+        "\n"
+        "entity DbFacade \n"
+        "control load \n"
+        "\n"
+        "User -- MainWin \n"
+        "User -- ErrWin \n"
+        "\n"
+        "@enduml"
+    };
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(5));
+    QCOMPARE_EQ(robG.edges.size(), size_t(4)); // important!
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
+
+    // ...
+}
+
+void Module::test_RobustnessGraph_read_okk1()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "actor \"Пользователь\" as User \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "\n"
+        "User --> MainWin : one line... \n"
+        "\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(robG.edges.size(), size_t(1));
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
+
+    // ***
+
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "User";
+        }));
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("User"));
+        QCOMPARE_EQ(rob_node->name, string("Пользователь"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Actor);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(0));
+    }
+    // ***
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("MainWin"));
+        QCOMPARE_EQ(rob_node->name, string("Главное окно"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Boundary);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges[0];
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
+        QCOMPARE_EQ(uc_edge->name, string("one line..."));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("User"));
+    }
+}
+
+void Module::test_RobustnessGraph_read_okk2()
+{
+    RobustnessGraph robG;
+    istringstream sin{
+        "control \"display add student screen\" as display_add_student_screen \n"
+        "boundary \"Главное окно\" as MainWin \n"
+        "\n"
+        "display_add_student_screen -- MainWin : edge text \n"
+        "\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(robG.read_puml(sin));
+    QCOMPARE_EQ(robG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(robG.edges.size(), size_t(2));
+    QCOMPARE_EQ(robG.uc_node.expired(), true);
+
+    // ***
+
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "display_add_student_screen";
+        }));
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(rob_node->name, string("display add student screen"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Control);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_node = robG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(robG.nodes), end(robG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ((detected_node == robG.nodes.end()), false);
+
+        auto rob_node = static_pointer_cast<RobustnessGraph::RobNode>(*detected_node);
+        QCOMPARE_EQ(rob_node->id, string("MainWin"));
+        QCOMPARE_EQ(rob_node->name, string("Главное окно"));
+        QCOMPARE_EQ(rob_node->type, RobustnessGraph::RobNode::Boundary);
+        QCOMPARE_EQ(rob_node->is_error, false);
+        QCOMPARE_EQ(rob_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(rob_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
+                                                            [](const shared_ptr<Graph::Edge> edge) {
+            return edge->id == "edge_1";
+        }));
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_1"));
+        QCOMPARE_EQ(uc_edge->name, string("edge text"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("MainWin"));
+    }
+    // ***
+    {
+        auto detected_edge = robG.edges.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_edge = find_if(begin(robG.edges), end(robG.edges),
+                                                            [](const shared_ptr<Graph::Edge> edge) {
+            return edge->id == "edge_2";
+        }));
+        auto uc_edge = static_pointer_cast<RobustnessGraph::RobEdge>(*detected_edge);
+
+        QCOMPARE_EQ(uc_edge->id, string("edge_2"));
+        QCOMPARE_EQ(uc_edge->name, string("edge text"));
+        QCOMPARE_EQ(uc_edge->end.lock()->id, string("display_add_student_screen"));
+        QCOMPARE_EQ(uc_edge->beg.lock()->id, string("MainWin"));
+    }
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_RobustnessGraph_read_puml_data()
+{
+    test_common_read_puml_data("converter/test/read_puml/rob_graph");
+}
+
+void Module::test_RobustnessGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    RobustnessGraph rob_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(rob_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
+}
+
+// SequenceGraph
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_okk()
+{
+    using SeqNode = SequenceGraph::SeqNode;
+    using SeqEdge = SequenceGraph::SeqEdge;
+
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob -> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(seqG.read_puml(sin));
+    QCOMPARE_EQ(seqG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(seqG.edges.size(), size_t(2));
+
+    QCOMPARE_EQ(seqG.uc_node.expired(), true);
+    QCOMPARE_EQ(seqG.stamps.size(), size_t(2));
+    QCOMPARE_EQ(seqG.frags.size(), size_t(0));
+    QCOMPARE_EQ(seqG.refs.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = seqG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(seqG.nodes), end(seqG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Bob";
+        }));
+        QCOMPARE_EQ((detected_node == seqG.nodes.end()), false);
+
+        auto seq_node = static_pointer_cast<SeqNode>(*detected_node);
+        QCOMPARE_EQ(seq_node->id, string("Bob"));
+        QCOMPARE_EQ(seq_node->name, string("Bob"));
+        QCOMPARE_EQ(seq_node->type, SeqNode::Actor);
+        QCOMPARE_EQ(seq_node->is_error, false);
+        QCOMPARE_EQ(seq_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(seq_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto detected_node = seqG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(seqG.nodes), end(seqG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "MainWin";
+        }));
+        QCOMPARE_EQ((detected_node == seqG.nodes.end()), false);
+
+        auto seq_node = static_pointer_cast<SeqNode>(*detected_node);
+        QCOMPARE_EQ(seq_node->id, string("MainWin"));
+        QCOMPARE_EQ(seq_node->name, string("MainWin"));
+        QCOMPARE_EQ(seq_node->type, SeqNode::Boundary);
+        QCOMPARE_EQ(seq_node->is_error, false);
+        QCOMPARE_EQ(seq_node->outs.size(), size_t(1));
+        QCOMPARE_EQ(seq_node->inns.size(), size_t(1));
+    }
+    // ***
+    {
+        auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[0]);
+        QCOMPARE_EQ(seq_edge->id, string("edge_1"));
+        QCOMPARE_EQ(seq_edge->name, string("on_clicked_menu()"));
+        QCOMPARE_EQ(seq_edge->type, SeqEdge::Sync);
+        QCOMPARE_EQ(seq_edge->beg.lock()->id, string("Bob"));
+        QCOMPARE_EQ(seq_edge->end.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(seq_edge->opd.expired(), true);
+    }
+    // ***
+    {
+        auto seq_edge = static_pointer_cast<SeqEdge>(seqG.edges[1]);
+        QCOMPARE_EQ(seq_edge->id, string("edge_2"));
+        QCOMPARE_EQ(seq_edge->name, string(""));
+        QCOMPARE_EQ(seq_edge->type, SeqEdge::Reply);
+        QCOMPARE_EQ(seq_edge->beg.lock()->id, string("MainWin"));
+        QCOMPARE_EQ(seq_edge->end.lock()->id, string("Bob"));
+        QCOMPARE_EQ(seq_edge->opd.expired(), true);
+    }
+}
+
+void Module::test_SequenceGraph_read_okk1()
+{
+    // TODO:
+}
+
+void Module::test_SequenceGraph_read_okk2()
+{
+    // TODO:
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_err()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob ..> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err1()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob <--> MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err2()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "actor      Bob\n"
+        "boundary   MainWin\n"
+        "\n"
+        "Bob -- MainWin : on_clicked_menu()\n"
+        "Bob <-- MainWin\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+void Module::test_SequenceGraph_read_err3()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "skinparam dpi 200\n"
+        "\n"
+        "actor Alice \n"
+        "actor Bob   \n"
+        "\n"
+        "ref over Alice, Bob, Log\n"
+        "Инициализация\n"
+        "end ref\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_SequenceGraph_read_puml_data()
+{
+    test_common_read_puml_data("converter/test/read_puml/seq_graph");
+}
+
+void Module::test_SequenceGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    SequenceGraph seq_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(seq_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
+}
+
+// ClassGraph
+// -----------------------------------------------------------------------
+void Module::test_ClassGraph_read_okk()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "   +val : Number\n"
+        "   -val1 : String\n"
+        "}\n"
+        "\n"
+        "class Bar{\n"
+        "\n"
+        "}\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(2));
+        QCOMPARE_EQ(class_node->datas[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->datas[0].name, "val");
+        QCOMPARE_EQ(class_node->datas[0].type, "Number");
+        QCOMPARE_EQ(class_node->datas[0].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->datas[1].mark, Member::Private);
+        QCOMPARE_EQ(class_node->datas[1].name, "val1");
+        QCOMPARE_EQ(class_node->datas[1].type, "String");
+        QCOMPARE_EQ(class_node->datas[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+    // ***
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Bar";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Bar"));
+        QCOMPARE_EQ(class_node->name, string("Bar"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk1()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "   +fn(Int, Double) : String\n"
+        "   #fn2() : void\n"
+        "}\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(1));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->funcs[0].name, "fn");
+        QCOMPARE_EQ(class_node->funcs[0].type, "String");
+
+        QCOMPARE_EQ(class_node->funcs[0].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].param_types[0], "Int");
+        QCOMPARE_EQ(class_node->funcs[0].param_types[1], "Double");
+
+        QCOMPARE_EQ(class_node->funcs[1].mark, Member::Protected);
+        QCOMPARE_EQ(class_node->funcs[1].name, "fn2");
+        QCOMPARE_EQ(class_node->funcs[1].type, "void");
+        QCOMPARE_EQ(class_node->funcs[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk2()
+{
+    using Member = ClassGraph::ClassNode::Member;
+    using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "   +fn(Int, Double) : List<String>\n"
+        "   #fn2() : Number\n"
+        "   -fn3(List<Number>, String) : None\n"
+        "}\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(1));
+    QCOMPARE_EQ(classG.edges.size(), size_t(0));
+
+    // ***
+
+    {
+        auto detected_node = classG.nodes.begin();
+        QVERIFY_THROWS_NO_EXCEPTION(detected_node = find_if(begin(classG.nodes), end(classG.nodes),
+                                                            [](const shared_ptr<Graph::Node> node) {
+            return node->id == "Foo";
+        }));
+        QCOMPARE_EQ((detected_node == classG.nodes.end()), false);
+
+        auto class_node = static_pointer_cast<ClassNode>(*detected_node);
+        QCOMPARE_EQ(class_node->id, string("Foo"));
+        QCOMPARE_EQ(class_node->name, string("Foo"));
+        QCOMPARE_EQ(class_node->outs.size(), size_t(0));
+        QCOMPARE_EQ(class_node->inns.size(), size_t(0));
+        QCOMPARE_EQ(class_node->type, ClassNode::Class);
+
+        QCOMPARE_EQ(class_node->funcs.size(), size_t(3));
+        QCOMPARE_EQ(class_node->funcs[0].mark, Member::Public);
+        QCOMPARE_EQ(class_node->funcs[0].name, "fn");
+        QCOMPARE_EQ(class_node->funcs[0].type, "List<String>");
+        QCOMPARE_EQ(class_node->funcs[0].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[0].param_types[0], "Int");
+        QCOMPARE_EQ(class_node->funcs[0].param_types[1], "Double");
+
+        QCOMPARE_EQ(class_node->funcs[1].mark, Member::Protected);
+        QCOMPARE_EQ(class_node->funcs[1].name, "fn2");
+        QCOMPARE_EQ(class_node->funcs[1].type, "Number");
+        QCOMPARE_EQ(class_node->funcs[1].param_types.size(), size_t(0));
+
+        QCOMPARE_EQ(class_node->funcs[2].mark, Member::Private);
+        QCOMPARE_EQ(class_node->funcs[2].name, "fn3");
+        QCOMPARE_EQ(class_node->funcs[2].type, "None");
+        QCOMPARE_EQ(class_node->funcs[2].param_types.size(), size_t(2));
+        QCOMPARE_EQ(class_node->funcs[2].param_types[0], "List<Number>");
+        QCOMPARE_EQ(class_node->funcs[2].param_types[1], "String");
+
+        QCOMPARE_EQ(class_node->datas.size(), size_t(0));
+        QCOMPARE_EQ(class_node->enum_values.size(), size_t(0));
+    }
+}
+
+void Module::test_ClassGraph_read_okk3()
+{
+    //using Member = ClassGraph::ClassNode::Member;
+    //using ClassNode = ClassGraph::ClassNode;
+
+    ClassGraph classG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "class Foo{\n"
+        "}\n"
+        "\n"
+        "Foo --> Bar\n"
+        "\n"
+        "@enduml"
+    };
+
+    QVERIFY_THROWS_NO_EXCEPTION(classG.read_puml(sin));
+    QCOMPARE_EQ(classG.nodes.size(), size_t(2));
+    QCOMPARE_EQ(classG.edges.size(), size_t(1));
+
+    // TODO:
+}
+
+void Module::test_ClassGraph_read_okk4()
+{
+    // TODO:
+}
+
+// -----------------------------------------------------------------------
+
+void Module::test_ClassGraph_read_puml_data()
+{
+    test_common_read_puml_data("converter/test/read_puml/class_graph");
+}
+
+void Module::test_ClassGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    ClassGraph class_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
 }
 
 QTEST_APPLESS_MAIN(Module)
