@@ -1,6 +1,9 @@
-/* Try it: https://bnfplayground.pauliankline.com/ */
+/* TODO: добавить возможность использовать actor из Uc? */
 
-/* -------------------------- Общие -------------------------- */
+/* Иструмент: https://bnfplayground.pauliankline.com/ */
+
+/* Общие */
+/* ----------------------------------------------------------------------- */
 
 /* элементарные (или встроенные) конструкции */
 
@@ -8,47 +11,47 @@
 <nln> ::= "\n"
 /* допустимые значения для типа char, не только: */
 <any_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+/* допустимые для идентификатора значения PlantUML: */
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
 
 /* --- */
+
+<string>  ::= <any_char>+
+<node_id> ::= <ids_char>+
 
 <optwhs> ::= <whs>*
 <reqwhs> ::= <whs>+
 
-/* множество допустимых для идентификатора символов PlantUML */
-<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
-<string> ::= <any_char>+
-<node_id> ::= <ids_char>+
 <end_curly_brace> ::= "}"
 
-/* -------------------------- Rob -------------------------- */
+/* Rob */
+/* ----------------------------------------------------------------------- */
 
 /* стрелка */
 <left_arrow_head> ::= "<" 
 <rght_arrow_head> ::= ">"
 <arrow_direction> ::= ("l" | "r" | "d" | "u") | ("left" | "right" | "down" | "up")
-<arrow_body> ::= "-"+ <arrow_direction> "-"+
-<arrow> ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+<arrow_body>      ::= "-"+ <arrow_direction> "-"+
+<arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
 
 /* составные конструкции (не используются напрямую) */
 
-<part_whole_node> ::=   "\"" <string> "\"" <reqwhs> "as" <reqwhs> <node_id>
+<part_whole_node> ::= "\"" <string> "\"" <reqwhs> "as" <reqwhs> <node_id>
+<node>            ::= <node_id>
 
-/* TODO: добавить возможность использовать actor из uc? */
-<node> ::= <node_id>
+/* составные конструкции (то из чего состоит диаграмма/то что вводит пользователь) */
 
-/* составные конструкции (то из чего состоит диаграмма, то что вводит пользователь) */
-
-<enduml> ::= "@enduml"
-<startuml> ::= "@startuml"
+<enduml>    ::= "@enduml"
+<startuml>  ::= "@startuml"
 <directive> ::= <startuml> | <enduml>
 
 /* --- */
 
-/* между токенами можно убрать пробелы? */
 <whole_node> ::= ("actor" | "boundary" | "entity" | "control") <reqwhs> <part_whole_node>
 <short_node> ::= ("actor" | "boundary" | "entity" | "control") <reqwhs> <node_id>
 
 /* --- */
+
 <connection> ::= <node> <reqwhs> <arrow> <reqwhs> <node>
 
 /* --- */

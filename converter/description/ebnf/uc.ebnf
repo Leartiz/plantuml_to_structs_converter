@@ -1,6 +1,9 @@
-/* Try it: https://bnfplayground.pauliankline.com/ */
+/* TODO: между токенами можно убрать пробелы? */
 
-/* -------------------------- Общие -------------------------- */
+/* Иструмент: https://bnfplayground.pauliankline.com/ */
+
+/* Общие */
+/* ----------------------------------------------------------------------- */
 
 /* элементарные (или встроенные) конструкции */
 
@@ -8,58 +11,60 @@
 <nln> ::= "\n"
 /* допустимые значения для типа char, не только: */
 <any_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+/* допустимые для идентификатора значения PlantUML: */
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
 
 /* --- */
+
+<string>  ::= <any_char>+
+<node_id> ::= <ids_char>+
 
 <optwhs> ::= <whs>*
 <reqwhs> ::= <whs>+
 
-/* множество допустимых для идентификатора символов PlantUML */
-<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
-<string> ::= <any_char>+
-<node_id> ::= <ids_char>+
 <end_curly_brace> ::= "}"
 
-/* -------------------------- Uc -------------------------- */
+/* Uc */
+/* ----------------------------------------------------------------------- */
 
 /* стрелка */
 <left_arrow_head> ::= "<" | "<|"
 <rght_arrow_head> ::= ">" | "|>"
 <arrow_direction> ::= ("l" | "r" | "d" | "u") | ("left" | "right" | "down" | "up")
-<arrow_body> ::= ("." | "-")+ <arrow_direction> ("." | "-")+
-<arrow> ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+<arrow_body>      ::= ("." | "-")+ <arrow_direction> ("." | "-")+
+<arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
 
 /* составные конструкции (не используются напрямую) */
 
-<part_whole_node> ::=   "\"" <string> "\"" <reqwhs> "as" <reqwhs> <node_id>
-<usecase_id> ::= "(" <string> ")"
-<actor_id> ::= ":" <string> ":"
-<node> ::= (<usecase_id> | <actor_id> | <node_id>)
+<part_whole_node> ::= "\"" <string> "\"" <reqwhs> "as" <reqwhs> <node_id>
+<usecase_id>      ::= "(" <string> ")"
+<actor_id>        ::= ":" <string> ":"
+<node>            ::= (<usecase_id> | <actor_id> | <node_id>)
 
-/* составные конструкции (то из чего состоит диаграмма, то что вводит пользователь) */
+/* составные конструкции (то из чего состоит диаграмма/то что вводит пользователь) */
 
-<enduml> ::= "@enduml"
-<startuml> ::= "@startuml"
+<enduml>    ::= "@enduml"
+<startuml>  ::= "@startuml"
 <directive> ::= <startuml> | <enduml>
 
 /* --- */
 
-/* между токенами можно убрать пробелы? */
 <actor_short_node> ::= <actor_id> <reqwhs> "as" <reqwhs> <node_id>
 <actor_whole_node> ::= "actor" <reqwhs> (<actor_short_node> | <part_whole_node>)
-<actor_node> ::= (<actor_short_node> | <actor_whole_node>)
+<actor_node>       ::= (<actor_short_node> | <actor_whole_node>)
 
 <usecase_short_node> ::= <usecase_id> <reqwhs> "as" <reqwhs> <node_id>
 <usecase_whole_node> ::= "usecase" <reqwhs> (<usecase_short_node> | <part_whole_node>)
-<usecase_node> ::= (<usecase_short_node> | <usecase_whole_node>)
+<usecase_node>       ::= (<usecase_short_node> | <usecase_whole_node>)
 
 /* --- */
+
 <connection> ::= <node> <reqwhs> <arrow> <reqwhs> <node>
 
 /* --- */
 
 <beg_grouping> ::= ("rectangle" | "package") <reqwhs> "{"
-<grouping> ::= <beg_grouping> <nln> ((<actor_node> | <usecase_node> | <connection>) <nln>)* <nln> <end_curly_brace>
+<grouping>     ::= <beg_grouping> <nln> ((<actor_node> | <usecase_node> | <connection>) <nln>)* <nln> <end_curly_brace>
 
 /* --- */
 
