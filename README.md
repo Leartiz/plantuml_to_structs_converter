@@ -2,20 +2,25 @@
 
 ## Доступный PlantUML для диаграмм ##
 ### Любая ###
-- [x] использование директив `@startuml`/`@enduml`;
+- [x] директивы `@startuml`/`@enduml`;
 - [x] смена направления:
   * `left to right direction`
   * `top to bottom direction`
-- [x] использование однострочных `skinparam`:
+- [x] однострочные `skinparam`:
   * `skinparam <key> <value>`
 - [x] однострочные заметки с ключевым словом `note`:
-  * `note right of <id> : <string>`
-  * `note bottom of <id> : <string>`
+  * `note <left|right|top|bottom> of <id> : <string>`
+  * `note <left|right|top|bottom> : <string>`
 - [x] многострочные заметки с ключевым словом `note`:
-  * `note right of <id> : <string>`
-  * `note bottom of <id> : <string>`
-- [x] комментарии:
-  * 
+  * `note as <note_id>` \
+    ... \
+    `end note`
+  * `note <left|right|top|bottom> of <id>` \
+    ... \
+    `end note`
+- [x] однострочные/многострочные комментарии:
+  * `' `...
+  * `\' `... `'\`
 - [x] пустые строки;
 
 ---
@@ -28,13 +33,23 @@
   * `actor :<name>: as <id>`
   * `actor "<name>" as <id>`
 - [x] ассоциация, включение, расширения, наследование:
-  * `UC <-- A`
-  * `UC ..> UC1 : <<include>>`
-  * `UC <.. UC1 : <<extend>>`
-  * `A1 --|> A`
+  * `<id> --> <id>` \
+    `<id> <-- <id>` 
+  * `<id> ..> <id> : <<include>>` \
+    `<id> <.. <id> : <<include>>`
+  * `<id> ..> <id> : <<extend>>` \
+    `<id> <.. <id> : <<extend>>`
+  * `<id> --|> <id>` \
+    `<id> <|-- <id>`
 - [ ] расширение и к ней точка и условие:
   * <пример с использованием заметки>
-- [x] группировки `package`/`rectangle`;
+- [x] группировки `package`/`rectangle`:
+  * `rectangle <name> {` \
+    ... \
+    `}`
+  * `package <name> {` \
+    ... \
+    `}`
 - [x] по умолчанию узлы без определения `actor`;
 
 В нотации РБНФ [тут](converter/description/ebnf/uc.ebnf).\
@@ -133,4 +148,8 @@
 
 ## Сериализация ##
 
+...
+
 ## Зависимости ##
+
+...
