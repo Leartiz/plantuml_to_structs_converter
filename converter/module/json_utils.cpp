@@ -10,7 +10,7 @@ nlohmann::json node_to_short_json(Graph::Node& node) {
 }
 
 nlohmann::json edge_to_short_json(Graph::Edge& edge) {
-
+    return { { "id", edge.id } };
 }
 
 // -----------------------------------------------------------------------

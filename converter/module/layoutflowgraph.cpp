@@ -36,10 +36,11 @@ bool try_image_state_short_node(const std::string& line) {
     if (!regex_match(line, match, rx)) {
         return false;
     }
+    return false;
 }
 
 bool try_image_state_whole_node(const std::string& line) {
-
+    return false;
 }
 
 // *** json
@@ -65,9 +66,9 @@ bool LayoutFlowGraph::try_node(const std::string& line, std::istream&) {
 }
 
 bool LayoutFlowGraph::try_connection(const std::string&, std::istream&) {
-
+    return false;
 }
 
 bool LayoutFlowGraph::try_grouping(const std::string&, std::istream&) {
-
+    return false;
 }
