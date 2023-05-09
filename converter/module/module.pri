@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/../../dependency/nlohmann/json/json.hpp \
     $$PWD/classgraph.h \
     $$PWD/constructhelper.h \
+    $$PWD/extra_reqs.h \
     $$PWD/graph.h \
     $$PWD/grapherror.h \
     $$PWD/json_utils.h \

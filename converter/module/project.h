@@ -3,24 +3,16 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
 #include "usecasegraph.h"
-#include "layoutflowgraph.h"
 #include "robustnessgraph.h"
 #include "sequencegraph.h"
 #include "classgraph.h"
 
-struct Desc final {
+#include "extra_reqs.h"
+#include "layoutflowgraph.h"
 
-};
-
-struct Layout final {
-
-};
-
-struct Format final {
-
-};
 
 struct Project final
 {
@@ -28,6 +20,9 @@ public:
     using UsecaseId = std::string;
     using BoundaryId = std::string;
     using EntityId = std::string;
+
+public:
+    void read_project(const std::string& project_root_path);
 
 public:
     std::shared_ptr<UseCaseGraph> uc_graph;

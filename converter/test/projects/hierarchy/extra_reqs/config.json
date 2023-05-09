@@ -1,0 +1,24 @@
+{
+    "layouts" : [
+        {
+            "editor_type": "",
+            "boundary_id": "any_window",
+            "image_ref": "layouts/out/any_window.png",
+            "source_ref": "layouts/src/any_window.wsd"
+        }
+    ],
+    "formats" : [
+        {
+            "editor_type": "",
+            "entity_id": "any_entity",
+            "image_ref": "formats/out/any_entity.png",
+            "source_ref": "formats/src/any_entity.yml"
+        }
+    ],
+    "descs" : [
+        {
+            "usecase_id": "any_usecase",
+            "source_ref": "descs/src/any_usecase.md"
+        }
+    ]
+}
