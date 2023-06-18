@@ -9,8 +9,9 @@
 #include "graph.h"
 #include "sequencegraph.h"
 
-struct ConstructHelper final
+struct ConstructHelper final /* context or bundle */
 {
+    using Sp = std::shared_ptr<ConstructHelper>;
     void reset();
 
 public:

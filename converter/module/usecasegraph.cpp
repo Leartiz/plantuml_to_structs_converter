@@ -38,9 +38,8 @@ UcEdge::UcEdge(string id, string name, Type tp) {
 
 namespace {
 
-ConstructHelper* ch{ nullptr };
-
-UcEdge::Type edge_type_from_arrow_part(const string& head,
+UcEdge::Type edge_type_from_arrow_part(ConstructHelper::Sp ch,
+                                       const string& head,
                                        const string& body,
                                        const string& note) {
     const auto it{ find(begin(body), end(body), '.') };
@@ -59,7 +58,7 @@ UcEdge::Type edge_type_from_arrow_part(const string& head,
     throw GraphError(ch->line_number, "unknown edge type");
 }
 
-shared_ptr<UcNode> create_node_if_need(string str) {
+shared_ptr<UcNode> create_node_if_need(ConstructHelper::Sp ch, string str) {
     auto node_type = UcNode::Actor;
     if (str.front() == '(' && str.back() == ')') {
         str_utils::trim_by_ref(str, "()");
@@ -127,8 +126,10 @@ json node_to_json(UcNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_whole_actor_node(const std::string& line) {
+bool try_whole_actor_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
+
+    // TODO: вынести все рег. выражения в отдельный файл
     static const regex rx{ "^\\s*actor\\s+(:(.+):|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
@@ -142,7 +143,7 @@ bool try_whole_actor_node(const std::string& line) {
     return true;
 }
 
-bool try_short_actor_node(const std::string& line) {
+bool try_short_actor_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*:(.+):\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -156,7 +157,7 @@ bool try_short_actor_node(const std::string& line) {
 
 // -----------------------------------------------------------------------
 
-bool try_whole_usecase_node(const std::string& line) {
+bool try_whole_usecase_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*usecase\\s+(\\((.+)\\)|\\\"(.+)\\\")\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -171,7 +172,7 @@ bool try_whole_usecase_node(const std::string& line) {
     return true;
 }
 
-bool try_short_usecase_node(const std::string& line) {
+bool try_short_usecase_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*\\((.+)\\)\\s+as\\s+(\\S+)\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -188,9 +189,7 @@ bool try_short_usecase_node(const std::string& line) {
 // -----------------------------------------------------------------------
 
 void UseCaseGraph::read_puml(istream& in) {
-    ch = m_ch.get();
     Graph::read_puml(in);
-    ch = nullptr; // raw ptr.
 }
 
 void UseCaseGraph::write_json(ostream& out) {
@@ -199,22 +198,22 @@ void UseCaseGraph::write_json(ostream& out) {
 
     /* edges */
     {
-        json::array_t json_edges;
-        for (const auto& edge : edges) {
-            auto uc_edge = static_pointer_cast<UcEdge>(edge);
-            json_edges.push_back(edge_to_json(*uc_edge));
-        }
-        json_graph["edges"] = json_edges;
+        json::array_t json_edges; json_edges.reserve(edges.size());
+        std::transform(begin(edges), end(edges), std::back_inserter(json_edges),
+                       [](const std::shared_ptr<Edge>& one) -> json {
+            return edge_to_json(*static_pointer_cast<UcEdge>(one));
+        });
+        json_graph["edges"] = std::move(json_edges);
     }
 
     /* nodes */
     {
-        json::array_t json_nodes;
-        for (const auto& node : nodes) {
-            auto uc_node = static_pointer_cast<UcNode>(node);
-            json_nodes.push_back(node_to_json(*uc_node));
-        }
-        json_graph["nodes"] = json_nodes;
+        json::array_t json_nodes; json_nodes.reserve(nodes.size());
+        std::transform(begin(nodes), end(nodes), std::back_inserter(json_nodes),
+                       [](const std::shared_ptr<Node>& one) -> json {
+            return node_to_json(*static_pointer_cast<UcNode>(one));
+        });
+        json_graph["nodes"] = std::move(json_nodes);
     }
 
     out << setw(2) << json_graph;
@@ -223,8 +222,8 @@ void UseCaseGraph::write_json(ostream& out) {
 // -----------------------------------------------------------------------
 
 bool UseCaseGraph::try_node(const std::string& line, std::istream&) {
-    return try_whole_actor_node(line) || try_whole_usecase_node(line) ||
-            try_short_actor_node(line) || try_short_usecase_node(line);
+    return try_whole_actor_node(m_ch, line) || try_whole_usecase_node(m_ch, line) ||
+            try_short_actor_node(m_ch, line) || try_short_usecase_node(m_ch, line);
 }
 
 bool UseCaseGraph::try_connection(const string& line, std::istream&) {
@@ -240,7 +239,7 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
     auto rght_head_arrow{ match[6].str() };
 
     if (!left_head_arrow.empty() && !rght_head_arrow.empty()) {
-        throw GraphError(ch->line_number, "double-sided arrow");
+        throw GraphError(m_ch->line_number, "double-sided arrow");
     }
 
     string arrow_head;
@@ -256,12 +255,12 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
     }
 
     auto arrow_body{ match[4].str() };
-    auto etype{ edge_type_from_arrow_part(arrow_head, arrow_body, match[10].str()) };
+    auto etype{ edge_type_from_arrow_part(m_ch, arrow_head, arrow_body, match[10].str()) };
 
-    const auto left_node{ create_node_if_need(match[1].str()) };
-    const auto rght_node{ create_node_if_need(match[7].str()) };
+    const auto left_node{ create_node_if_need(m_ch, match[1].str()) };
+    const auto rght_node{ create_node_if_need(m_ch, match[7].str()) };
 
-    const auto edge{ make_shared<UcEdge>(ch->next_edge_id(), match[9].str(), etype) };
+    const auto edge{ make_shared<UcEdge>(m_ch->next_edge_id(), match[9].str(), etype) };
     if (is_left_to_rght) {
         edge->beg = left_node;
         edge->end = rght_node;
@@ -276,7 +275,7 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
         left_node->inns.push_back(edge);
         rght_node->outs.push_back(edge);
     }
-    ch->id_edge[edge->id] = edge;
+    m_ch->id_edge[edge->id] = edge;
     return true;
 }
 
@@ -288,22 +287,22 @@ bool UseCaseGraph::try_grouping(const string& line, istream& in) {
     }
 
     while (in) {
-        const auto line{ read_line(in) };
-        if (try_end_curly_brace(line)) {
+        const auto next_line{ read_line(in) };
+        if (try_end_curly_brace(next_line)) {
             return true;
         }
 
         if (
-                !try_node(line, in) &&
-                !try_connection(line, in) &&
-                !try_whitespaces(line) &&
+                !try_node(next_line, in) &&
+                !try_connection(next_line, in) &&
+                !try_whitespaces(next_line) &&
 
-                !try_note(line, in) &&
-                !try_comment(line, in) &&
+                !try_note(next_line, in) &&
+                !try_comment(next_line, in) &&
 
-                !try_grouping(line, in)) {
-            throw GraphError(ch->line_number, "unknown line");
+                !try_grouping(next_line, in)) {
+            throw GraphError(m_ch->line_number, "unknown line");
         }
     }
-    throw GraphError(ch->line_number, "group is not closed");
+    throw GraphError(m_ch->line_number, "group is not closed");
 }

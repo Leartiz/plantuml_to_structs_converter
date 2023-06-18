@@ -621,7 +621,8 @@ void Module::test_common_read_puml_data(const QString& basic_path)
         const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
         const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
 
-        const std::string tst_name{ "catalog name: /" + test_catalogs[i].toStdString() };
+        const std::string tst_name{ "catalog name: /" + basic_path.toStdString() +
+                    "/" + test_catalogs[i].toStdString() };
         QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
     }
 }
@@ -891,12 +892,12 @@ void Module::test_UseCaseGraph_read_err1()
 
 // -----------------------------------------------------------------------
 
-void Module::test_UseCaseGraph_read_puml_data()
+void Module::test_UseCaseGraph_read_puml_okks_data()
 {
-    test_common_read_puml_data("converter/test/read_puml/uc_graph");
+    test_common_read_puml_data("converter/test/read_puml/okks/uc_graph");
 }
 
-void Module::test_UseCaseGraph_read_puml()
+void Module::test_UseCaseGraph_read_puml_okks()
 {
     QFETCH(string, inn_fpath);
     QFETCH(string, expect_out_fpath);
@@ -1116,7 +1117,7 @@ void Module::test_RobustnessGraph_read_okk2()
 
 void Module::test_RobustnessGraph_read_puml_data()
 {
-    test_common_read_puml_data("converter/test/read_puml/rob_graph");
+    test_common_read_puml_data("converter/test/read_puml/okks/rob_graph");
 }
 
 void Module::test_RobustnessGraph_read_puml()
@@ -1336,11 +1337,32 @@ void Module::test_SequenceGraph_read_err3()
     QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
 }
 
+void Module::test_SequenceGraph_read_err4()
+{
+    SequenceGraph seqG;
+    istringstream sin{
+        "@startuml\n"
+        "\n"
+        "participant First\n"
+        "participant Middle\n"
+        "\n"
+        "loop i < 30\n"
+        "First--> Middle : some()\n"
+        "else\n"
+        "First --> Middle : some2()\n"
+        "end\n"
+        "\n"
+        "@enduml\n"
+    };
+
+    QVERIFY_THROWS_EXCEPTION(GraphError, seqG.read_puml(sin));
+}
+
 // -----------------------------------------------------------------------
 
 void Module::test_SequenceGraph_read_puml_data()
 {
-    test_common_read_puml_data("converter/test/read_puml/seq_graph");
+    test_common_read_puml_data("converter/test/read_puml/okks/seq_graph");
 }
 
 void Module::test_SequenceGraph_read_puml()
@@ -1619,7 +1641,7 @@ void Module::test_ClassGraph_read_okk4()
 
 void Module::test_ClassGraph_read_puml_data()
 {
-    test_common_read_puml_data("converter/test/read_puml/class_graph");
+    test_common_read_puml_data("converter/test/read_puml/okks/class_graph");
 }
 
 void Module::test_ClassGraph_read_puml()

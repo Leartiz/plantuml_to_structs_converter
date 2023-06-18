@@ -38,7 +38,7 @@ public:
 
     struct SeqFrag : SeqGroup {
         enum Type : uint32_t {
-            Opt, Alt, Loop
+            Opt, Alt, Loop, Par
         };
 
         SeqFrag(uint32_t onum, std::string id, Type,
@@ -58,7 +58,7 @@ public:
 public:
     struct SeqNode : Node {
         enum Type : uint32_t {
-            Actor, Boundary, Control, Entity,
+            Actor, Boundary, Control, Entity, Participant,
         };
 
         SeqNode() = default;

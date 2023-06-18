@@ -31,10 +31,6 @@ RobEdge::RobEdge(std::string id, std::string name) {
 
 namespace {
 
-ConstructHelper* ch{ nullptr };
-
-// *** json and not only
-
 string node_type_to_str(const RobNode::Type tp) {
     switch (tp) {
     case RobNode::Actor: return "actor";
@@ -55,6 +51,8 @@ RobNode::Type str_to_node_type(const string& str) {
     throw runtime_error{ "rob node type as str unknown" };
 }
 
+// *** json
+
 json edge_to_json(RobustnessGraph::RobEdge& edge) {
     json result = json_utils::edge_to_whole_json(edge);
     return result;
@@ -69,7 +67,7 @@ json node_to_json(RobustnessGraph::RobNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_whole_node(const std::string& line) {
+bool try_whole_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -89,7 +87,7 @@ bool try_whole_node(const std::string& line) {
     return true;
 }
 
-bool try_short_node(const std::string& line) {
+bool try_short_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -113,9 +111,7 @@ bool try_short_node(const std::string& line) {
 // -----------------------------------------------------------------------
 
 void RobustnessGraph::read_puml(std::istream& in) {
-    ch = m_ch.get();
     Graph::read_puml(in);
-    ch = nullptr;
 }
 
 void RobustnessGraph::write_json(std::ostream& out) {
@@ -130,22 +126,22 @@ void RobustnessGraph::write_json(std::ostream& out) {
 
     /* edges */
     {
-        json::array_t json_edges;
-        for (const auto& edge : edges) {
-            auto uc_edge = static_pointer_cast<RobEdge>(edge);
-            json_edges.push_back(edge_to_json(*uc_edge));
-        }
-        json_graph["edges"] = json_edges;
+        json::array_t json_edges; json_edges.reserve(edges.size());
+        std::transform(begin(edges), end(edges), std::back_inserter(json_edges),
+                       [](const std::shared_ptr<Edge>& one) -> json {
+            return edge_to_json(*static_pointer_cast<RobEdge>(one));
+        });
+        json_graph["edges"] = std::move(json_edges);
     }
 
     /* nodes */
     {
-        json::array_t json_nodes;
-        for (const auto& node : nodes) {
-            auto uc_node = static_pointer_cast<RobNode>(node);
-            json_nodes.push_back(node_to_json(*uc_node));
-        }
-        json_graph["nodes"] = json_nodes;
+        json::array_t json_nodes; json_nodes.reserve(nodes.size());
+        std::transform(begin(nodes), end(nodes), std::back_inserter(json_nodes),
+                       [](const std::shared_ptr<Node>& one) -> json {
+            return node_to_json(*static_pointer_cast<RobNode>(one));
+        });
+        json_graph["nodes"] = std::move(json_nodes);
     }
 
     out << setw(2) << json_graph;
@@ -154,7 +150,7 @@ void RobustnessGraph::write_json(std::ostream& out) {
 // -----------------------------------------------------------------------
 
 bool RobustnessGraph::try_node(const std::string& line, std::istream&) {
-    return try_whole_node(line) || try_short_node(line);
+    return try_whole_node(m_ch, line) || try_short_node(m_ch, line);
 }
 
 bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
@@ -167,12 +163,12 @@ bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
 
     const auto left_node_name = match[1].str();
     const auto rght_node_name = match[7].str();
-    if (!ch->id_node.count(left_node_name) || !ch->id_node.count(rght_node_name)) {
+    if (!m_ch->id_node.count(left_node_name) || !m_ch->id_node.count(rght_node_name)) {
         throw runtime_error{ "node not defined" };
     }
 
-    const auto left_node{ static_pointer_cast<RobNode>(ch->id_node[left_node_name]) };
-    const auto rght_node{ static_pointer_cast<RobNode>(ch->id_node[rght_node_name]) };
+    const auto left_node{ static_pointer_cast<RobNode>(m_ch->id_node[left_node_name]) };
+    const auto rght_node{ static_pointer_cast<RobNode>(m_ch->id_node[rght_node_name]) };
 
     const auto left_head_arrow{ match[3].str() };
     const auto rght_head_arrow{ match[6].str() };
@@ -185,30 +181,30 @@ bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
 
         // -->
         {
-            const auto left_to_rght_edge{ make_shared<RobEdge>(ch->next_edge_id(), edge_text) }; // -->
+            const auto left_to_rght_edge{ make_shared<RobEdge>(m_ch->next_edge_id(), edge_text) }; // -->
             left_to_rght_edge->beg = left_node;
             left_to_rght_edge->end = rght_node;
 
             left_node->outs.push_back(left_to_rght_edge);
             rght_node->inns.push_back(left_to_rght_edge);
 
-            ch->id_edge[left_to_rght_edge->id] = left_to_rght_edge;
+            m_ch->id_edge[left_to_rght_edge->id] = left_to_rght_edge;
         }
         // <--
         {
-            const auto rght_to_left_edge{ make_shared<RobEdge>(ch->next_edge_id(), edge_text) };
+            const auto rght_to_left_edge{ make_shared<RobEdge>(m_ch->next_edge_id(), edge_text) };
             rght_to_left_edge->beg = rght_node;
             rght_to_left_edge->end = left_node;
 
             rght_node->outs.push_back(rght_to_left_edge);
             left_node->inns.push_back(rght_to_left_edge);
 
-            ch->id_edge[rght_to_left_edge->id] = rght_to_left_edge;
+            m_ch->id_edge[rght_to_left_edge->id] = rght_to_left_edge;
         }
         return true;
     }
 
-    const auto edge{ make_shared<RobEdge>(ch->next_edge_id(), edge_text) };
+    const auto edge{ make_shared<RobEdge>(m_ch->next_edge_id(), edge_text) };
     // -->
     if (left_head_arrow.empty()) {
         edge->beg = left_node;
@@ -225,6 +221,6 @@ bool RobustnessGraph::try_connection(const std::string& line, std::istream&) {
         left_node->inns.push_back(edge);
         rght_node->outs.push_back(edge);
     }
-    ch->id_edge[edge->id] = edge;
+    m_ch->id_edge[edge->id] = edge;
     return true;
 }

@@ -1,0 +1,57 @@
+@startuml
+
+skinparam ArrowThickness 1.25
+
+skinparam ActorBorderThickness 1.5
+skinparam ActorBackgroundColor #FEFECE
+skinparam ActorBorderColor #B20842
+
+skinparam BoundaryBorderThickness 1.5
+skinparam BoundaryBackgroundColor #FEFECE
+skinparam BoundaryBorderColor #B20842
+
+skinparam EntityBorderThickness 1.5
+skinparam EntityBackgroundColor #FEFECE
+skinparam EntityBorderColor #B20842
+
+skinparam ControlBorderThickness 1.5
+skinparam ControlBackgroundColor #FEFECE
+skinparam ControlBorderColor #B20842
+
+skinparam dpi 200
+skinparam Shadowing true
+
+'hide footbox
+
+actor    "User"      as User
+boundary "CourseWin" as CourseWin
+entity   "NetFacade" as NetFacade
+boundary "ErrWin"    as ErrWin #red
+
+' -----------------------------------------------
+
+ref over User
+    Authorization
+end ref
+
+User -> CourseWin : start_test()
+
+loop test started
+
+User -> CourseWin : send_one()
+CourseWin -> NetFacade : check()
+NetFacade --> CourseWin
+
+    alt correct
+        CourseWin --> User : return message
+    else error count > 3
+        CourseWin -> CourseWin : stop_test()
+        CourseWin -> ErrWin : show()
+    end
+
+    opt last question
+        CourseWin -> CourseWin : stop_test()
+    end
+end
+
+@enduml

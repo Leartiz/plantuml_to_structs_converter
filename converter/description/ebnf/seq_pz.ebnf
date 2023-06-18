@@ -1,0 +1,65 @@
+<nln> ::= "\n"
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+
+<string>  ::= <any_char>+
+<node_id> ::= <ids_char>+
+
+<end_curly_brace> ::= "}"
+
+/* ------------------------------------------------------------------ */
+ 
+ /* стрелка */
+ <left_arrow_head> ::= "<" 
+ <rght_arrow_head> ::= ">"
+ <arrow_direction> ::= ("l" | "r" | "d" | "u") | 
+                       ("left" | "right" | "down" | "up")
+ <arrow_body>      ::= "-"+ <arrow_direction> "-"+
+ <arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+ 
+ /* составные конструкции (не используются напрямую) */
+ 
+ <part_whole_node> ::=   "\"" <string> "\"" "as" <node_id>
+ <node>            ::= <node_id>
+ 
+ /* составные конструкции (построчно вводит пользователь) */
+ 
+ <enduml>    ::= "@enduml"
+ <startuml>  ::= "@startuml"
+ <directive> ::= <startuml> | <enduml>
+ 
+ /* --- */
+ 
+ /* сторожевое условие */
+ <condition> ::= <any_char>+
+ /* перечисление узлов */
+ <nodes>     ::= <any_char>+
+ 
+ <whole_node> ::= ("actor" | "boundary" |
+                   "entity" | "control") <part_whole_node>
+ <short_node> ::= ("actor" | "boundary" |
+                   "entity" | "control") <node_id>
+ 
+ /* --- */
+ 
+ <connection> ::= <node> <arrow> <node>
+ 
+ /* --- */
+ 
+ <beg_fragment>  ::= ("alt" | "opt" | "loop") <condition>
+ <else_opd>      ::= "else" <any_char>+
+ <end_opd>       ::= "end"
+ <fragment_body> ::= (<connection> <nln>)+ (<else_opd> <nln>)?
+ <fragment>      ::= <beg_fragment> <nln> <fragment_body> <end_opd>
+ 
+ <beg_ref_over>  ::= "ref" "over" <nodes>
+ <end_ref>       ::= <end_opd> "ref"
+ <ref_over_body> ::= (<string> <nln>)+
+ <ref_over>      ::= <beg_ref_over> <nln> <ref_over_body> <end_ref>
+ 
+ <grouping> ::= (<fragment> | <ref_over>)
+ 
+ /* --- */
+ 
+ <diagram> ::= <startuml> <nln>
+               ((<whole_node> | <short_node> |
+               <connection> | <grouping>) <nln>)* <enduml> 

@@ -1,0 +1,12 @@
+@startuml
+
+participant First
+participant Middle
+
+loop i < 30
+First--> Middle : some()
+else
+First --> Middle : some2()
+end
+
+@enduml

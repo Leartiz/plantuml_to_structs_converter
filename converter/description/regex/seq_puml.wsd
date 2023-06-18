@@ -3,13 +3,23 @@
 actor Bob 
 boundary MainWin
 
-alt 6
+participant "123123" as First
+participant Middle
+participant First
+
+alt das
 Bob -> MainWin : on_clicked_menu()
 boundary MainWin2
 else asd
 Bob <-- MainWin
 ...  
 
+end
+
+par
+Bob --> Middle : some()
+else
+Bob --> Middle : some2()
 end
 
 ref over Bob

@@ -3,11 +3,11 @@
 ' https://plantuml-documentation.readthedocs.io/en/latest/formatting/html.html
 
 state TransportWindow1
-state " " as TransportWindow2
-state "Auth\nWindow\n<img:layouts/3.png>" as AuthWindow
-state "MainWindow\n<img:layouts/0.png>" as MainWindow  
+state " "                                    as TransportWindow2
+state "Auth\nWindow\n<img:layouts/3.png>"    as AuthWindow
+state "MainWindow\n<img:layouts/0.png>"      as MainWindow  
 state "ReferenceWindow\n<img:layouts/2.png>" as ReferenceWindow  
-state "<img:layouts/1.png>" as TransportWindow
+state "<img:layouts/1.png>"                  as TransportWindow
 
 [*] --> AuthWindow
 AuthWindow --> [*] : закрыли\nокно

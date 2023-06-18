@@ -66,8 +66,6 @@ SequenceGraph::SeqEdge::SeqEdge(uint32_t onum, string id, string name, Type tp) 
 
 namespace {
 
-ConstructHelper* ch{ nullptr };
-
 SeqEdge::Type edge_type_from_arrow_part(const string& body) {
     const auto part_count{ count(begin(body), end(body), '-') };
 
@@ -76,8 +74,8 @@ SeqEdge::Type edge_type_from_arrow_part(const string& body) {
     return SeqEdge::Reply;
 }
 
-// TODO: не самое точное решение, может привести к проблемам
-vector<string> str_to_node_names(const string& str) {
+// TODO: не самое точное решение, может привести к проблемам. Как часть, тесты проходит
+vector<string> str_to_node_names(ConstructHelper::Sp ch, const string& str) {
     vector<string> result;
     istringstream sin{ str };
     while (!sin.eof()) {
@@ -112,6 +110,7 @@ string node_type_to_str(const SeqNode::Type tp) {
     case SeqNode::Boundary: return "boundary";
     case SeqNode::Control: return "control";
     case SeqNode::Entity: return "entity";
+    case SeqNode::Participant: return "participant";
     }
 
     throw runtime_error{ "seq node type unknown" };
@@ -123,6 +122,7 @@ SeqNode::Type str_to_node_type(const string& str) {
     if (node_type_to_str(Type::Boundary) == str) return Type::Boundary;
     if (node_type_to_str(Type::Control) == str) return Type::Control;
     if (node_type_to_str(Type::Entity) == str) return Type::Entity;
+    if (node_type_to_str(Type::Participant) == str) return Type::Participant;
     throw runtime_error{ "seq node type as str unknown" };
 }
 
@@ -133,6 +133,7 @@ string frag_type_to_str(const SeqFrag::Type tp) {
     case SeqFrag::Opt: return "opt";
     case SeqFrag::Alt: return "alt";
     case SeqFrag::Loop: return "loop";
+    case SeqFrag::Par: return "par";
     }
 
     throw runtime_error{ "seq fragment type unknown" };
@@ -253,9 +254,9 @@ json node_to_json(SeqNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_whole_node(const std::string& line) {
+bool try_whole_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
-    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    static const regex rx{ "^\\s*(boundary|entity|actor|control|participant)\\s+\"(.+)\"\\s+as\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
@@ -273,9 +274,9 @@ bool try_whole_node(const std::string& line) {
     return true;
 }
 
-bool try_short_node(const std::string& line) {
+bool try_short_node(ConstructHelper::Sp ch, const std::string& line) {
     smatch match;
-    static const regex rx{ "^\\s*(boundary|entity|actor|control)\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
+    static const regex rx{ "^\\s*(boundary|entity|actor|control|participant)\\s+([^\\s#]+)\\s*(#red)?\\s*$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
@@ -299,11 +300,16 @@ bool try_three_dots(const std::string& line) {
     return regex_match(line, rx);
 }
 
-bool try_operand_else(const std::string& line, shared_ptr<SeqFrag> frag) {
+bool try_operand_else(ConstructHelper::Sp ch, const std::string& line, shared_ptr<SeqFrag> frag) {
     smatch match;
     static const regex rx{ "^\\s*else\\s+(.*)$" };
     if (!regex_match(line, match, rx)) {
         return false;
+    }
+
+    // TODO: возможно, нужно убрать эту проверку совсем
+    if (frag->type != SeqFrag::Alt && frag->type != SeqFrag::Par) {
+        throw GraphError{ ch->line_number, "invalid fragment type for operand else" };
     }
 
     const auto opd_cond = str_utils::trim_space(match[1].str());
@@ -332,9 +338,7 @@ void SequenceGraph::read_puml(std::istream& in) {
     frags.clear();
     stamps.clear();
 
-    ch = m_ch.get();
     Graph::read_puml(in);
-    ch = nullptr;
 }
 
 void SequenceGraph::write_json(std::ostream& out) {
@@ -351,21 +355,21 @@ void SequenceGraph::write_json(std::ostream& out) {
     {
         /* edges */
         {
-            json::array_t json_edges;
-            for (const auto& edge : edges) {
-                auto uc_edge = static_pointer_cast<SeqEdge>(edge);
-                json_edges.push_back(edge_to_json(*uc_edge));
-            }
-            json_graph["edges"] = json_edges;
+            json::array_t json_edges; json_edges.reserve(edges.size());
+            std::transform(begin(edges), end(edges), std::back_inserter(json_edges),
+                           [](const std::shared_ptr<Edge>& one) -> json {
+                return edge_to_json(*static_pointer_cast<SeqEdge>(one));
+            });
+            json_graph["edges"] = std::move(json_edges);
         }
         /* nodes */
         {
-            json::array_t json_nodes;
-            for (const auto& node : nodes) {
-                auto uc_node = static_pointer_cast<SeqNode>(node);
-                json_nodes.push_back(node_to_json(*uc_node));
-            }
-            json_graph["nodes"] = json_nodes;
+            json::array_t json_nodes; json_nodes.reserve(nodes.size());
+            std::transform(begin(nodes), end(nodes), std::back_inserter(json_nodes),
+                           [](const std::shared_ptr<Node>& one) -> json {
+                return node_to_json(*static_pointer_cast<SeqNode>(one));
+            });
+            json_graph["nodes"] = std::move(json_nodes);
         }
     }
 
@@ -373,27 +377,33 @@ void SequenceGraph::write_json(std::ostream& out) {
     {
         /* frags */
         {
-            json::array_t json_frags;
-            for (const auto& frag : frags)
-                json_frags.push_back(frag_to_json(*frag));
-            json_graph["frags"] = json_frags;
+            json::array_t json_frags; json_frags.reserve(frags.size());
+            std::transform(begin(frags), end(frags), std::back_inserter(json_frags),
+                           [](const std::shared_ptr<SeqFrag>& one) -> json {
+                return frag_to_json(*one);
+            });
+            json_graph["frags"] = std::move(json_frags);
         }
         /* refs */
         {
-            json::array_t json_refs;
-            for (const auto& rf : refs)
-                json_refs.push_back(ref_to_json(*rf));
-            json_graph["refs"] = json_refs;
+            json::array_t json_refs; json_refs.reserve(refs.size());
+            std::transform(begin(refs), end(refs), std::back_inserter(json_refs),
+                           [](const std::shared_ptr<SeqRef>& one) -> json {
+                return ref_to_json(*one);
+            });
+            json_graph["refs"] = std::move(json_refs);
         }
     }
 
     /* stamps */
     {
         {
-            json::array_t json_stamps;
-            for (const auto& stamp : stamps)
-                json_stamps.push_back(only_stamp_to_json(*stamp));
-            json_graph["stamps"] = json_stamps;
+            json::array_t json_stamps; json_stamps.reserve(stamps.size());
+            std::transform(begin(stamps), end(stamps), std::back_inserter(json_stamps),
+                           [](const std::shared_ptr<Stamp>& one) -> json {
+                return only_stamp_to_json(*one);
+            });
+            json_graph["stamps"] = std::move(json_stamps);
         }
     }
 
@@ -403,7 +413,7 @@ void SequenceGraph::write_json(std::ostream& out) {
 // -----------------------------------------------------------------------
 
 bool SequenceGraph::try_node(const std::string& line, std::istream&) {
-    return try_whole_node(line) || try_short_node(line);
+    return try_whole_node(m_ch, line) || try_short_node(m_ch, line);
 }
 
 bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
@@ -416,11 +426,11 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     // *** node
     const auto left_node_name = match[1].str();
     const auto rght_node_name = match[6].str();
-    if (!ch->id_node.count(left_node_name)) throw GraphError{ ch->line_number, "left node not defined" };
-    if (!ch->id_node.count(rght_node_name)) throw GraphError{ ch->line_number, "right node not defined" };
+    if (!m_ch->id_node.count(left_node_name)) throw GraphError{ m_ch->line_number, "left node not defined" };
+    if (!m_ch->id_node.count(rght_node_name)) throw GraphError{ m_ch->line_number, "right node not defined" };
 
-    const auto left_node{ static_pointer_cast<SeqNode>(ch->id_node[left_node_name]) };
-    const auto rght_node{ static_pointer_cast<SeqNode>(ch->id_node[rght_node_name]) };
+    const auto left_node{ static_pointer_cast<SeqNode>(m_ch->id_node[left_node_name]) };
+    const auto rght_node{ static_pointer_cast<SeqNode>(m_ch->id_node[rght_node_name]) };
 
     // *** edge
     const auto left_head_arrow{ match[3].str() };
@@ -428,14 +438,16 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
     if (
             (!left_head_arrow.empty() && !rght_head_arrow.empty()) ||
             (left_head_arrow.empty() && rght_head_arrow.empty())) {
-        throw GraphError{ ch->line_number, "double-sided arrow" };
+        throw GraphError{ m_ch->line_number, "double-sided arrow" };
     }
 
     const auto edge_type = edge_type_from_arrow_part(match[4].str());
     auto edge_text = str_utils::trim_space(match[8].str());
     edge_text = str_utils::un_quote(edge_text);
 
-    const auto edge{ make_shared<SeqEdge>(ch->next_order_number(), ch->next_edge_id(), edge_text, edge_type) };
+    const auto edge{ make_shared<SeqEdge>(m_ch->next_order_number(),
+                                          m_ch->next_edge_id(),
+                                          edge_text, edge_type) };
     // -->
     if (left_head_arrow.empty()) {
         edge->beg = left_node;
@@ -452,7 +464,7 @@ bool SequenceGraph::try_connection(const std::string& line, std::istream&) {
         left_node->inns.push_back(edge);
         rght_node->outs.push_back(edge);
     }
-    ch->id_edge[edge->id] = edge;
+    m_ch->id_edge[edge->id] = edge;
     add_stamp(edge);
     return true;
 }
@@ -465,7 +477,7 @@ bool SequenceGraph::try_grouping(const std::string& line, std::istream& in) {
 
 bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     smatch match;
-    static const regex rx{ "^\\s*(alt|opt|loop)\\s+(.*)$" };
+    static const regex rx{ "^\\s*(alt|opt|loop|par)\\s+(.*)$" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
@@ -474,42 +486,42 @@ bool SequenceGraph::try_fragment(const std::string& line, std::istream& in) {
     const auto frag_type = str_to_frag_type(match[1].str()); // regex level check.
     const auto opd_cond = str_utils::trim_space(match[2].str());
 
-    auto frag = make_shared<SeqFrag>(ch->next_order_number(), frag_id, frag_type, ch->current_opd());
-    auto opd = make_shared<SeqOpd>(ch->next_order_number(), ch->next_opd_id(), opd_cond);
+    auto frag = make_shared<SeqFrag>(m_ch->next_order_number(), frag_id, frag_type, m_ch->current_opd());
+    auto opd = make_shared<SeqOpd>(m_ch->next_order_number(), m_ch->next_opd_id(), opd_cond);
     add_frag(frag);
 
-    ch->nested_opds.push(opd);
+    m_ch->nested_opds.push(opd);
     frag->opds.push_back(opd);
     opd->frag = frag; // enable_shared_from_this!
     add_stamp(opd);
 
     while (in) {
-        const auto line{ read_line(in) };
-        if (try_operand_end(line)) {
-            ch->nested_opds.pop();
+        const auto next_line{ read_line(in) };
+        if (try_operand_end(next_line)) {
+            m_ch->nested_opds.pop();
             return true;
         }
 
-        if (try_operand_else(line, frag)) {
+        if (try_operand_else(m_ch, next_line, frag)) {
             opd = frag->opds.back();
-            ch->nested_opds.top() = opd;
+            m_ch->nested_opds.top() = opd;
             add_stamp(opd); /* rare case */
             continue;
         }
 
-        if (try_connection(line, in)) {
-            auto edge = ch->id_edge[ch->last_edge_id()];
+        if (try_connection(next_line, in)) {
+            auto edge = m_ch->id_edge[m_ch->last_edge_id()];
             auto seq_edge = static_pointer_cast<SeqEdge>(edge);
-            seq_edge->opd = ch->current_opd();
+            seq_edge->opd = m_ch->current_opd();
             continue;
         }
 
         // TODO: добавить возможность объявления новых узлов
-        if (!try_whitespaces(line) && !try_three_dots(line) && !try_grouping(line, in)) {
-            throw GraphError(ch->line_number, "unknown line");
+        if (!try_whitespaces(next_line) && !try_three_dots(next_line) && !try_grouping(next_line, in)) {
+            throw GraphError(m_ch->line_number, "unknown line");
         }
     }
-    throw GraphError(ch->line_number, "fragment is not closed");
+    throw GraphError(m_ch->line_number, "fragment is not closed");
 }
 
 bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
@@ -520,21 +532,21 @@ bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
     }
 
     vector<weak_ptr<Node>> nodes_above;
-    const auto node_names{ str_to_node_names(match[1].str()) };
+    const auto node_names{ str_to_node_names(m_ch, match[1].str()) };
     for (const auto& one : node_names) {
-        if (ch->id_node.count(one)) {
-            nodes_above.push_back(ch->id_node[one]);
+        if (m_ch->id_node.count(one)) {
+            nodes_above.push_back(m_ch->id_node[one]);
             continue;
         }
-        throw GraphError{ ch->line_number, "unknown node name" };
+        throw GraphError{ m_ch->line_number, "unknown node name" };
     }
 
     string text;
     while (!in.eof()) {
-        const auto line{ read_line(in) };
-        if (try_end_ref(line)) {
+        const auto next_line{ read_line(in) };
+        if (try_end_ref(next_line)) {
             const string ref_id = "ref_" + to_string(refs.size() + 1);
-            const auto ref = make_shared<SeqRef>(ch->next_onum(), ref_id, text, ch->current_opd());
+            const auto ref = make_shared<SeqRef>(m_ch->next_onum(), ref_id, text, m_ch->current_opd());
             ref->nodes = std::move(nodes_above);
             add_ref(ref);
             return true;
@@ -542,10 +554,10 @@ bool SequenceGraph::try_ref_over(const std::string& line, std::istream& in) {
         else {
             if (!text.empty())
                 text.push_back('\n');
-            text.append(str_utils::trim_space(line));
+            text.append(str_utils::trim_space(next_line));
         }
     }
-    throw GraphError{ ch->line_number, "ref over is not closed" };
+    throw GraphError{ m_ch->line_number, "ref over is not closed" };
 }
 
 // -----------------------------------------------------------------------

@@ -86,7 +86,7 @@ bool Graph::try_beg_note_with_id(const string& line) const {
         return false;
     }
 
-    // TODO: нужна ли вообще такая заметка?
+    // TODO: нужна ли вообще такая заметка? Так как ее можно "отслеживать"
     static_cast<void>(match);
 
     return true;
@@ -121,8 +121,8 @@ bool Graph::try_note(const string& line, istream& in) {
     }
 
     while (in) {
-        const auto line{ read_line(in) };
-        if (try_end_multi_note(line)) {
+        const auto next_line{ read_line(in) };
+        if (try_end_multi_note(next_line)) {
             return true;
         }
     }
@@ -156,8 +156,8 @@ bool Graph::try_comment(const std::string& line, std::istream& in) {
     }
 
     while (in) {
-        const auto line{ read_line(in) };
-        if (try_end_multi_comment(line)) {
+        const auto next_line{ read_line(in) };
+        if (try_end_multi_comment(next_line)) {
             return true;
         }
     }
@@ -168,15 +168,15 @@ bool Graph::try_comment(const std::string& line, std::istream& in) {
 
 bool Graph::try_any(const std::string& line, std::istream& in) {
     return
-            (try_node(line, in) ||
+            (try_node(line, in)       ||
              try_connection(line, in) ||
-             try_whitespaces(line) ||
-             try_grouping(line, in) ||
+             try_whitespaces(line)    ||
+             try_grouping(line, in)   ||
 
-             try_note(line, in) ||
+             try_note(line, in)    ||
              try_comment(line, in) ||
-             try_directive(line) ||
-             try_skinparam(line) ||
+             try_directive(line)   ||
+             try_skinparam(line)   ||
              try_direction(line));
 }
 

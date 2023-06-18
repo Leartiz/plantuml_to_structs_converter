@@ -41,9 +41,8 @@ ClassEdge::ClassEdge(std::string id, std::string name, Type tp) {
 
 namespace {
 
-ConstructHelper* ch{ nullptr };
-
-ClassEdge::Type edge_type_from_arrow_part(const string& head,
+ClassEdge::Type edge_type_from_arrow_part(ConstructHelper::Sp ch,
+                                          const string& head,
                                           const string& body) {
     using Type = ClassEdge::Type;
     const auto it{ find(begin(body), end(body), '.') };
@@ -73,7 +72,7 @@ ClassEdge::Type edge_type_from_arrow_part(const string& head,
     throw GraphError{ ch->line_number, "unknown edge type" };
 }
 
-shared_ptr<ClassNode> create_node_if_need(const string& str) {
+shared_ptr<ClassNode> create_node_if_need(ConstructHelper::Sp ch, const string& str) {
     shared_ptr<ClassNode> res_node;
     if (!ch->id_node.count(str)) {
         res_node = make_shared<ClassNode>(str, str, ClassNode::Class);
@@ -85,7 +84,7 @@ shared_ptr<ClassNode> create_node_if_need(const string& str) {
     return res_node;
 }
 
-Member::Mark str_to_mark(const string str) {
+Member::Mark str_to_mark(const string& str) {
     auto result{ Member::Public };
     if (str.empty()) {
         return result;
@@ -96,7 +95,6 @@ Member::Mark str_to_mark(const string str) {
 
     switch (str.front()) {
     case '+':
-        result = Member::Public;
         break;
     case '-':
         result = Member::Private;
@@ -121,7 +119,7 @@ string mark_to_str(Member::Mark mark) {
     throw runtime_error{ "mark unknown" };
 }
 
-vector<string> str_to_param_types(const string& str) {
+vector<string> str_to_param_types(ConstructHelper::Sp ch, const string& str) {
     vector<string> result;
     istringstream sin{ str };
     while (!sin.eof()) {
@@ -185,25 +183,31 @@ json member_data_to_json(const Member& data) {
 }
 
 json member_func_to_json(const Member& func) {
-    json::array_t json_pt;
     json json_func = member_data_to_json(func);
-    for (const auto& one_pt : func.param_types)
-        json_pt.push_back(one_pt);
+    json::array_t json_pt; json_pt.reserve(func.param_types.size());
+    std::copy(begin(func.param_types), end(func.param_types),
+              back_inserter(json_pt));
     json_func["param_types"] = json_pt;
     return json_func;
 }
 
+// ***
+
 json::array_t datas_to_json(const vector<Member>& datas) {
-    json::array_t json_datas;
-    for (const auto& mb : datas)
-        json_datas.push_back(member_data_to_json(mb));
+    json::array_t json_datas; json_datas.reserve(datas.size());
+    std::transform(begin(datas), end(datas), back_inserter(json_datas),
+                   [](const Member& mb) -> json {
+        return member_data_to_json(mb);
+    });
     return json_datas;
 }
 
 json::array_t funcs_to_json(const vector<Member>& funcs) {
-    json::array_t json_funcs;
-    for (const auto& mb : funcs)
-        json_funcs.push_back(member_func_to_json(mb));
+    json::array_t json_funcs; json_funcs.reserve(funcs.size());
+    std::transform(begin(funcs), end(funcs), back_inserter(json_funcs),
+                   [](const Member& mb) -> json {
+        return member_func_to_json(mb);
+    });
     return json_funcs;
 }
 
@@ -239,7 +243,7 @@ json node_to_json(ClassNode& node) {
 
 // -----------------------------------------------------------------------
 
-bool try_interface_member_func(std::shared_ptr<ClassNode> node, const std::string& line) {
+bool try_interface_member_func(ConstructHelper::Sp ch, std::shared_ptr<ClassNode> node, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*\\+?(\\w+)\\s*(\\(([\\w<>]+,?\\s*)*\\))\\s*(:\\s*([\\w<>]+))?\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -250,12 +254,12 @@ bool try_interface_member_func(std::shared_ptr<ClassNode> node, const std::strin
     const auto mem_type{ match[5].str() };
 
     Member member{ Member::Public, mem_name, mem_type };
-    member.param_types = str_to_param_types(str_utils::trim(match[2].str(), "()"));
+    member.param_types = str_to_param_types(ch, str_utils::trim(match[2].str(), "()"));
     node->funcs.push_back(std::move(member));
     return true;
 }
 
-bool try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) {
+bool try_class_member(ConstructHelper::Sp ch, std::shared_ptr<ClassNode> node, const std::string& line) {
     smatch match;
     static const regex rx{ "^\\s*([+#-])?(\\w+)\\s*(\\(([\\w<>]+(\\s*,\\s*)?\\s*)*\\))?\\s*(:\\s*([\\w<>]+))\\s*$" };
     if (!regex_match(line, match, rx)) {
@@ -271,7 +275,7 @@ bool try_class_member(std::shared_ptr<ClassNode> node, const std::string& line) 
             node->datas.push_back(std::move(member));
         }
         else {
-            member.param_types = str_to_param_types(str_utils::trim(match[3].str(), "()"));
+            member.param_types = str_to_param_types(ch, str_utils::trim(match[3].str(), "()"));
             node->funcs.push_back(std::move(member));
         }
     }
@@ -305,9 +309,7 @@ bool try_hide_empty_members(const std::string& line) {
 // -----------------------------------------------------------------------
 
 void ClassGraph::read_puml(std::istream& in) {
-    ch = m_ch.get();
     Graph::read_puml(in);
-    ch = nullptr;
 }
 
 void ClassGraph::write_json(std::ostream& out) {
@@ -357,9 +359,9 @@ bool ClassGraph::try_node(const std::string& line, std::istream& in) {
     const auto node_nmid = match[2].str();
     const auto node_type = str_to_node_type(match[1].str()); // regex level check.
 
-    if (!ch->id_node.count(node_nmid)) {
+    if (!m_ch->id_node.count(node_nmid)) {
         auto res_node{ make_shared<ClassNode>(node_nmid, node_nmid, node_type) };
-        ch->id_node[node_nmid] = res_node;
+        m_ch->id_node[node_nmid] = res_node;
     }
 
     if (node_type == Type::Class)
@@ -380,11 +382,11 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
         return false;
     }
 
-    auto left_head_arrow{ match[3].str() };
-    auto rght_head_arrow{ match[6].str() };
+    const auto left_head_arrow{ match[3].str() };
+    const auto rght_head_arrow{ match[6].str() };
 
     if (!left_head_arrow.empty() && !rght_head_arrow.empty()) {
-        throw GraphError(ch->line_number, "double-sided arrow");
+        throw GraphError(m_ch->line_number, "double-sided arrow");
     }
 
     string arrow_head;
@@ -400,17 +402,17 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
     }
 
     auto arrow_body{ match[4].str() };
-    auto etype{ edge_type_from_arrow_part(arrow_head, arrow_body) };
+    auto etype{ edge_type_from_arrow_part(m_ch, arrow_head, arrow_body) };
     if (etype == ClassEdge::Composition || etype == ClassEdge::Aggregation) {
         is_left_to_rght = !is_left_to_rght;
     }
 
-    const auto left_node{ create_node_if_need(match[1].str()) };
-    const auto rght_node{ create_node_if_need(match[7].str()) };
+    const auto left_node{ create_node_if_need(m_ch, match[1].str()) };
+    const auto rght_node{ create_node_if_need(m_ch, match[7].str()) };
 
     auto edge_text = str_utils::trim_space(match[9].str());
     edge_text = str_utils::un_quote(edge_text);
-    const auto edge{ make_shared<ClassEdge>(ch->next_edge_id(), edge_text, etype) };
+    const auto edge{ make_shared<ClassEdge>(m_ch->next_edge_id(), edge_text, etype) };
     if (is_left_to_rght) {
         edge->beg = left_node;
         edge->end = rght_node;
@@ -425,7 +427,7 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
         left_node->inns.push_back(edge);
         rght_node->outs.push_back(edge);
     }
-    ch->id_edge[edge->id] = edge;
+    m_ch->id_edge[edge->id] = edge;
 
     return true;
 }
@@ -434,9 +436,9 @@ bool ClassGraph::try_connection(const std::string& line, std::istream&) {
 // -----------------------------------------------------------------------
 
 void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
-    auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
+    auto node{ static_pointer_cast<ClassNode>(m_ch->id_node[nmid]) };
     if (node->type != ClassNode::Interface) {
-        throw GraphError{ ch->line_number, "node has no interface type" };
+        throw GraphError{ m_ch->line_number, "node has no interface type" };
     }
 
     while (in) {
@@ -446,19 +448,19 @@ void ClassGraph::try_interface_body(const std::string& nmid, std::istream& in) {
         }
 
         if (
-                !try_interface_member_func(node, line) &&
+                !try_interface_member_func(m_ch, node, line) &&
                 !try_whitespaces(line) && !try_comment(line, in)) {
-            throw GraphError(ch->line_number, "unknown line");
+            throw GraphError(m_ch->line_number, "unknown line");
         }
     }
 
-    throw GraphError{ ch->line_number, "interface body is not closed" };
+    throw GraphError{ m_ch->line_number, "interface body is not closed" };
 }
 
 void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
-    auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
+    auto node{ static_pointer_cast<ClassNode>(m_ch->id_node[nmid]) };
     if (node->type != ClassNode::Class) {
-        throw GraphError{ ch->line_number, "node has no class type" };
+        throw GraphError{ m_ch->line_number, "node has no class type" };
     }
 
     while (in) {
@@ -468,19 +470,19 @@ void ClassGraph::try_class_body(const std::string& nmid, std::istream& in) {
         }
 
         if (
-                !try_class_member(node, line) &&
+                !try_class_member(m_ch, node, line) &&
                 !try_whitespaces(line) && !try_comment(line, in)) {
-            throw GraphError(ch->line_number, "unknown line");
+            throw GraphError(m_ch->line_number, "unknown line");
         }
     }
 
-    throw GraphError{ ch->line_number, "class body is not closed" };
+    throw GraphError{ m_ch->line_number, "class body is not closed" };
 }
 
 void ClassGraph::try_enum_body(const std::string& nmid, std::istream& in) {
-    auto node{ static_pointer_cast<ClassNode>(ch->id_node[nmid]) };
+    auto node{ static_pointer_cast<ClassNode>(m_ch->id_node[nmid]) };
     if (node->type != ClassNode::Enum) {
-        throw GraphError{ ch->line_number, "node has no enum type" };
+        throw GraphError{ m_ch->line_number, "node has no enum type" };
     }
 
     while (in) {
@@ -492,9 +494,9 @@ void ClassGraph::try_enum_body(const std::string& nmid, std::istream& in) {
         if (
                 !try_enum_value(node, line) &&
                 !try_whitespaces(line) && !try_comment(line, in)) {
-            throw GraphError(ch->line_number, "unknown line");
+            throw GraphError(m_ch->line_number, "unknown line");
         }
     }
 
-    throw GraphError{ ch->line_number, "enum body is not closed" };
+    throw GraphError{ m_ch->line_number, "enum body is not closed" };
 }

@@ -1,0 +1,46 @@
+<nln> ::= "\n"
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+
+<string>  ::= <any_char>+
+<node_id> ::= <ids_char>+
+
+<end_curly_brace> ::= "}"
+
+/* ------------------------------------------------------------------ */
+ 
+ /* стрелка */
+ <left_arrow_head> ::= "<" 
+ <rght_arrow_head> ::= ">"
+ <arrow_direction> ::= ("l" | "r" | "d" | "u") | 
+                       ("left" | "right" | "down" | "up")
+ <arrow_body>      ::= "-"+ <arrow_direction> "-"+
+ <arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+ 
+ /* составные конструкции (не используются напрямую) */
+ 
+ <part_whole_node> ::= "\"" <string> "\"" "as" <node_id>
+ <node>            ::= <node_id>
+ 
+ /* составные конструкции (построчно вводит пользователь) */
+ 
+ <enduml>    ::= "@enduml"
+ <startuml>  ::= "@startuml"
+ <directive> ::= <startuml> | <enduml>
+ 
+ /* --- */
+ 
+ <whole_node> ::= ("actor" | "boundary" |
+                   "entity" | "control") <part_whole_node>
+ <short_node> ::= ("actor" | "boundary" | 
+                   "entity" | "control") <node_id>
+ 
+ /* --- */
+ 
+ <connection> ::= <node> <arrow> <node>
+ 
+ /* --- */
+ 
+ <diagram> ::= <startuml> <nln>
+               ((<whole_node> | <short_node> |
+               <connection>) <nln>)*
+               <enduml>

@@ -1,0 +1,327 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_1",
+      "name": "start_test()",
+      "opd": null,
+      "order_number": 2,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_2",
+      "name": "send_one()",
+      "opd": "opd_1",
+      "order_number": 5,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "NetFacade"
+      },
+      "id": "edge_3",
+      "name": "check()",
+      "opd": "opd_1",
+      "order_number": 6,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "NetFacade"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_4",
+      "name": "",
+      "opd": "opd_1",
+      "order_number": 7,
+      "type": "reply"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "User"
+      },
+      "id": "edge_5",
+      "name": "return message",
+      "opd": "opd_2",
+      "order_number": 10,
+      "type": "reply"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_6",
+      "name": "stop_test()",
+      "opd": "opd_3",
+      "order_number": 12,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "ErrWin"
+      },
+      "id": "edge_7",
+      "name": "show()",
+      "opd": "opd_3",
+      "order_number": 13,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_8",
+      "name": "stop_test()",
+      "opd": "opd_4",
+      "order_number": 16,
+      "type": "sync"
+    }
+  ],
+  "frags": [
+    {
+      "id": "frag_1",
+      "opds": [
+        {
+          "condition": "test started",
+          "frag": "frag_1",
+          "id": "opd_1",
+          "order_number": 4
+        }
+      ],
+      "order_number": 3,
+      "root_opd": null,
+      "type": "loop"
+    },
+    {
+      "id": "frag_2",
+      "opds": [
+        {
+          "condition": "correct",
+          "frag": "frag_2",
+          "id": "opd_2",
+          "order_number": 9
+        },
+        {
+          "condition": "error count > 3",
+          "frag": "frag_2",
+          "id": "opd_3",
+          "order_number": 11
+        }
+      ],
+      "order_number": 8,
+      "root_opd": "opd_1",
+      "type": "alt"
+    },
+    {
+      "id": "frag_3",
+      "opds": [
+        {
+          "condition": "last question",
+          "frag": "frag_3",
+          "id": "opd_4",
+          "order_number": 15
+        }
+      ],
+      "order_number": 14,
+      "root_opd": "opd_1",
+      "type": "opt"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "CourseWin",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_6"
+        },
+        {
+          "id": "edge_8"
+        }
+      ],
+      "is_error": false,
+      "name": "CourseWin",
+      "out_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_5"
+        },
+        {
+          "id": "edge_6"
+        },
+        {
+          "id": "edge_7"
+        },
+        {
+          "id": "edge_8"
+        }
+      ],
+      "type": "boundary"
+    },
+    {
+      "id": "ErrWin",
+      "inn_edges": [
+        {
+          "id": "edge_7"
+        }
+      ],
+      "is_error": true,
+      "name": "ErrWin",
+      "out_edges": [],
+      "type": "boundary"
+    },
+    {
+      "id": "NetFacade",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "is_error": false,
+      "name": "NetFacade",
+      "out_edges": [
+        {
+          "id": "edge_4"
+        }
+      ],
+      "type": "entity"
+    },
+    {
+      "id": "User",
+      "inn_edges": [
+        {
+          "id": "edge_5"
+        }
+      ],
+      "is_error": false,
+      "name": "User",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        }
+      ],
+      "type": "actor"
+    }
+  ],
+  "refs": [
+    {
+      "id": "ref_1",
+      "nodes": [
+        {
+          "id": "User"
+        }
+      ],
+      "order_number": 1,
+      "root_opd": null,
+      "text": "Authorization"
+    }
+  ],
+  "stamps": [
+    {
+      "id": "ref_1",
+      "order_number": 1
+    },
+    {
+      "id": "edge_1",
+      "order_number": 2
+    },
+    {
+      "id": "frag_1",
+      "order_number": 3
+    },
+    {
+      "id": "opd_1",
+      "order_number": 4
+    },
+    {
+      "id": "edge_2",
+      "order_number": 5
+    },
+    {
+      "id": "edge_3",
+      "order_number": 6
+    },
+    {
+      "id": "edge_4",
+      "order_number": 7
+    },
+    {
+      "id": "frag_2",
+      "order_number": 8
+    },
+    {
+      "id": "opd_2",
+      "order_number": 9
+    },
+    {
+      "id": "edge_5",
+      "order_number": 10
+    },
+    {
+      "id": "opd_3",
+      "order_number": 11
+    },
+    {
+      "id": "edge_6",
+      "order_number": 12
+    },
+    {
+      "id": "edge_7",
+      "order_number": 13
+    },
+    {
+      "id": "frag_3",
+      "order_number": 14
+    },
+    {
+      "id": "opd_4",
+      "order_number": 15
+    },
+    {
+      "id": "edge_8",
+      "order_number": 16
+    }
+  ]
+}

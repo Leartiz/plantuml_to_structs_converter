@@ -74,8 +74,8 @@ private slots:
     void test_UseCaseGraph_read_err();
     void test_UseCaseGraph_read_err1();
 
-    void test_UseCaseGraph_read_puml_data();
-    void test_UseCaseGraph_read_puml();
+    void test_UseCaseGraph_read_puml_okks_data();
+    void test_UseCaseGraph_read_puml_okks();
 
     // RobustnessGraph
 private slots:
@@ -96,6 +96,7 @@ private slots:
     void test_SequenceGraph_read_err1();
     void test_SequenceGraph_read_err2();
     void test_SequenceGraph_read_err3();
+    void test_SequenceGraph_read_err4();
 
     void test_SequenceGraph_read_puml_data();
     void test_SequenceGraph_read_puml();

@@ -8,7 +8,6 @@
 struct SequenceGraph;
 struct RobustnessGraph;
 
-// TODO: изменить имя на Use_case_dia?
 struct UseCaseGraph final : Graph {
 
     struct UcNode : Node {

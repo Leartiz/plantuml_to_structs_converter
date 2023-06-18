@@ -37,8 +37,25 @@ void visual_test_rob_0()
 
 // TODO: переименовать проект в консоль. app
 
+struct A {
+    int a{ 123 };
+};
+
+void foo(A& b) {
+    cout << b.a << endl;
+}
+
 int main()
 {
-    visual_test_rob_0();
+    {
+        A* a = new A;
+        foo(*a);
+        delete a;
+        foo(*a);
+        a = nullptr;
+        foo(*a);
+    }
+
+    //visual_test_rob_0();
     return 0;
 }
