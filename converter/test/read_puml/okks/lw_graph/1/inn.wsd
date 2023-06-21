@@ -1,0 +1,37 @@
+@startuml
+
+' как делать ссылку на картинку? Ответ:
+' https://plantuml-documentation.readthedocs.io/en/latest/formatting/html.html
+
+skinparam StateBorderThickness 1.5
+skinparam StateBackgroundColor #FEFECE
+skinparam StateBorderColor #B20842
+
+skinparam dpi 200
+skinparam Shadowing true
+
+hide    empty    description
+
+' ------------------------------------------------------------------------
+
+state AuthWindow
+state "Main window"      as MainWindow  
+state "Reference window" as ReferenceWindow  
+state "Transport window" as TransportWindow
+
+' связь через идентификатор
+
+' edge_1
+[*] --> AuthWindow
+' edge_2
+AuthWindow --> [*] : закрыли\nокно
+' edge_3
+AuthWindow -> MainWindow : Выполнен вход в систему 
+' edge_4
+MainWindow --> [*] : закрыли\nокно
+' edge_5
+MainWindow --> ReferenceWindow : Переход на\nвкладку\n"Справочники"
+' edge_6
+ReferenceWindow -d-> TransportWindow : Выбран справочник\n"Виды транспорта" 
+
+@enduml

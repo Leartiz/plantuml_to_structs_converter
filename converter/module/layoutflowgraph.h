@@ -3,19 +3,29 @@
 
 #include "graph.h"
 
+// TODO: неудачное название. Наверно лучше Screen или...
 struct LayoutFlowGraph final : Graph {
 
     struct LwNode : Node {
         enum Type : uint32_t {
-            Initial, Ordinary, Final
+            Starting, Ending,
+            Ordinary, // --> state
         };
 
+        // TODO: можно вообще объединить в один узел
+        static constexpr char const starting_id[] = "[*]_starting";
+        static constexpr char const ending_id[]   = "[*]_ending";
+
         LwNode() = default;
-        LwNode(std::string id, std::string name, Type);
+        explicit LwNode(const std::string& nmid, Type = Ordinary);
+        LwNode(std::string id, std::string name, Type = Ordinary);
 
         Type type{ Ordinary };
-        bool image_source;
-        std::vector<std::string> desc;
+
+        // TODO: можно "жестко" проверить что имя = идентификатор. Но лучше гибко, через файл конфигурации
+        std::string img_ref; // may differ!
+        // not used for analysis?
+        std::vector<std::string> desc_lines;
     };
 
     struct LwEdge : Edge {
@@ -28,9 +38,9 @@ public:
     void write_json(std::ostream&) override;
 
 protected:
+    bool try_any(const std::string&, std::istream&) override;
     bool try_node(const std::string&, std::istream&) override;
     bool try_connection(const std::string&, std::istream&) override;
-    bool try_grouping(const std::string&, std::istream&) override;
 };
 
 #endif // LAYOUTFLOWGRAPH_H

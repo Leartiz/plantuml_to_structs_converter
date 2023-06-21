@@ -144,6 +144,7 @@ SeqFrag::Type str_to_frag_type(const string& str) {
     if (frag_type_to_str(Type::Loop) == str) return Type::Loop;
     if (frag_type_to_str(Type::Alt) == str) return Type::Alt;
     if (frag_type_to_str(Type::Opt) == str) return Type::Opt;
+    if (frag_type_to_str(Type::Par) == str) return Type::Par;
     throw runtime_error{ "seq fragment type as str unknown" };
 }
 
@@ -302,7 +303,7 @@ bool try_three_dots(const std::string& line) {
 
 bool try_operand_else(ConstructHelper::Sp ch, const std::string& line, shared_ptr<SeqFrag> frag) {
     smatch match;
-    static const regex rx{ "^\\s*else\\s+(.*)$" };
+    static const regex rx{ R"(^\s*else\s*?((\s+)(.+))?$)" };
     if (!regex_match(line, match, rx)) {
         return false;
     }
@@ -312,7 +313,7 @@ bool try_operand_else(ConstructHelper::Sp ch, const std::string& line, shared_pt
         throw GraphError{ ch->line_number, "invalid fragment type for operand else" };
     }
 
-    const auto opd_cond = str_utils::trim_space(match[1].str());
+    const auto opd_cond = str_utils::trim_space(match[3].str());
     auto opd = make_shared<SeqOpd>(ch->next_order_number(), ch->next_opd_id(), opd_cond);
     frag->opds.push_back(opd);
     opd->frag = frag;
@@ -337,6 +338,8 @@ void SequenceGraph::read_puml(std::istream& in) {
     refs.clear();
     frags.clear();
     stamps.clear();
+
+    // ***
 
     Graph::read_puml(in);
 }

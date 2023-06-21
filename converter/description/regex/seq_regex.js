@@ -5,7 +5,7 @@ var short_node = /^\s*(boundary|entity|actor|control|participant)\s+([^\s#]+)\s*
 var connection = /^\s*(\S+)\s+((<?)([-]+)(>?))\s+(\S+)\s*(:(.*))?\s*$/gm
 
 var operand_start = /^\s*(alt|opt|loop|par)\s+(.*)$/gm
-var operand_else = /^\s*else\s+(.*)$/gm
+var operand_else = /^\s*else\s*?((\s+)(.+))?$/gm
 var operand_end = /^\s*end\s*$/gm
 
 var beg_ref_over = /^\s*ref\s+over\s+(.*)$/gm

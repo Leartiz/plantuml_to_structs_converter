@@ -1,0 +1,262 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "Student"
+      },
+      "end": {
+        "id": "User"
+      },
+      "id": "edge_1",
+      "name": "",
+      "type": "generalization"
+    },
+    {
+      "beg": {
+        "id": "Teacher"
+      },
+      "end": {
+        "id": "User"
+      },
+      "id": "edge_2",
+      "name": "",
+      "type": "generalization"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "Reg"
+      },
+      "id": "edge_3",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "Auth"
+      },
+      "id": "edge_4",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Teacher"
+      },
+      "end": {
+        "id": "CreateCourse"
+      },
+      "id": "edge_5",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Student"
+      },
+      "end": {
+        "id": "TakeCourse"
+      },
+      "id": "edge_6",
+      "name": "",
+      "type": "association"
+    },
+    {
+      "beg": {
+        "id": "Pay"
+      },
+      "end": {
+        "id": "TakeCourse"
+      },
+      "id": "edge_7",
+      "name": "<<extend>>",
+      "type": "extend"
+    },
+    {
+      "beg": {
+        "id": "CreateCourse"
+      },
+      "end": {
+        "id": "PrepareLectures"
+      },
+      "id": "edge_8",
+      "name": "<<include>>",
+      "type": "include"
+    },
+    {
+      "beg": {
+        "id": "CreateCourse"
+      },
+      "end": {
+        "id": "CreateTests"
+      },
+      "id": "edge_9",
+      "name": "<<include>>",
+      "type": "include"
+    }
+  ],
+  "id": "use_case_dia",
+  "nodes": [
+    {
+      "id": "Auth",
+      "inn_edges": [
+        {
+          "id": "edge_4"
+        }
+      ],
+      "name": "Authorization",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "CreateCourse",
+      "inn_edges": [
+        {
+          "id": "edge_5"
+        }
+      ],
+      "name": "Create a course",
+      "out_edges": [
+        {
+          "id": "edge_8"
+        },
+        {
+          "id": "edge_9"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "CreateTests",
+      "inn_edges": [
+        {
+          "id": "edge_9"
+        }
+      ],
+      "name": "Create tests",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Pay",
+      "inn_edges": [],
+      "name": "Pay",
+      "out_edges": [
+        {
+          "id": "edge_7"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "PrepareLectures",
+      "inn_edges": [
+        {
+          "id": "edge_8"
+        }
+      ],
+      "name": "Prepare lectures",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Reg",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "name": "Registation",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Student",
+      "inn_edges": [],
+      "name": "Student",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_6"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "TakeCourse",
+      "inn_edges": [
+        {
+          "id": "edge_6"
+        },
+        {
+          "id": "edge_7"
+        }
+      ],
+      "name": "Take a course",
+      "out_edges": [],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "usecase"
+    },
+    {
+      "id": "Teacher",
+      "inn_edges": [],
+      "name": "Teacher",
+      "out_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    },
+    {
+      "id": "User",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        }
+      ],
+      "name": "User",
+      "out_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "rob_dia": null,
+      "seq_dia": null,
+      "type": "actor"
+    }
+  ]
+}

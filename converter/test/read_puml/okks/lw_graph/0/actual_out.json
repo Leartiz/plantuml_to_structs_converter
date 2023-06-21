@@ -1,0 +1,183 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "[*]_starting"
+      },
+      "end": {
+        "id": "AuthWindow"
+      },
+      "id": "edge_1",
+      "name": ""
+    },
+    {
+      "beg": {
+        "id": "AuthWindow"
+      },
+      "end": {
+        "id": "[*]_ending"
+      },
+      "id": "edge_2",
+      "name": "закрыли\\nокно"
+    },
+    {
+      "beg": {
+        "id": "AuthWindow"
+      },
+      "end": {
+        "id": "MainWindow"
+      },
+      "id": "edge_3",
+      "name": "Выполнен вход в систему"
+    },
+    {
+      "beg": {
+        "id": "MainWindow"
+      },
+      "end": {
+        "id": "[*]_ending"
+      },
+      "id": "edge_4",
+      "name": "закрыли\\nокно"
+    },
+    {
+      "beg": {
+        "id": "MainWindow"
+      },
+      "end": {
+        "id": "ReferenceWindow"
+      },
+      "id": "edge_5",
+      "name": "Переход на\\nвкладку\\n\"Справочники\""
+    },
+    {
+      "beg": {
+        "id": "ReferenceWindow"
+      },
+      "end": {
+        "id": "TransportWindow"
+      },
+      "id": "edge_6",
+      "name": "Выбран справочник\\n\"Виды транспорта\""
+    }
+  ],
+  "id": "layout_flow_graph",
+  "nodes": [
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "- ввести правильный пароль",
+        "- ввести неправильный пароль",
+        "- закрыть окно"
+      ],
+      "id": "AuthWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "name": "AuthWindow",
+      "out_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_3"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "- ...",
+        "- перейти на вкладку \"Справочники\"",
+        "- ...",
+        "- закрыть окно"
+      ],
+      "id": "MainWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        }
+      ],
+      "name": "Main window",
+      "out_edges": [
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "- выбрать \"Название справочника\""
+      ],
+      "id": "ReferenceWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_5"
+        }
+      ],
+      "name": "Reference window",
+      "out_edges": [
+        {
+          "id": "edge_6"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "..."
+      ],
+      "id": "TransportWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_6"
+        }
+      ],
+      "name": "Transport window",
+      "out_edges": [],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [],
+      "id": "[*]_ending",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_2"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "name": "[*]_ending",
+      "out_edges": [],
+      "type": "ending"
+    },
+    {
+      "desc_lines": [],
+      "id": "[*]_starting",
+      "img_ref": "",
+      "inn_edges": [],
+      "name": "[*]_starting",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        }
+      ],
+      "type": "starting"
+    }
+  ]
+}

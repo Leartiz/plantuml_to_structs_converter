@@ -1,0 +1,33 @@
+@startuml
+
+skinparam ArrowThickness 1.25
+
+skinparam ParticipantBorderThickness 1.5
+skinparam ParticipantBackgroundColor #FEFECE
+skinparam ParticipantBorderColor #B20842
+
+skinparam dpi 200
+skinparam Shadowing true
+
+participant "User"      as User
+participant "CourseWin" as CourseWin
+participant "NetFacade" as NetFacade
+participant "ErrWin"    as ErrWin #red
+
+' -----------------------------------------------
+
+User -> CourseWin : start_test()
+
+loop test
+    User -> CourseWin : send_all()
+
+    par dasd
+        CourseWin -> NetFacade : check1()   
+    else
+        CourseWin -> NetFacade : check2()
+    else
+        CourseWin -> NetFacade : check3()
+    end
+end
+
+@enduml

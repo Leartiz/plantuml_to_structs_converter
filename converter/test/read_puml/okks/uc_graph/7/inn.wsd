@@ -1,0 +1,58 @@
+@startuml
+
+skinparam ArrowThickness 1.25
+
+skinparam ActorBorderThickness 1.5
+skinparam ActorBackgroundColor #FEFECE
+skinparam ActorBorderColor #B20842
+
+skinparam UsecaseBorderColor #B20842
+skinparam UsecaseBorderThickness 1.25
+skinparam UsecaseBackgroundColor #FEFECE
+
+skinparam dpi 200
+skinparam Shadowing true
+
+' ------------------------------------------------------------------------
+
+'left to right direction
+
+actor "User" as User
+actor "Student" as Student
+actor "Teacher" as Teacher
+
+usecase (Registation) as Reg
+usecase (Authorization) as Auth
+
+usecase (Create a course) as CreateCourse
+usecase (Prepare lectures) as PrepareLectures
+usecase (Create tests) as CreateTests
+
+usecase (Take a course) as TakeCourse
+usecase (Take a course) as TakeCourse
+usecase (Pay) as Pay
+
+' ------------------------------------------------------------------------
+
+' edge_1
+Student -u-|> User
+' edge_2
+Teacher -r-|> User
+
+' edge_3
+User -d-> Reg
+' edge_4
+User -d-> Auth
+' edge_5
+Teacher -d-> CreateCourse
+' edge_6
+Student --> TakeCourse
+' edge_7
+TakeCourse <.r. Pay : <<extend>>
+
+' edge_8
+CreateCourse .d.> PrepareLectures : <<include>>
+' edge_9
+CreateCourse .u.> CreateTests : <<include>>
+
+@enduml

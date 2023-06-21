@@ -12,4 +12,6 @@ SUBDIRS += \
     rtti \
     std_string \
     str_stream \
+    temp_const_ref \
+    user_type_scope \
     w_and_s_ptrs

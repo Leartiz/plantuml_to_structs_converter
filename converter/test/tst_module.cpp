@@ -5,6 +5,7 @@
 #include "tst_module.h"
 
 #include "usecasegraph.h"
+#include "layoutflowgraph.h"
 #include "robustnessgraph.h"
 #include "sequencegraph.h"
 #include "classgraph.h"
@@ -606,6 +607,14 @@ void Module::test_common_read_puml_data(const QString& basic_path)
     // ***
 
     for (qsizetype i = 0; i < test_catalogs.size(); ++i) {
+        const std::string tst_name{ "catalog name: /" + basic_path.toStdString() +
+                    "/" + test_catalogs[i].toStdString() };
+
+        if (test_catalogs[i].startsWith("_")) {
+            qWarning() << "ignore... " << QString::fromStdString(tst_name);
+            continue;
+        }
+
         const QDir cur_test_catalog{ cur_dir.absolutePath() + "/" + test_catalogs[i] };
         QCOMPARE_EQ(cur_test_catalog.exists(), true);
 
@@ -621,11 +630,10 @@ void Module::test_common_read_puml_data(const QString& basic_path)
         const std::string expect_out_fpath{ dia_expect_destin.toStdString() };
         const std::string actual_out_fpath{ dia_actual_destin.toStdString() };
 
-        const std::string tst_name{ "catalog name: /" + basic_path.toStdString() +
-                    "/" + test_catalogs[i].toStdString() };
         QTest::newRow(tst_name.c_str()) << inn_fpath << expect_out_fpath << actual_out_fpath;
     }
 }
+
 
 // UseCaseGraph
 // -----------------------------------------------------------------------
@@ -897,6 +905,7 @@ void Module::test_UseCaseGraph_read_puml_okks_data()
     test_common_read_puml_data("converter/test/read_puml/okks/uc_graph");
 }
 
+// TODO: сделать общий метод, возможно (?)
 void Module::test_UseCaseGraph_read_puml_okks()
 {
     QFETCH(string, inn_fpath);
@@ -1163,6 +1172,7 @@ void Module::test_RobustnessGraph_read_puml()
     QCOMPARE_EQ((actual == expected), true);
 }
 
+
 // SequenceGraph
 // -----------------------------------------------------------------------
 
@@ -1407,6 +1417,7 @@ void Module::test_SequenceGraph_read_puml()
     QCOMPARE_EQ(expected.is_object(), true);
     QCOMPARE_EQ((actual == expected), true);
 }
+
 
 // ClassGraph
 // -----------------------------------------------------------------------
@@ -1673,6 +1684,57 @@ void Module::test_ClassGraph_read_puml()
     QVERIFY_THROWS_NO_EXCEPTION(class_graph.read_puml(fin_inn));
     QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(fout_actual));
     QVERIFY_THROWS_NO_EXCEPTION(class_graph.write_json(siout_actual));
+
+    // ***
+
+    json actual;
+    QVERIFY_THROWS_NO_EXCEPTION(siout_actual >> actual);
+
+    json expected;
+    QVERIFY_THROWS_NO_EXCEPTION(fin_expect >> expected);
+
+    QCOMPARE_EQ(actual.is_object(), true);
+    QCOMPARE_EQ(expected.is_object(), true);
+    QCOMPARE_EQ((actual == expected), true);
+}
+
+
+// LayoutFlowGraph
+// -----------------------------------------------------------------------
+void Module::test_LayoutFlowGraph_read_puml_data()
+{
+    test_common_read_puml_data("converter/test/read_puml/okks/lw_graph");
+}
+
+void Module::test_LayoutFlowGraph_read_puml()
+{
+    QFETCH(string, inn_fpath);
+    QFETCH(string, expect_out_fpath);
+    QFETCH(string, actual_out_fpath);
+
+    // ***
+
+    ifstream fin_inn{ inn_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ifstream fin_expect{ expect_out_fpath };
+    QCOMPARE_EQ(fin_inn.is_open(), true);
+
+    ofstream fout_actual{ actual_out_fpath };
+    QCOMPARE_EQ(fout_actual.is_open(), true);
+
+    stringstream siout_actual;
+
+    // ***
+
+    // TODO: проверка синтаксиса инструментом PlantUML
+
+    // ***
+
+    LayoutFlowGraph lw_graph;
+    QVERIFY_THROWS_NO_EXCEPTION(lw_graph.read_puml(fin_inn));
+    QVERIFY_THROWS_NO_EXCEPTION(lw_graph.write_json(fout_actual));
+    QVERIFY_THROWS_NO_EXCEPTION(lw_graph.write_json(siout_actual));
 
     // ***
 

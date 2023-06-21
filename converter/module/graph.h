@@ -6,8 +6,9 @@
 #include <sstream>
 
 struct ConstructHelper;
-struct Graph {
+struct Graph { // or diagram.
     struct Unit {
+        // name is just visual.
         std::string id, name;
         virtual ~Unit() = default;
     };

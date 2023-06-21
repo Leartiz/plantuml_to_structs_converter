@@ -52,13 +52,14 @@ public:
         SeqOpd(uint32_t onum, std::string id, std::string condition);
 
         std::string id, condition;
-        std::weak_ptr<SeqFrag> frag;
+        std::weak_ptr<SeqFrag> frag; // excess?
     };
 
 public:
     struct SeqNode : Node {
         enum Type : uint32_t {
-            Actor, Boundary, Control, Entity, Participant,
+            Actor, Boundary, Control, Entity,
+            Participant, // TODO: ничего не говорит о типе узла
         };
 
         SeqNode() = default;

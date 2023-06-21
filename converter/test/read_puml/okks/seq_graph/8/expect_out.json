@@ -1,0 +1,227 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_1",
+      "name": "start_test()",
+      "opd": null,
+      "order_number": 1,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "User"
+      },
+      "end": {
+        "id": "CourseWin"
+      },
+      "id": "edge_2",
+      "name": "send_all()",
+      "opd": "opd_1",
+      "order_number": 4,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "NetFacade"
+      },
+      "id": "edge_3",
+      "name": "check1()",
+      "opd": "opd_2",
+      "order_number": 7,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "NetFacade"
+      },
+      "id": "edge_4",
+      "name": "check2()",
+      "opd": "opd_3",
+      "order_number": 9,
+      "type": "sync"
+    },
+    {
+      "beg": {
+        "id": "CourseWin"
+      },
+      "end": {
+        "id": "NetFacade"
+      },
+      "id": "edge_5",
+      "name": "check3()",
+      "opd": "opd_4",
+      "order_number": 11,
+      "type": "sync"
+    }
+  ],
+  "frags": [
+    {
+      "id": "frag_1",
+      "opds": [
+        {
+          "condition": "test",
+          "frag": "frag_1",
+          "id": "opd_1",
+          "order_number": 3
+        }
+      ],
+      "order_number": 2,
+      "root_opd": null,
+      "type": "loop"
+    },
+    {
+      "id": "frag_2",
+      "opds": [
+        {
+          "condition": "dasd",
+          "frag": "frag_2",
+          "id": "opd_2",
+          "order_number": 6
+        },
+        {
+          "condition": "",
+          "frag": "frag_2",
+          "id": "opd_3",
+          "order_number": 8
+        },
+        {
+          "condition": "",
+          "frag": "frag_2",
+          "id": "opd_4",
+          "order_number": 10
+        }
+      ],
+      "order_number": 5,
+      "root_opd": "opd_1",
+      "type": "par"
+    }
+  ],
+  "id": null,
+  "nodes": [
+    {
+      "id": "CourseWin",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        }
+      ],
+      "is_error": false,
+      "name": "CourseWin",
+      "out_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "type": "participant"
+    },
+    {
+      "id": "ErrWin",
+      "inn_edges": [],
+      "is_error": true,
+      "name": "ErrWin",
+      "out_edges": [],
+      "type": "participant"
+    },
+    {
+      "id": "NetFacade",
+      "inn_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_4"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "is_error": false,
+      "name": "NetFacade",
+      "out_edges": [],
+      "type": "participant"
+    },
+    {
+      "id": "User",
+      "inn_edges": [],
+      "is_error": false,
+      "name": "User",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        }
+      ],
+      "type": "participant"
+    }
+  ],
+  "refs": [],
+  "stamps": [
+    {
+      "id": "edge_1",
+      "order_number": 1
+    },
+    {
+      "id": "frag_1",
+      "order_number": 2
+    },
+    {
+      "id": "opd_1",
+      "order_number": 3
+    },
+    {
+      "id": "edge_2",
+      "order_number": 4
+    },
+    {
+      "id": "frag_2",
+      "order_number": 5
+    },
+    {
+      "id": "opd_2",
+      "order_number": 6
+    },
+    {
+      "id": "edge_3",
+      "order_number": 7
+    },
+    {
+      "id": "opd_3",
+      "order_number": 8
+    },
+    {
+      "id": "edge_4",
+      "order_number": 9
+    },
+    {
+      "id": "opd_4",
+      "order_number": 10
+    },
+    {
+      "id": "edge_5",
+      "order_number": 11
+    }
+  ]
+}

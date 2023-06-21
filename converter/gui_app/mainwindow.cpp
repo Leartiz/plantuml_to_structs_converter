@@ -76,11 +76,11 @@ void MainWindow::onClicked_pushBtnConvert()
         m_model->setJson(jsonDoc.object());
     }
     catch (const GraphError& err) {
-        m_ui->textEditLog->setText(QString::fromStdString(err.complete_message()));
+        m_ui->textEditLog->setText("ge: " + QString::fromStdString(err.what()));
         return;
     }
     catch (const std::runtime_error& err) {
-        m_ui->textEditLog->setText(QString::fromStdString(err.what()));
+        m_ui->textEditLog->setText("re: " + QString::fromStdString(err.what()));
         return;
     }
 

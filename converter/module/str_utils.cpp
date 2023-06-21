@@ -288,4 +288,6 @@ bool is_squar_bracket_balance(const std::string& str)
     return is_bracket_balance(str, '[');
 }
 
+// -----------------------------------------------------------------------
+
 }

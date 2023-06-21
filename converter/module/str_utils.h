@@ -52,6 +52,8 @@ bool is_curly_bracket_balance(const std::string& str);
 bool is_trgle_bracket_balance(const std::string& str);
 bool is_squar_bracket_balance(const std::string& str);
 
+
+
 }
 
 #endif // STR_UTILS_H

@@ -7,11 +7,13 @@
 class GraphError : public std::runtime_error
 {
 public:
-    GraphError(size_t line_num, const std::string& txt);
-    std::string complete_message() const;
+    GraphError(const size_t line_num, const std::string& txt);
+    const std::string& only_text() const;
+    size_t only_line_num() const;
 
 private:
     size_t m_line_num{ 0 };
+    std::string m_text;
 };
 
 #endif // GRAPHERROR_H

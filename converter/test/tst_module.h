@@ -114,7 +114,8 @@ private slots:
 
     // LayoutFlowGraph
 private slots:
-
+    void test_LayoutFlowGraph_read_puml_data();
+    void test_LayoutFlowGraph_read_puml();
 };
 
 #endif // TST_MODULE_H

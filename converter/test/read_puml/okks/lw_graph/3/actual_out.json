@@ -1,0 +1,194 @@
+{
+  "edges": [
+    {
+      "beg": {
+        "id": "[*]_starting"
+      },
+      "end": {
+        "id": "[*]_ending"
+      },
+      "id": "edge_1",
+      "name": ""
+    },
+    {
+      "beg": {
+        "id": "[*]_starting"
+      },
+      "end": {
+        "id": "AuthWindow"
+      },
+      "id": "edge_2",
+      "name": ""
+    },
+    {
+      "beg": {
+        "id": "AuthWindow"
+      },
+      "end": {
+        "id": "[*]_ending"
+      },
+      "id": "edge_3",
+      "name": "закрыли\\nокно"
+    },
+    {
+      "beg": {
+        "id": "AuthWindow"
+      },
+      "end": {
+        "id": "MainWindow"
+      },
+      "id": "edge_4",
+      "name": "Выполнен вход в систему"
+    },
+    {
+      "beg": {
+        "id": "MainWindow"
+      },
+      "end": {
+        "id": "[*]_ending"
+      },
+      "id": "edge_5",
+      "name": "закрыли\\nокно"
+    },
+    {
+      "beg": {
+        "id": "MainWindow"
+      },
+      "end": {
+        "id": "ReferenceWindow"
+      },
+      "id": "edge_6",
+      "name": "Переход на\\nвкладку\\n\"Справочники\""
+    },
+    {
+      "beg": {
+        "id": "ReferenceWindow"
+      },
+      "end": {
+        "id": "TransportWindow"
+      },
+      "id": "edge_7",
+      "name": "Выбран справочник\\n\"Виды транспорта\""
+    }
+  ],
+  "id": "layout_flow_graph",
+  "nodes": [
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "..."
+      ],
+      "id": "AuthWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_2"
+        }
+      ],
+      "name": "AuthWindow",
+      "out_edges": [
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_4"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "- ..."
+      ],
+      "id": "MainWindow",
+      "img_ref": "layouts/out/lt_1.png",
+      "inn_edges": [
+        {
+          "id": "edge_4"
+        }
+      ],
+      "name": "MainWindow",
+      "out_edges": [
+        {
+          "id": "edge_5"
+        },
+        {
+          "id": "edge_6"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "..."
+      ],
+      "id": "ReferenceWindow",
+      "img_ref": "layouts/out/lt_2.png",
+      "inn_edges": [
+        {
+          "id": "edge_6"
+        }
+      ],
+      "name": "ReferenceWindow",
+      "out_edges": [
+        {
+          "id": "edge_7"
+        }
+      ],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [
+        "Пользователь может:",
+        "..."
+      ],
+      "id": "TransportWindow",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_7"
+        }
+      ],
+      "name": "Transport window",
+      "out_edges": [],
+      "type": "ordinary"
+    },
+    {
+      "desc_lines": [],
+      "id": "[*]_ending",
+      "img_ref": "",
+      "inn_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_3"
+        },
+        {
+          "id": "edge_5"
+        }
+      ],
+      "name": "[*]_ending",
+      "out_edges": [],
+      "type": "ending"
+    },
+    {
+      "desc_lines": [],
+      "id": "[*]_starting",
+      "img_ref": "",
+      "inn_edges": [],
+      "name": "[*]_starting",
+      "out_edges": [
+        {
+          "id": "edge_1"
+        },
+        {
+          "id": "edge_2"
+        }
+      ],
+      "type": "starting"
+    }
+  ]
+}

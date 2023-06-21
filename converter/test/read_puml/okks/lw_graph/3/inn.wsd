@@ -1,0 +1,39 @@
+@startuml
+
+skinparam StateBorderThickness 1.5
+skinparam StateBackgroundColor #FEFECE
+skinparam StateBorderColor #B20842
+
+skinparam dpi 200
+skinparam Shadowing true
+
+' ------------------------------------------------------------------------
+
+state AuthWindow
+
+state "<img:layouts/out/lt_1.png>" as MainWindow  
+state "<img:layouts/out/lt_2.png>" as ReferenceWindow  
+state "Transport window"           as TransportWindow
+
+[*] --> [*] 
+
+[*] --> AuthWindow
+AuthWindow --> [*] : закрыли\nокно
+
+AuthWindow : Пользователь может:
+AuthWindow : ...
+
+AuthWindow -> MainWindow : Выполнен вход в систему 
+MainWindow : Пользователь может:
+MainWindow : - ...
+
+MainWindow --> [*] : закрыли\nокно
+MainWindow --> ReferenceWindow : Переход на\nвкладку\n"Справочники"
+ReferenceWindow : Пользователь может:
+ReferenceWindow : ...
+
+ReferenceWindow -d-> TransportWindow : Выбран справочник\n"Виды транспорта" 
+TransportWindow : Пользователь может:
+TransportWindow : ...
+
+@enduml

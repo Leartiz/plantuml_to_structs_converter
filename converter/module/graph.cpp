@@ -25,6 +25,8 @@ void Graph::read_puml(std::istream& in) {
         }
     }
 
+    // ***
+
     nodes = m_ch->to_nodes();
     edges = m_ch->to_edges();
 }

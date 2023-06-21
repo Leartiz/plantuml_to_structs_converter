@@ -235,8 +235,8 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
         return false;
     }
 
-    auto left_head_arrow{ match[3].str() };
-    auto rght_head_arrow{ match[6].str() };
+    const auto left_head_arrow{ match[3].str() };
+    const auto rght_head_arrow{ match[6].str() };
 
     if (!left_head_arrow.empty() && !rght_head_arrow.empty()) {
         throw GraphError(m_ch->line_number, "double-sided arrow");
@@ -254,8 +254,8 @@ bool UseCaseGraph::try_connection(const string& line, std::istream&) {
         arrow_head = rght_head_arrow;
     }
 
-    auto arrow_body{ match[4].str() };
-    auto etype{ edge_type_from_arrow_part(m_ch, arrow_head, arrow_body, match[10].str()) };
+    const auto arrow_body{ match[4].str() };
+    const auto etype{ edge_type_from_arrow_part(m_ch, arrow_head, arrow_body, match[10].str()) };
 
     const auto left_node{ create_node_if_need(m_ch, match[1].str()) };
     const auto rght_node{ create_node_if_need(m_ch, match[7].str()) };
