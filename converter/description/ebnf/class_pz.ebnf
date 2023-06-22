@@ -1,0 +1,68 @@
+<nln> ::= "\n"
+<ids_char> ::= ([A-Z] | [a-z] | [0-9] | "_")+
+
+/* --- */
+
+<string>  ::= <any_char>+
+<node_id> ::= <ids_char>+
+
+<end_curly_brace> ::= "}"
+
+/* Class */
+/* ------------------------------------------------------------------ */
+
+/* стрелка */
+<left_arrow_head> ::= "<" | "<|" | "*" | "o"
+<rght_arrow_head> ::= ">" | "|>" | "*" | "o"
+<arrow_direction> ::= ("l" | "r" | "d" | "u") |
+                    ("left" | "right" | "down" | "up")
+<arrow_body>      ::= ("." | "-")+ <arrow_direction> ("." | "-")+
+<arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+
+/* составные конструкции (не используются напрямую) */
+
+<node>        ::= <node_id>
+<member_mark> ::= "+" | "#" | "-"
+
+/* составные конструкции (построчно вводит пользователь) */
+
+<enduml>    ::= "@enduml"
+<startuml>  ::= "@startuml"
+<directive> ::= <startuml> | <enduml>
+
+/* --- */
+
+<beg_interface>         ::= "interface" <node_id> "{"
+<interface_member_func> ::= "+"? <ids_char>+ "(" (<ids_char>+ ",")+ ")"
+<interface_body>        ::= (<interface_member_func> <nln>)+ 
+<interface>             ::= <beg_interface> <nln>
+                            <interface_body>
+                            <end_curly_brace>
+
+<beg_class>         ::= "class" <node_id> "{"
+<class_member_data> ::= <member_mark> <ids_char>+ ":" <ids_char>+
+<class_member_func> ::= <member_mark> <ids_char>+
+                        "(" (<ids_char>+ ",")+ ")"
+                        ":" <ids_char>+
+<class_member>      ::= <class_member_data> | <class_member_func>
+<class_body>        ::= (<class_member> <nln>)+
+<class>             ::= <beg_class> <nln> <class_body> <end_curly_brace>
+
+<beg_enum>   ::= "enum" <node_id> "{"
+<enum_value> ::= <ids_char>+
+<enum_body>  ::= (<enum_value> <nln>)+
+<enum>       ::= <beg_enum> <nln> (<enum_value> <nln>)+ <end_curly_brace>
+
+<short_node> ::= ("class" | "enum" | "interface") <node_id>
+<whole_node> ::= <class> | <enum> | <interface>
+
+/* --- */
+
+<connection> ::= <node> <arrow> <node>
+
+/* --- */
+
+<diagram> ::= <startuml> <nln>
+            ((<whole_node> | <short_node> |
+            <connection>) <nln>)* 
+            <enduml>

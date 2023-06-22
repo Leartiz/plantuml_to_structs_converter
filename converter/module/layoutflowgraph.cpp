@@ -16,6 +16,9 @@ using LwEdge = LayoutFlowGraph::LwEdge;
 
 // -----------------------------------------------------------------------
 
+const std::string LwNode::starting_id = "[*]_starting";
+const std::string LwNode::ending_id = "[*]_ending";
+
 LwNode::LwNode(string id, std::string name, Type tp) {
     this->name = std::move(name);
     this->id = std::move(id);

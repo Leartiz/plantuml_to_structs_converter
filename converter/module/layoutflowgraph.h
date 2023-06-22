@@ -13,8 +13,8 @@ struct LayoutFlowGraph final : Graph {
         };
 
         // TODO: можно вообще объединить в один узел
-        static constexpr char const starting_id[] = "[*]_starting";
-        static constexpr char const ending_id[]   = "[*]_ending";
+        static const std::string starting_id;
+        static const std::string ending_id;
 
         LwNode() = default;
         explicit LwNode(const std::string& nmid, Type = Ordinary);

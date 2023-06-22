@@ -1,18 +1,22 @@
 {
     "layouts" : [
         {
-            "boundary_id": "any_window",
-            "img_ref": "layouts/out/any_window.png",
-
-            "_comment": "// исходного файла может и не быть",
-            "src_ref":  "layouts/any_window.wsd"
+            "meta": {
+                "boundary_id": "any_window",
+                "img_ref": "layouts/out/any_window.png",
+    
+                "_comment": "// исходного файла может и не быть",
+                "src_ref":  "layouts/any_window.wsd"
+            }
         }
     ],
     "formats" : [
         {
-            "entity_id": "any_entity",
-            "img_ref": "formats/out/any_entity.png",
-            "src_ref": "formats/any_entity.yml"
+            "meta": {
+                "entity_id": "any_entity",
+                "img_ref": "formats/out/any_entity.png",
+                "src_ref": "formats/any_entity.yml"
+            }
         }
     ]
 }
