@@ -1,5 +1,6 @@
 @startuml
 
-
+usecase A
+A --> B
 
 @enduml

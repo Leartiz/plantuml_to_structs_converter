@@ -7,6 +7,7 @@
 #include <QJsonObject>
 
 #include "usecasegraph.h"
+#include "layoutflowgraph.h"
 #include "robustnessgraph.h"
 #include "sequencegraph.h"
 #include "classgraph.h"
@@ -55,7 +56,7 @@ void MainWindow::onClicked_pushBtnConvert()
 
     try {
         if (m_ui->radioButtonUc->isChecked()) {
-            UseCaseGraph g; g.read_puml(sin);
+            LayoutFlowGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
         else if (m_ui->radioButtonRob->isChecked()) {
@@ -70,6 +71,10 @@ void MainWindow::onClicked_pushBtnConvert()
             ClassGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
+//        else if (m_ui->radioButtonLw->isChecked()) {
+//            LayoutFlowGraph g; g.read_puml(sin);
+//            g.write_json(sout);
+//        }
 
         m_ui->textEditJson->setText(QString::fromStdString(sout.str()));
         QJsonDocument jsonDoc = QJsonDocument::fromJson(QString::fromStdString(sout.str()).toUtf8());

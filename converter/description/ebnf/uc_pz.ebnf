@@ -8,54 +8,54 @@
 
 /* ------------------------------------------------------------------ */
  
- /* стрелка */
- <left_arrow_head> ::= "<" | "<|"
- <rght_arrow_head> ::= ">" | "|>"
- <arrow_direction> ::= ("l" | "r" | "d" | "u") | 
-                       ("left" | "right" | "down" | "up")
- <arrow_body>      ::= ("." | "-")+ <arrow_direction> ("." | "-")+
- <arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
- 
- /* составные конструкции (не используются напрямую) */
- 
- <part_whole_node> ::= "\"" <string> "\"" "as" <node_id>
- <usecase_id>      ::= "(" <string> ")"
- <actor_id>        ::= ":" <string> ":"
- <node>            ::= (<usecase_id> | <actor_id> | <node_id>)
- 
- /* составные конструкции (построчно вводит пользователь) */
- 
- <enduml>    ::= "@enduml"
- <startuml>  ::= "@startuml"
- <directive> ::= <startuml> | <enduml>
- 
- /* --- */
- 
- <actor_short_node> ::= <actor_id> <reqwhs> "as" <node_id>
- <actor_whole_node> ::= "actor" (<actor_short_node> | <part_whole_node>)
- <actor_node>       ::= (<actor_short_node> | <actor_whole_node>)
- 
- <usecase_short_node> ::= <usecase_id> "as" <node_id>
- <usecase_whole_node> ::= "usecase" \
-                          (<usecase_short_node> | <part_whole_node>)
- <usecase_node>       ::= (<usecase_short_node> | <usecase_whole_node>)
- 
- /* --- */
- 
- <connection> ::= <node> <arrow> <node>
- 
- /* --- */
- 
- <beg_grouping> ::= ("rectangle" | "package") "{"
- <grouping>     ::= <beg_grouping> 
-                    <nln> 
-                    ((<actor_node> | <usecase_node> | <connection>) <nln>)*
-                    <nln>
-                    <end_curly_brace>
- 
- /* --- */
- 
- <diagram> ::= <startuml> <nln>
-               ((<actor_node> | <usecase_node> |
-               <connection> | <grouping>) <nln>)*
-               <enduml>
+/* стрелка */
+<left_arrow_head> ::= "<" | "<|"
+<rght_arrow_head> ::= ">" | "|>"
+<arrow_direction> ::= ("l" | "r" | "d" | "u") | 
+                      ("left" | "right" | "down" | "up")
+<arrow_body>      ::= ("." | "-")+ <arrow_direction> ("." | "-")+
+<arrow>           ::= <left_arrow_head>? <arrow_body> <rght_arrow_head>?
+
+/* составные конструкции (не используются напрямую) */
+
+<part_whole_node> ::= "\"" <string> "\"" "as" <node_id>
+<usecase_id>      ::= "(" <string> ")"
+<actor_id>        ::= ":" <string> ":"
+<node>            ::= (<usecase_id> | <actor_id> | <node_id>)
+
+/* составные конструкции (построчно вводит пользователь) */
+
+<enduml>    ::= "@enduml"
+<startuml>  ::= "@startuml"
+<directive> ::= <startuml> | <enduml>
+
+/* --- */
+
+<actor_short_node> ::= <actor_id> <reqwhs> "as" <node_id>
+<actor_whole_node> ::= "actor" (<actor_short_node> | <part_whole_node>)
+<actor_node>       ::= (<actor_short_node> | <actor_whole_node>)
+
+<usecase_short_node> ::= <usecase_id> "as" <node_id>
+<usecase_whole_node> ::= "usecase" \
+                         (<usecase_short_node> | <part_whole_node>)
+<usecase_node>       ::= (<usecase_short_node> | <usecase_whole_node>)
+
+/* --- */
+
+<connection> ::= <node> <arrow> <node>
+
+/* --- */
+
+<beg_grouping> ::= ("rectangle" | "package") "{"
+<grouping>     ::= <beg_grouping> 
+                   <nln> 
+                   ((<actor_node> | <usecase_node> | <connection>) <nln>)*
+                   <nln>
+                   <end_curly_brace>
+
+/* --- */
+
+<diagram> ::= <startuml> <nln>
+              ((<actor_node> | <usecase_node> |
+              <connection> | <grouping>) <nln>)*
+              <enduml>
