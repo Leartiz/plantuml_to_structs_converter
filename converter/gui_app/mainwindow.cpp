@@ -46,17 +46,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::onClicked_pushBtnConvert()
 {
-    m_ui->textEditLog->clear();
+    m_ui->plainTextEditLog->clear();
 
     m_ui->textEditJson->clear();
     m_model->setJson(QJsonObject{});
 
-    std::istringstream sin{ m_ui->codeEditor->toPlainText().toStdString() };
+    // ***
+
+    std::istringstream sin{
+        m_ui->codeEditor->toPlainText().toStdString()
+    };
     std::ostringstream sout;
 
     try {
         if (m_ui->radioButtonUc->isChecked()) {
-            LayoutFlowGraph g; g.read_puml(sin);
+            UseCaseGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
         else if (m_ui->radioButtonRob->isChecked()) {
@@ -71,25 +75,34 @@ void MainWindow::onClicked_pushBtnConvert()
             ClassGraph g; g.read_puml(sin);
             g.write_json(sout);
         }
-//        else if (m_ui->radioButtonLw->isChecked()) {
-//            LayoutFlowGraph g; g.read_puml(sin);
-//            g.write_json(sout);
-//        }
+        else if (m_ui->radioButtonLw->isChecked()) {
+            LayoutFlowGraph g; g.read_puml(sin);
+            g.write_json(sout);
+        }
 
-        m_ui->textEditJson->setText(QString::fromStdString(sout.str()));
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(QString::fromStdString(sout.str()).toUtf8());
-        m_model->setJson(jsonDoc.object());
+        // ***
+
+        m_ui->textEditJson->setText(
+            QString::fromStdString(
+                sout.str()));
+
+        m_model->setJson(
+            QJsonDocument::fromJson(
+                QString::fromStdString(
+                    sout.str()).toUtf8()).object());
+        m_model->dumpObjectTree();
     }
     catch (const GraphError& err) {
-        m_ui->textEditLog->setText("ge: " + QString::fromStdString(err.what()));
+        m_ui->plainTextEditLog->setPlainText("graph err: " + QString::fromStdString(err.what()));
         return;
     }
     catch (const std::runtime_error& err) {
-        m_ui->textEditLog->setText("re: " + QString::fromStdString(err.what()));
+        m_ui->plainTextEditLog->setPlainText("runtime err: " + QString::fromStdString(err.what()));
         return;
     }
 
-    m_ui->textEditLog->setText("puml2stts - [OK]");
+    m_ui->plainTextEditLog->setPlainText(
+        "puml2stts - [OK]");
 }
 
 
